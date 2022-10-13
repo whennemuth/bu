@@ -1,0 +1,5 @@
+DO NOT REMOVE THIS FILE FROM THE BUILD CONTEXT.
+This file will keep the COPY instruction in the Dockerfile from failing and stopping the build if no tomcat gz file is present.
+In that case, this dummy file is copied into the image.
+The next step is to identify if any .gz file is present in the image that does not have the term "dummmy" in it.
+The first such file found will be the tomcat tar file to use, otherwise an attempt to download it from the standard apache website location will occur.

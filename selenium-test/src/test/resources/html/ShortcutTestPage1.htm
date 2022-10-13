@@ -1,0 +1,81 @@
+<html>
+<!-- 
+	This provides content for unit tests that concern links that are to be located through the ShortcutElementLocator.
+	The tests include anchor tags, buttons, and hidden/disabled items.
+ -->
+	<head>
+		<style>
+			.uif-actionLink{} 
+			.uif-boxLayoutHorizontalItem{} 
+			.icon-plus{}
+			
+			div{
+				border: solid 1px black;
+				padding: 10px;
+			}
+		</style>
+	</head>
+	<body leftmargin=50 topmargin=50>
+	
+		<!-- hyperlinks and hotspots -->
+		<div>
+			<span>headingA 1</span>
+			<div>
+				<span>headingA 2</span>
+				<div>
+					<span>headingA 3</span>
+					<div>
+						<a href="#">target 1</a>						
+						<a id="u10mjulv" class="uif-actionLink uif-boxLayoutHorizontalItem icon-plus icon-plus"></a>
+						<a id="u11mjulv" class="uif-actionLink uif-boxLayoutHorizontalItem icon-search icon-search"><img src=""></a>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- buttons -->
+		<div>
+			<a>headingB 1</a>
+			<div>
+				<a>headingB 2</a>
+				<div>
+					<span>headingB 3</span>
+					<div>
+						<input type="button" value="target 2">					
+						<input type="button" id="u10mjulv" class="uif-actionLink uif-boxLayoutHorizontalItem icon-plus icon-plus">
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- hidden content -->
+		<div>
+			<span>headingC 1</span>
+			<div>
+				<span>headingC 2</span>
+				<div>
+					<span>headingC 3</span>
+					<div style="display:none">
+						<a href="#">target 3</a>						
+						<a id="u10mjulv" class="uif-actionLink uif-boxLayoutHorizontalItem icon-plus icon-plus"></a>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- disabled content -->
+		<div>
+			<span>headingD 1</span>
+			<div>
+				<span>headingD 2</span>
+				<div>
+					<span>headingD 3</span>
+					<div>
+						<input type="button" value="target 4" DISABLED>					
+						<a id="u10mjulv" class="uif-actionLink uif-boxLayoutHorizontalItem icon-plus icon-plus" DISABLED></a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

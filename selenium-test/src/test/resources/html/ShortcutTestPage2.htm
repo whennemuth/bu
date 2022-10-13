@@ -1,0 +1,74 @@
+<html>
+<!-- 
+	This provides content for unit tests that concern links that are to be located through the ShortcutElementLocator.
+	The tests focus on items that rely on parent elements to be clicked before becoming accessible.
+ -->
+	<head>
+		<style>
+			.uif-actionLink{} 
+			.uif-boxLayoutHorizontalItem{} 
+			.icon-plus{}
+			
+			div{
+				border: solid 1px black;
+				padding: 10px;
+			}
+		</style>
+		
+		<script>
+		function showHiddenDiv(id, timeout) {
+			var code = "document.getElementById('" + id + "').style.display = 'block';";
+			if(timeout == undefined || timeout == 0) {
+				eval(code);
+			}
+			else {
+				setTimeout(function(){ eval(code); }, timeout);
+			}
+		}
+		</script>		
+	</head>
+	<body leftmargin=50 topmargin=50>
+	
+		<!-- top div is hidden -->
+		<div>
+			<a href="#" onclick="showHiddenDiv('div1');">headingA 1</a>
+			<div id="div1" style="display:none;">
+				<span>headingA 2</span>
+				<div>
+					<span>headingA 3</span>
+					<div>
+						<a href="#">target 1</a>						
+					</div>
+				</div>
+			</div>
+		</div>
+	
+		<!-- top div is hidden with unhiding time delay -->
+		<div>
+			<a href="#" onclick="showHiddenDiv('div2', 2000);">headingB 1</a>
+			<div id="div2" style="display:none;">
+				<span>headingB 2</span>
+				<div>
+					<span>headingB 3</span>
+					<div>
+						<a id="u10mjulv" class="uif-actionLink uif-boxLayoutHorizontalItem icon-plus icon-plus"><img src=""></a>
+					</div>
+				</div>
+			</div>
+		</div>
+	
+		<!-- All divs are hidden and last one has an unhiding time delay -->
+		<div>
+			<a href="#" onclick="showHiddenDiv('div3');">headingC 1</a>
+			<div id="div3" style="display:none;">
+				<a href="#" onclick="showHiddenDiv('div4');">headingC 2</a>
+				<div id="div4" style="display:none;">
+					<a href="#" onclick="showHiddenDiv('div5', 2000);">headingC 3</a>
+					<div id="div5" style="display:none;">
+						<a id="u11mjulv" class="uif-actionLink uif-boxLayoutHorizontalItem icon-search icon-search"><img src=""></a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

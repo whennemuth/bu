@@ -1,0 +1,132 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Testing polling of git for build triggering</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>GITFLOW_BRANCH</name>
+          <description>The standard gitflow branch in the github repository to be pulled for the maven build.
+(Unless overridden by the BRANCH parameter).</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>bu-master</string>
+              <string>mastercopy</string>
+              <string>master</string>
+              <string>develop</string>
+              <string>hotfix</string>
+              <string>support</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description>The branch in the github repository to be pulled for the maven build.
+(Change the default value to build against a custom branch). </description>
+          <defaultValue>${GITFLOW_BRANCH}</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_REPO_URL</name>
+          <description>The git repository from which the build will pull source code.</description>
+          <defaultValue>https://github.com/bu-ist/kuali-research</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_REFSPEC</name>
+          <description>Controls the remote refs to be retrieved and how they map to local refs.
+The default ref narrows refs to retrieve to a specific branch.
+To narrow down to a specific tag or tags (will use the latest matching pattern used) use:
+
++refs/tags/[tag pattern]:refs/remotes/origin/tags/[tag pattern]
+
+To narrow to the HEAD of a branch use:
+
++refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}</description>
+          <defaultValue>+refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_BRANCHES_TO_BUILD</name>
+          <description>Specify the branches if you&apos;d like to track a specific branch in a repository. If left blank, all branches will be examined for changes and built.</description>
+          <defaultValue>refs/heads/${BRANCH}</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.10.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <refspec>${GIT_REFSPEC}</refspec>
+        <url>${GIT_REPO_URL}</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>${GIT_BRANCHES_TO_BUILD}</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+
+echo &quot;GIT_COMMIT - SHA of the current:&quot;
+echo $GIT_COMMIT
+echo &quot;&quot;
+
+echo &quot;GIT_BRANCH - Name of the remote repository (defaults to origin), followed by name of the branch currently being used, e.g. \&quot;origin/master&quot; or &quot;origin/foo\&quot;:&quot;
+echo $GIT_BRANCH
+echo &quot;&quot;
+
+echo &quot;GIT_LOCAL_BRANCH - Name of the branch on Jenkins. When the \&quot;checkout to specific local branch\&quot; behavior is configured, the variable is published.  If the behavior is configured as null or **, the property will contain the resulting local branch name sans the remote name. :&quot;
+echo $GIT_LOCAL_BRANCH
+echo &quot;&quot;
+
+echo &quot;GIT_PREVIOUS_COMMIT - SHA of the previous built commit from the same branch (the current SHA on first build in branch):&quot;
+echo $GIT_PREVIOUS_COMMIT
+echo &quot;&quot;
+
+echo &quot;GIT_PREVIOUS_SUCCESSFUL_COMMIT - SHA of the previous successfully built commit from the same branch.:&quot;
+echo $GIT_PREVIOUS_SUCCESSFUL_COMMIT
+echo &quot;&quot;
+
+echo &quot;GIT_URL - Repository remote URL:&quot;
+echo $GIT_URL
+echo &quot;&quot;
+
+echo &quot;GIT_URL_N - Repository remote URLs when there are more than 1 remotes, e.g. GIT_URL_1, GIT_URL_2:&quot;
+echo $GIT_URL_N
+echo &quot;&quot;
+
+echo &quot;GIT_AUTHOR_NAME and GIT_COMMITTER_NAME - The name entered if the \&quot;Custom user name/e-mail address\&quot; behaviour is enabled; falls back to the value entered in the Jenkins system config under \&quot;Global Config user.name Value\&quot; (if any):&quot;
+echo &quot;$GIT_AUTHOR_NAME and $GIT_COMMITTER_NAME&quot;
+echo &quot;&quot;
+
+echo &quot;GIT_AUTHOR_EMAIL and GIT_COMMITTER_EMAIL - The email entered if the \&quot;Custom user name/e-mail address\&quot; behaviour is enabled; falls back to the value entered in the Jenkins system config under \&quot;Global Config user.email Value\&quot; (if any):&quot;
+echo &quot;$GIT_AUTHOR_EMAIL and $GIT_COMMITTER_EMAIL&quot;
+echo &quot;&quot;
+
+set -x</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

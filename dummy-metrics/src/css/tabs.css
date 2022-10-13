@@ -1,0 +1,40 @@
+div.tab {
+    border-radius : 15px;
+    border : 1px solid black;
+    border-bottom-style:none;
+    padding : 12px;
+    font: 12px bold Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    color: green;
+    background-color: #e3e3e3;
+    display: block;
+    float : left;
+    position : relative;
+    width: 100px;
+    height: 40px;
+    text-align : center;
+    cursor: pointer;
+}
+
+div.tabshield {
+    padding: 5px;
+    position: relative;
+    background-color: white;
+    top : 41px;
+    border-top : 1px solid black;
+    z-index : 0;
+}
+
+div.tabshieldCover {
+    border-style : none;
+    padding : 12px;
+    top : 31px;
+    z-index : 2;
+    background-color : #e3e3e3;
+    background-image:
+        linear-gradient(
+        to bottom, 
+        #e3e3e3, white
+        );
+    border-left: 1px solid black; 
+}

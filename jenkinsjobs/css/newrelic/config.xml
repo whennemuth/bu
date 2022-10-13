@@ -1,0 +1,192 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Perform various newrelic tasks against specific ec2 instance(s)</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>LANDSCAPE</name>
+          <description>Select the target application host(s) by environment.</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>sb</string>
+              <string>ci</string>
+              <string>qa</string>
+              <string>stg</string>
+              <string>prod</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.5.7">
+          <name>TASKS</name>
+          <description></description>
+          <randomName>choice-parameter-74156061755430262</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>def list = [
+   &apos;1) Install newrelic&apos;, 
+   &apos;2) Configure newrelic&apos;,
+   &apos;3) Enable newrelic infrastructure agent&apos;,
+   &apos;4) Enable newrelic logging&apos;,
+   &apos;5) Disable newrelic infrastructure agent&apos;,
+   &apos;6) Disable newrelic logging&apos;
+]</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>def list = [&apos;error&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>newrelic</projectName>
+          <choiceType>PT_CHECKBOX</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>DESCRIPTION</name>
+          <description></description>
+          <randomName>choice-parameter-74156570408841437</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>def sb = new StringBuilder(&quot;&lt;div style=&apos;padding-left:20px&apos;&gt;&quot;)
+sb.append(&quot;&lt;pre style=&apos;width: 600px; background-color:#ebe0e0; padding:10px; border:1px solid black; margin:5px;&apos;name=&apos;value&apos;&gt;&quot;)
+
+if(TASKS == null || TASKS.isEmpty()) {
+   return sb.append(&quot;Nothing selected&lt;/pre&gt;&lt;/div&gt;&quot;)
+}
+
+sb.append(&quot;&lt;ul&gt;&quot;)
+for(task in TASKS.split(&quot;,&quot;)) {
+   sb.append(&quot;&lt;li&gt;&quot;)
+   switch(task.substring(0,1)) {
+      case &apos;1&apos;:
+         sb.append(&apos;Install the newrelic infrastructure agent. The agent is downloaded from the internet.&apos;); break;
+      case &apos;2&apos;:
+         sb.append(&apos;Acquire the newrelic-infra.yml file from S3 and deposit it on the application host.&apos;); break;
+      case &apos;3&apos;:
+         sb.append(&apos;Start or restart the newrelic service on the target application host.&apos;); break;
+      case &apos;4&apos;:
+         sb.append(&apos;Start sending /var/log/tomcat and /var/log/httpd content up to newrelic&apos;); break;    
+      case &apos;5&apos;:
+         sb.append(&apos;Stop the newrelic infrastructure agent (will also stop logging&apos;); break;    
+      case &apos;6&apos;:
+         sb.append(&apos;Discontinue logging from the specified application host&apos;); break;    
+   }
+   sb.append(&apos;&lt;/li&gt;&apos;)
+}
+
+sb.append(&quot;&lt;/ul&gt;&lt;/pre&gt;&lt;/div&gt;&quot;)
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &apos;error&apos;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>newrelic</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>TASKS</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+
+case &quot;$LANDSCAPE&quot; in
+   &quot;sb&quot;)
+      EC2_IDS=(&quot;i-099de1c5407493f9b&quot; &quot;i-0c2d2ef87e98f2088&quot;);;
+   &quot;ci&quot;)
+      BRANCH=&quot;bu-master&quot;
+      EC2_IDS=(&quot;i-0258a5f2a87ba7972&quot; &quot;i-0511b83a249cd9fb1&quot;);;      
+   &quot;qa&quot;)
+      EC2_IDS=(&quot;i-011ccd29dec6c6d10&quot;);;
+   &quot;stg&quot;)
+      EC2_IDS=(&quot;i-090d188ea237c8bcf&quot; &quot;i-0cb479180574b4ba2&quot;);;
+   &quot;prod&quot;)
+      EC2_IDS=(&quot;i-0534c4e38e6a24009&quot; &quot;i-07d7b5f3e629e89ae&quot;);;
+esac
+
+# Get the file with the scripting.
+printf &quot;\nGetting newrelic.sh from github...\n\n&quot;
+
+curl \
+  -H &quot;Authorization: token ${GITHUB_API_TOKEN}&quot; \
+  -L https://api.github.com/repos/bu-ist/kuali-research-docker/contents/newrelic.sh \
+  | jq &apos;.content&apos; \
+  | sed &apos;s/\\n//g&apos; \
+  | sed &apos;s/&quot;//g&apos; \
+  | base64 --decode &gt; newrelic.sh  
+  
+printf &quot;\n&quot;
+
+for ec2InstanceId in ${EC2_IDS[@]} ; do
+  while read task ; do
+    case ${task:0:1} in
+      1)
+        echo &quot;Installing...&quot;
+        sh newrelic.sh send-install $ec2InstanceId $GITHUB_API_TOKEN
+        ;;
+      2)
+        echo &quot;Configuring...&quot;
+        sh newrelic.sh send-config $ec2InstanceId $GITHUB_API_TOKEN
+        ;;
+      3)
+        echo &quot;Enabling the infrastructure agent...&quot;
+        sh newrelic.sh send-enable $ec2InstanceId $GITHUB_API_TOKEN start
+        ;;
+      4)
+        echo &quot;Enabling logging...&quot;
+        sh newrelic.sh send-logging $ec2InstanceId $GITHUB_API_TOKEN start
+        ;;
+      5)
+        echo &quot;Disabling the infrastructure agent...&quot;
+        sh newrelic.sh send-enable $ec2InstanceId $GITHUB_API_TOKEN stop
+        ;;
+      6)
+        echo &quot;Disabling logging...&quot;
+        sh newrelic.sh send-logging $ec2InstanceId $GITHUB_API_TOKEN stop
+        ;;
+    esac
+  done &lt;&lt;&lt; &quot;$(echo &quot;$TASKS&quot; | awk &apos;BEGIN { RS = &quot;,&quot; } { print $0 }&apos;)&quot;
+done
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.27">
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.StringBinding>
+          <credentialsId>credentials.newrelic.license.key</credentialsId>
+          <variable>GITHUB_API_TOKEN</variable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.StringBinding>
+      </bindings>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
+  </buildWrappers>
+</project>

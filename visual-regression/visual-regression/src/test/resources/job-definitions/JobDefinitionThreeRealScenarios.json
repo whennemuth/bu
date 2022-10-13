@@ -1,0 +1,26 @@
+{
+  "id" : "MyJob",
+  "scenarios" : [
+    {
+      "label" : "students.health.services",
+      "url" : "http://www-test.bu.edu/students/health/services/",
+      "referenceUrl" : "http://www.bu.edu/students/health/services/",
+      "loginUrl" : "https://ref-domain.bu.edu/login.htm"
+    },
+    {
+      "label" : "students.ref.resources",
+      "url" : "http://www-test.bu.edu/students/reference/resources/",
+      "referenceUrl" : "http://www.bu.edu/students/reference/resources/"
+    },
+    {
+      "label" : "students.finances",
+      "url" : "http://http://www-test.bu.edu/students/finances/",
+      "referenceUrl" : "http://www.bu.edu/students/finances/"
+    }
+  ],
+  "scenarioInheritance" : {
+    "label" : "Default-Label",
+    "cookiePath" : "backstop_data/engine_scripts/cookies.json",
+    "loginUrl" : "https://weblogin.bu.edu//web@login3?jsv=1.5p&br=un&fl=0"
+  }
+}

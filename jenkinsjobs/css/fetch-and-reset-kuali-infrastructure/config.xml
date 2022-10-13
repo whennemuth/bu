@@ -1,0 +1,79 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Pull the latest from the kuali-infrastructure github repository for creating/updating/deleting cloudformation stacks.&#xd;
+&#xd;
+IMPORTANT!!!  This is not really a pull, but a fetch followed by a hard reset.&#xd;
+If you have made any changes to the repository locally, push those first before running this job.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>GITUSER</name>
+          <description>What user are you identifying yourself to git as?</description>
+          <defaultValue>jenkins</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REPO</name>
+          <description>What is the url of the git repo for kuali infrastructure?</description>
+          <defaultValue>git@github.com:bu-ist/kuali-infrastructure.git</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description>The branch to be fetched.</description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+cd ${JENKINS_HOME}
+if [ ! -d kuali-infrastructure ] ; then
+  mkdir kuali-infrastructure
+fi
+cd kuali-infrastructure
+
+eval `ssh-agent -s`
+# Add the key to the agent.
+ssh-add ${JENKINS_HOME}/.ssh/bu_github_id_kuali_cloudformation_rsa
+# ssh -T git@github.com
+if [ ! -d .git ] ; then
+	git init	
+	git config user.email &quot;jenkins@bu.edu&quot;
+	git config user.name $GITUSER
+	git remote add github $REPO
+fi
+if [ -n &quot;$(git status -s -z)&quot; ] ; then
+    echo &quot;FOUND LOCAL CHANGES! SORRY, YOUR ARE GOING TO LOSE THESE.&quot;
+fi
+echo &quot;Fetching from upstream and performing hard reset&quot;
+git fetch github $BRANCH
+git reset --hard FETCH_HEAD
+eval `ssh-agent -k`</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

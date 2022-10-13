@@ -1,0 +1,220 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>SELECTIONS</name>
+          <description></description>
+          <randomName>choice-parameter-3648888793256717</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>File ui = new File(&apos;/var/lib/jenkins/jobs/all-updates/ui.htm&apos;)
+if(ui.isFile()) {
+   return ui.text
+}
+return &apos;&lt;span color=red&gt;ERROR! cannot find html for this parameter at: &apos; + ui.getAbsolutePath() + &apos;&lt;/span&gt;&apos;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;ERROR!!!&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>all-updates</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <hudson.model.StringParameterDefinition>
+          <name>ECR_REGISTRY_URL</name>
+          <description>The url to the AWS registry where is located the docker repository for the docker image built here.</description>
+          <defaultValue>730096353738.dkr.ecr.us-east-1.amazonaws.com</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DEBUG</name>
+          <description>If true, prints out would be calls to other jobs, but does not go through with them.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+
+source /var/lib/jenkins/cli-credentials.sh
+CLI=${JENKINS_HOME}/jenkins-cli.jar
+HOST=http://localhost:8080/
+BACKUP_DIR=${JENKINS_HOME}/backup/kuali-research/war
+CMDS=$()
+
+# BUGFIX: The Active Choices Reactive Parameter Rendering feature is adding 
+# a comma to the end of the SELECTIONS hidden input value, so strip off the comma
+if ( [ -n &quot;${SELECTIONS}&quot; ] &amp;&amp; [ &quot;${SELECTIONS}&quot; != &quot;,&quot; ] ); then
+	SELECTIONS=$(echo ${SELECTIONS} | grep -i -o -P &apos;^.*[^,](?=,?$)&apos;)
+fi
+
+if ( [ -n &quot;$(echo &quot;${SELECTIONS}&quot; | grep &apos;centos&apos;)&quot; ] ) ; then
+
+	# 1) Add a command to rebuild the docker centos-java-tomcat image
+	CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;check-centos-1-docker-build-image&apos; -v -f&quot;
+	CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD}&quot;)
+
+	# 2) Add a command to push the built image to our registry
+	CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;check-centos-2-docker-push-image&apos; -v -f&quot;
+	CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD}&quot;)
+fi
+
+if ( [ -n &quot;$(echo &quot;${SELECTIONS}&quot; | grep &apos;apache&apos;)&quot; ] ) ; then
+
+	# 1) Add a command to call the apache-shibboleth-1-docker-build-image job
+	CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;apache-shibboleth-1-docker-build-image&apos; -v -f&quot;
+	CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD}&quot;)
+
+	# 2) Add a command to call the apache-shibboleth-2-docker-push-image job
+	CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;apache-shibboleth-2-docker-push-image&apos; -v -f&quot;
+	CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD}&quot;)
+
+	# 3) Add a command to call the apache-shibboleth-3-docker-run-container for every indicated landscape
+	LANDSCAPES=($(echo $SELECTIONS | grep -i -o -P &quot;apache\\-\\w+&quot;))
+	for i in $(seq ${#LANDSCAPES[@]}); do
+		LANDSCAPE=$(echo &quot;${LANDSCAPES[i-1]}&quot; | grep -o -P &quot;[^\\-]+$&quot;)
+		CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;apache-shibboleth-3-docker-run-container&apos; -v -f \
+			-p EC2_INSTANCE_ID=EC2ID \
+			-p LANDSCAPE=LNDSCP&quot;
+		case &quot;$LANDSCAPE&quot; in
+		&quot;sb&quot;)
+			CMD1=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-099de1c5407493f9b/&apos; | sed &apos;s/LNDSCP/sandbox/&apos;)&quot;
+			CMD2=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-0c2d2ef87e98f2088/&apos; | sed &apos;s/LNDSCP/sandbox/&apos;)&quot;
+			CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD1}&quot; &quot;${CMD2}&quot;);;
+		&quot;ci&quot;)
+			CMD1=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-0258a5f2a87ba7972/&apos; | sed &apos;s/LNDSCP/ci/&apos;)&quot;
+			CMD2=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-0511b83a249cd9fb1/&apos; | sed &apos;s/LNDSCP/ci/&apos;)&quot;
+			CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD1}&quot; &quot;${CMD2}&quot;);;
+		&quot;qa&quot;)
+			CMD=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-011ccd29dec6c6d10/&apos; | sed &apos;s/LNDSCP/qa/&apos;)&quot;
+			CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD}&quot;);;
+		&quot;stg&quot;)
+			CMD1=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-090d188ea237c8bcf/&apos; | sed &apos;s/LNDSCP/stage/&apos;)&quot;
+			CMD2=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-0cb479180574b4ba2/&apos; | sed &apos;s/LNDSCP/stage/&apos;)&quot;
+			CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD1}&quot; &quot;${CMD2}&quot;);;
+		&quot;prod&quot;)
+			CMD1=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-0534c4e38e6a24009/&apos; | sed &apos;s/LNDSCP/prod/&apos;)&quot;
+			CMD2=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-07d7b5f3e629e89ae/&apos; | sed &apos;s/LNDSCP/prod/&apos;)&quot;
+			CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD1}&quot; &quot;${CMD2}&quot;);;
+		esac		
+	done
+fi
+
+if ( [ -n &quot;$(echo &quot;${SELECTIONS}&quot; | grep &apos;kuali&apos;)&quot; ] ) ; then 
+
+	SANDBOX_REGISTRY_UPDATED=false;
+	KUALI_REGISTRY_UPDATED=false;
+	LANDSCAPES=($(echo $SELECTIONS | grep -i -o -P &quot;kuali\\-\\w+&quot;))
+	for i in $(seq ${#LANDSCAPES[@]}); do
+		LANDSCAPE=$(echo &quot;${LANDSCAPES[i-1]}&quot; | grep -o -P &quot;[^\\-]+$&quot;)
+		case &quot;$LANDSCAPE&quot; in
+		&quot;sb&quot;)
+			BRANCH=&quot;master&quot;
+			REGISTRY_REPO_NAME=&quot;coeus-sandbox&quot;
+			SKIP_REGISTRY=$SANDBOX_REGISTRY_UPDATED;;
+		&quot;ci&quot;|&quot;qa&quot;|&quot;stg&quot;|&quot;prod&quot;|&quot;production&quot;)
+			BRANCH=&quot;bu-master&quot;
+			REGISTRY_REPO_NAME=&quot;coeus&quot;
+			SKIP_REGISTRY=$KUALI_REGISTRY_UPDATED;;
+		esac
+
+		WAR_FILE=$(ls -1 ${BACKUP_DIR}/${BRANCH} | grep -P &quot;^.*war$&quot;)
+		POM_VERSION=$(echo $WAR_FILE | sed &apos;s/coeus-webapp-//&apos; | sed &apos;s/.war//&apos;)
+
+		if [ &quot;$SKIP_REGISTRY&quot; == false ] ; then
+
+			# 1st step) Build the docker image locally 
+			CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;kuali-research-2-docker-build-image&apos; -v -f \
+			-p POM_VERSION=${POM_VERSION} \
+			-p REGISTRY_REPO_NAME=${REGISTRY_REPO_NAME} \
+			-p JENKINS_WAR_FILE=${BACKUP_DIR}/${BRANCH}/${WAR_FILE} \
+			-p ECR_REGISTRY_URL=${ECR_REGISTRY_URL}&quot;
+			CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD}&quot;)
+			 
+			# 2nd step) Push the docker image to the registry
+			CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;kuali-research-3-docker-push-image&apos; -v -f \
+			-p ECR_REGISTRY_URL=${ECR_REGISTRY_URL} \
+			-p POM_VERSION=${POM_VERSION} \
+			-p REGISTRY_REPO_NAME=${REGISTRY_REPO_NAME}&quot;
+			CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD}&quot;)
+
+			if [ $LANDSCAPE == &quot;sb&quot; ] ; then SANDBOX_REGISTRY_UPDATED=true; else KUALI_REGISTRY_UPDATED=true; fi
+		fi
+
+		# 3rd step) Pull the docker image from the registry to the application instance and start a container there from it.
+		CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;kuali-research-4-docker-run-container&apos; -v -f \
+		-p ECR_REGISTRY_URL=${ECR_REGISTRY_URL} \
+		-p EC2_INSTANCE_ID=EC2ID \
+		-p POM_VERSION=${POM_VERSION} \
+		-p REGISTRY_REPO_NAME=${REGISTRY_REPO_NAME}&quot;
+        
+        case &quot;$LANDSCAPE&quot; in
+		&quot;sb&quot;)
+			CMD1=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-099de1c5407493f9b/&apos;)&quot;
+			CMD2=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-0c2d2ef87e98f2088/&apos;)&quot;
+			CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD1}&quot; &quot;${CMD2}&quot;);;
+		&quot;ci&quot;)
+			CMD1=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-0258a5f2a87ba7972/&apos;)&quot;
+			CMD2=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-0511b83a249cd9fb1/&apos;)&quot;
+			CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD1}&quot; &quot;${CMD2}&quot;);;
+		&quot;qa&quot;)
+			CMD=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-011ccd29dec6c6d10/&apos;)&quot;
+			CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD}&quot;);;
+		&quot;stg&quot;)
+			CMD1=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-090d188ea237c8bcf/&apos;)&quot;
+			CMD2=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-0cb479180574b4ba2/&apos;)&quot;
+			CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD1}&quot; &quot;${CMD2}&quot;);;
+		&quot;prod&quot;)
+			CMD1=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-0534c4e38e6a24009/&apos;)&quot;
+			CMD2=&quot;$(echo ${CMD} | sed &apos;s/EC2ID/i-07d7b5f3e629e89ae/&apos;)&quot;
+			CMDS=(&quot;${CMDS[@]}&quot; &quot;${CMD1}&quot; &quot;${CMD2}&quot;);;
+		esac
+
+	done
+fi
+
+if [ ${#CMDS[@]} &gt; 0 ] ; then
+	for (( i=0; i&lt;${#CMDS[@]}; i++ ));
+	do
+		[ &quot;$DEBUG&quot; == true ] &amp;&amp; echo ${CMDS[$i]} || eval ${CMDS[$i]}
+	done	
+else
+	echo &quot;ERROR! COULD NOT CREATE A LIST OF JOBS TO RUN.&quot;
+	exit 1;
+fi
+
+set -x</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

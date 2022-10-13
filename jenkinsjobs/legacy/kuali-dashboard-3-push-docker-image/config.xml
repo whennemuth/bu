@@ -1,0 +1,181 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>This job uploads a specified docker image for research-portal from the local repository to a specified docker registry</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.BooleanParameterDefinition>
+          <name>VERBOSE</name>
+          <description>Log output will be verbose
+
+</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>ECR_REGISTRY_URL</name>
+          <description>&lt;div style=&quot;font-size:14px;font-family:verdana; width:600px; padding:5px; padding-bottom:20px;&quot;&gt;
+Indicates the location of the elastic container registry (ECR) where the docker image is to be pushed to.
+&lt;/div&gt;</description>
+          <randomName>choice-parameter-7754835500414235</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def reg = &apos;730096353738.dkr.ecr.us-east-1.amazonaws.com&apos;
+return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;&quot; + reg + &quot;&apos; style=&apos;width:400px;font-family:monospace&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-dashboard-3-push-docker-image</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>REGISTRY_REPO_NAME</name>
+          <description>&lt;div style=&quot;font-size:14px;font-family:verdana; width:600px; padding:5px; padding-bottom:20px;&quot;&gt;
+This is used to identify the name of the docker registry repository that this image is going to be pushed to. 
+The value is &quot;portal&quot; by default, but remember that any feature images should go to a registry repository called &quot;portal-feature&quot;. 
+Unlike coeus, the docker image for the sandbox environment is no different from any other environment - it is run-time configuration that implement environment specific distinctions.
+&lt;/div&gt;</description>
+          <randomName>choice-parameter-7758862631200119</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;portal&apos; style=&apos;width:400px;font-family:monospace&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-dashboard-3-push-docker-image</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>VERSION_OPT</name>
+          <description>&lt;div style=&quot;font-size:14px;font-family:verdana; width:600px; padding:5px; padding-bottom:20px;&quot;&gt;
+How do you want to enter the version value?
+&lt;/div&gt;</description>
+          <randomName>choice-parameter-7758862632456718</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def list = [ &apos;Available:selected&apos;, &apos;Custom&apos; ]</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>def list = [ &apos;ERROR&apos; ]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-dashboard-3-push-docker-image</projectName>
+          <choiceType>PT_RADIO</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>VERSION</name>
+          <description>&lt;div style=&quot;font-size:14px;font-family:verdana; width:600px; padding:5px; padding-bottom:20px;&quot;&gt;
+This value reflects the git tag applied to the codebase the docker image was based on. 
+The git commit may not be the exact commit that was tagged, but would be the most recent commit since that tag before the next tag is encountered. 
+Combined with ECR_REGISTRY_URL, this value serves to identify the docker image as it will have been already tagged accordingly.
+&lt;/div&gt;</description>
+          <randomName>choice-parameter-7758862633667747</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>if(&quot;available&quot;.equalsIgnoreCase(VERSION_OPT)) {
+   def sb = new StringBuilder(&quot;&lt;select name=&apos;value&apos; style=&apos;width:400px;font-family:monospace;&apos;&gt;&quot;)
+   def multiline = &apos;docker images -q --filter=reference=730096353738.dkr.ecr.us-east-1.amazonaws.com/portal:* --format {{.Tag}}&apos;.execute()
+   multiline.waitForOrKill(20000)
+   def lines = multiline.text.readLines()
+   lines.each {
+      sb.append(&quot;&lt;option value=&apos;${it}&apos;&gt;${it}&lt;/option&gt;&quot;)
+   }
+   sb.append(&quot;&lt;/select&gt;&quot;)
+   return sb.toString()
+}
+else {
+   return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; style=&apos;width:400px;font-family:monospace&apos;&gt;&quot;
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-dashboard-3-push-docker-image</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>VERSION_OPT</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>[ &quot;$VERBOSE&quot; == false ] &amp;&amp; set +x
+
+# Validate the job parameters
+[ -z &quot;$REGISTRY_REPO_NAME&quot; ] &amp;&amp; echo &quot;ERROR! REGISTRY_REPO_NAME cannot be empty!&quot; &amp;&amp; exit 1
+[ -z &quot;$ECR_REGISTRY_URL&quot; ] &amp;&amp; echo &quot;ERROR! ECR_REGISTRY_URL cannot be empty!&quot; &amp;&amp; exit 1
+[ -z &quot;$VERSION&quot; ] &amp;&amp; echo &quot;ERROR! VERSION cannot be empty!&quot; &amp;&amp; exit 1
+
+# Fix the trailing comma issue with active choices parameters reactive
+ECR_REGISTRY_URL=&quot;$(echo $ECR_REGISTRY_URL | sed &apos;s/,//g&apos;)&quot;
+REGISTRY_REPO_NAME=&quot;$(echo $REGISTRY_REPO_NAME | sed &apos;s/,//g&apos;)&quot;
+VERSION=&quot;$(echo $VERSION | sed &apos;s/,//g&apos;)&quot;
+
+DOCKER_TAG=&quot;${ECR_REGISTRY_URL}/${REGISTRY_REPO_NAME}:${VERSION}&quot;
+
+# Login to the registry
+# NOTE: info on how to store credentials can be found at: 
+#       http://docs.aws.amazon.com/cli/latest/topic/config-vars.html
+#       requires ~/.aws/config
+
+evalstr=&quot;$(aws ecr get-login)&quot;
+# NOTE: The ecr get-login command of the aws cli returns a docker command that includes a removed switch.
+# The -e (email) switch will be rejected by the newer version of docker that we have installed on our aws
+# ec2 instances to accomodate cloud watch logging from our containers. Therefore I am removing the offending
+# &quot;-e none&quot; portion of the command with the stream editor.
+evalstr=&quot;$(echo $evalstr | sed &apos;s/ -e none//&apos;)&quot;
+eval $evalstr
+
+# Push the newly created image to the registry
+docker push ${DOCKER_TAG}
+
+set -x</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

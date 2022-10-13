@@ -1,0 +1,45 @@
+# java -jar /var/lib/jenkins/jobs/javajobs/ContinuousIntegration/target/ContinuousIntegration-0.0.1-SNAPSHOT-jar-with-dependencies.jar apples oranges pears
+
+Environment Variables:
+PATH = /usr/lib/jvm/java-1.8.0//bin:/usr/lib/jvm/java-1.8.0//bin:/sbin:/usr/sbin:/bin:/usr/bin
+HUDSON_HOME = /var/lib/jenkins
+UPSTART_JOB = rc
+JOB_URL = http://10.57.236.6:8080/job/test-javajobs1/
+JAVA_HOME = /usr/lib/jvm/java-1.8.0/
+HUDSON_COOKIE = acd53925-0e62-48dc-84a5-379d2f1a9185
+TERM = linux
+BUILD_ID = 4
+XFILESEARCHPATH = /usr/dt/app-defaults/%L/Dt
+LANG = en_US.UTF-8
+JOB_NAME = test-javajobs1
+MY_PARM3 = testing3
+MY_PARM2 = testing2
+MY_PARM1 = testing1
+NODE_LABELS = master
+HUDSON_URL = http://10.57.236.6:8080/
+JENKINS_SERVER_COOKIE = d641b0750afcb206
+LOGNAME = jenkins
+WORKSPACE = /var/lib/jenkins/workspace/test-javajobs1
+LANGSH_SOURCED = 1
+PWD = /var/lib/jenkins/workspace/test-javajobs1
+JENKINS_URL = http://10.57.236.6:8080/
+_ = /usr/lib/jvm/java-1.8.0//bin/java
+CONSOLETYPE = serial
+RUNLEVEL = 3
+BUILD_TAG = jenkins-test-javajobs1-4
+SHELL = /bin/bash
+previous = N
+EXECUTOR_NUMBER = 3
+HUDSON_SERVER_COOKIE = d641b0750afcb206
+UPSTART_EVENTS = runlevel
+JOB_BASE_NAME = test-javajobs1
+USER = jenkins
+JENKINS_HOME = /var/lib/jenkins
+PREVLEVEL = N
+BUILD_NUMBER = 4
+NODE_NAME = master
+BUILD_DISPLAY_NAME = #4
+BUILD_URL = http://10.57.236.6:8080/job/test-javajobs1/4/
+NLSPATH = /usr/dt/lib/nls/msg/%L/%N.cat
+HOME = /var/lib/jenkins
+SHLVL = 4

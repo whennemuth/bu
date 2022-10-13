@@ -1,0 +1,70 @@
+# Environment variable are not accessible from context.xml files, they must be exported here
+export DOCLIB=$DOCLIB
+
+# Increasing the java heap settings for tomcat as kuali can be a hog.
+# Careful not to exceed the total memory of the AWS instance (currently is t2.medium, 4GB)
+CATALINA_OPTS="$CATALINA_OPTS -Xms2048m"
+CATALINA_OPTS="$CATALINA_OPTS -Xmx4096m"
+# CATALINA_OPTS="$CATALINA_OPTS -XX:MaxPermSize=1024m"
+
+# Set jars needed for log4j bootstrapping here.
+cp=(
+  $CATALINA_HOME/bin/tomcat-juli.jar:
+  $CATALINA_HOME/bin/bootstrap.jar:
+  $CATALINA_HOME/lib/*:
+  $CATALINA_HOME/log4j2/lib/*:
+  $CATALINA_HOME/log4j2/conf
+) 
+# Set log4j bootstrap jars here. NOTE setting CLASSPATH prior to setenv.sh being run is useless as catalina.sh unsets it.
+CLASSPATH="$(printf '%s' ${cp[@]})"
+echo "CLASSPATH set with the following:"
+printf '  %s\n' ${cp[@]} | sed 's/://g'
+
+if [ -f /opt/newrelic/newrelic.jar ] ; then
+  JAVA_OPTS="-javaagent:/opt/newrelic/newrelic.jar"
+fi
+if [ -f $CATALINA_HOME/lib/spring-instrument.jar ] ; then
+  echo "setenv.sh: Tomcat version: ${TOMCAT_VERSION}"
+  if [ "${TOMCAT_VERSION:0:1}" -ge 9 ] ; then
+    JAVA_OPTS="$JAVA_OPTS -javaagent:$CATALINA_HOME/lib/spring-instrument.jar"
+  else
+    rm -f $CATALINA_HOME/lib/spring-instrument.jar
+  fi
+else
+  echo "setenv.sh: spring-instrument.jar not found."
+fi
+
+# Set all the required system variables (These will be looked for in log4j2-tomcat.xml and kc-config.xml)
+JAVA_OPTS="$JAVA_OPTS -Dlog4j.configurationFile=$CATALINA_HOME/log4j2/conf/log4j2-tomcat.xml"
+JAVA_OPTS="$JAVA_OPTS -Dalt.config.location=/opt/kuali/kc-config.xml"
+[ -n "$VIRTUAL_HOST" ] && JAVA_OPTS="$JAVA_OPTS -DVIRTUAL_HOST=$VIRTUAL_HOST"
+[ -n "$DOCLIB" ] && JAVA_OPTS="$JAVA_OPTS -DDOCLIB=$DOCLIB"
+[ -n "$SERVICE_SECRET_1" ] && JAVA_OPTS="$JAVA_OPTS -DSERVICE_SECRET_1=$SERVICE_SECRET_1"
+[ -n "$DB_HOST" ] && JAVA_OPTS="$JAVA_OPTS -DDB_HOST=$DB_HOST"
+[ -n "$KCOEUS_PASSWORD" ] && JAVA_OPTS="$JAVA_OPTS -DKCOEUS_PASSWORD=$KCOEUS_PASSWORD"
+[ -n "$CORE_AUTH_ENABLED" ] && JAVA_OPTS="$JAVA_OPTS -DCORE_AUTH_ENABLED=$CORE_AUTH_ENABLED"
+[ -n "$CORE_AUTH_TOKEN" ] && JAVA_OPTS="$JAVA_OPTS -DCORE_AUTH_TOKEN=$CORE_AUTH_TOKEN"
+[ -n "$CORE_PRIVATE_URL" ] && JAVA_OPTS="$JAVA_OPTS -DCORE_PRIVATE_URL=$CORE_PRIVATE_URL"
+[ -n "$KC_PRIVATE_HOST" ] && JAVA_OPTS="$JAVA_OPTS -DKC_PRIVATE_HOST=$KC_PRIVATE_HOST"
+[ -n "$PDF_PRIVATE_URL" ] && JAVA_OPTS="$JAVA_OPTS -DPDF_PRIVATE_URL=$PDF_PRIVATE_URL"
+
+
+if [ "${REMOTE_DEBUG,,}" == 'true' ] ; then
+  # https://dzone.com/articles/remote-debugging-java-applications-with-jdwp
+  echo "setenv.sh: The JVM will start with remote debugging on port 8787"
+  JAVA_OPTS="$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,address=*:8787,server=y,suspend=n"
+  # JAVA_OPTS="$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n"
+  JAVA_OPTS="$JAVA_OPTS -noverify"
+fi
+
+if [ -f "/opt/kuali/certs/sslcert.sh" ] ; then
+  if [ -z "$CERT_FILE" ] ; then
+    # If no explicit path provided for the certificate, it should exist in the directory mount along with the sslcert.sh file.
+    CERT_FILE="$(find /opt/kuali/certs -iname *.crt -type f 2> /dev/null | head -1)"
+  fi
+  if [ -f "$CERT_FILE" ] ; then
+    sh /opt/kuali/certs/sslcert.sh import-cert CERT_FILE=$CERT_FILE
+  fi
+fi
+
+LOGGING_MANAGER="-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"

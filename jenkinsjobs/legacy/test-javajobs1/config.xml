@@ -1,0 +1,130 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.TextParameterDefinition>
+          <name>JOB_DEF</name>
+          <description>This json provides a configuration for this job in terms that the java job we delegate to will understand.
+More specifically, this json can be de-serialized into an instance of edu.bu.ist.ci.JobDef</description>
+          <defaultValue>{
+   &quot;className&quot;:&quot;edu.bu.ist.ci.jenkins.job.SampleJavaJob&quot;,
+   &quot;parameterDefs&quot;:[
+      {&quot;name&quot;:&quot;MyParmDef1&quot;,&quot;required&quot;:true,&quot;viewPathName&quot;:null}, 
+      {&quot;name&quot;:&quot;MyParmDef2&quot;,&quot;required&quot;:true,&quot;viewPathName&quot;:null}, 
+      {&quot;name&quot;:&quot;MyParmDef3&quot;,&quot;required&quot;:true,&quot;viewPathName&quot;:null}
+   ]
+}</defaultValue>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>JAR_FILE</name>
+          <description></description>
+          <defaultValue>/var/lib/jenkins/jobs/javajobs/ContinuousIntegration/target/ContinuousIntegration-0.0.1-SNAPSHOT-jar-with-dependencies.jar</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@1.5.2">
+          <name>MYPARMDEF1</name>
+          <description></description>
+          <randomName>choice-parameter-3302605351656889</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.24">
+              <script>String json64 = JOB_DEF.bytes.encodeBase64().toString()
+def command = &quot;java -jar -Djob.get.html=MyParmDef1 -Djob.def.json=&quot; + json64 + &quot; &quot; + JAR_FILE
+def process = command.execute()
+process.waitForOrKill(20000) 
+return process.in.text</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.24">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:310px;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>test-javajobs1</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>JOB_DEF, JAR_FILE</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@1.5.2">
+          <name>MYPARMDEF2</name>
+          <description></description>
+          <randomName>choice-parameter-3375589882355160</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.24">
+              <script>String json64 = JOB_DEF.bytes.encodeBase64().toString()
+def command = &quot;java -jar -Djob.get.html=MyParmDef2 -Djob.def.json=&quot; + json64 + &quot; &quot; + JAR_FILE + &quot; MyParmDef1=&quot; + MYPARMDEF1
+def process = command.execute()
+process.waitForOrKill(20000) 
+return process.in.text</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.24">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:310px;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>test-javajobs1</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>JOB_DEF, JAR_FILE, MYPARMDEF1</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@1.5.2">
+          <name>MYPARMDEF3</name>
+          <description></description>
+          <randomName>choice-parameter-3375589883532943</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.24">
+              <script>String json64 = JOB_DEF.bytes.encodeBase64().toString()
+def command = &quot;java -jar -Djob.get.html=MyParmDef3 -Djob.def.json=&quot; + json64 + &quot; &quot; + JAR_FILE + &quot; MyParmDef1=&quot; + MYPARMDEF1 + &quot; MyParmDef2=&quot; + MYPARMDEF2
+def process = command.execute()
+process.waitForOrKill(20000) 
+return process.in.text</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.24">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:310px;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>test-javajobs1</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>JOB_DEF, JAR_FILE, MYPARMDEF1, MYPARMDEF2</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>java -jar \
+   -Djob.def.json=&quot;${JOB_DEF}&quot; \
+   &quot;${JENKINS_HOME}/jobs/javajobs/ContinuousIntegration/target/ContinuousIntegration-0.0.1-SNAPSHOT-jar-with-dependencies.jar&quot; \
+   &quot;myparmdef1=\&quot;${MYPARMDEF1}\&quot;&quot; &quot;myparmdef2=\&quot;${MYPARMDEF2}\&quot;&quot; &quot;myparmdef3=\&quot;${MYPARMDEF3}\&quot;&quot;</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

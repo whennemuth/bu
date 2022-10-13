@@ -1,0 +1,160 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  Create the parameters used by research admin reports
+  
+Parameters:
+
+  GlobalTag:
+    Type: String
+    Description: >
+      A common value that all resources in this template will have prefixed to
+      their name and attached as a tag to establish a bundling through naming convention.
+    Default: research-admin-reports
+ 
+  Service:
+    Description: Service catalog name
+    Type: String
+    Default: research-administration
+
+  Function:
+    Description: The Function within the Service
+    Type: String
+    Default: kuali
+
+  Landscape:
+    Description: A landscape of the database.
+    Type: String
+
+  DbUser:
+    Description: The database user for batch.
+    Type: String
+    Default: KCBATCH
+
+  DbHost:
+    Description: The database host value.
+    Type: String
+    # Example1, direct: kuali-oracle-stg.clb9d4mkglfd.us-east-1.rds.amazonaws.com
+    # Example2, route53: stg.db.kuali.research.bu.edu
+
+  EmailReplyTo:
+    Description: Reply To value for s3 report link emails
+    Type: String
+    Default: dhaywood@bu.edu
+      
+Resources:
+
+  # ------------------------------------------------------------------------
+  #   Parameters of type "SecureString" are not supported by cloudformation. 
+  #   These should be created before stack creation.  
+  # ------------------------------------------------------------------------
+  # ParameterPrivateKey:
+  #   Type: AWS::SSM::Parameter
+  #   Properties:
+  #     Name:  !Sub /${GlobalTag}/${Landscape}/cloudfront/rsa-private-key      
+  # ParameterOraclePassword:
+  #   Type: AWS::SSM::Parameter
+  #   Properties:
+  #     Name:  !Sub /${GlobalTag}/${Landscape}/oracle/pswd
+
+  ParameterTtlDays:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      DataType: text
+      Description: Number of days until expiration of the s3 report link sent in emails.
+      Name:  !Sub /${GlobalTag}/${Landscape}/cloudfront/ttl-days
+      Type: String
+      Value: 30
+      Tags: 
+        Name: !Sub /${GlobalTag}/${Landscape}/cloudfront/ttl-days
+        Service: !Ref Service
+        Function: !Ref Function
+      
+  ParameterEmailFrom:
+    Type: AWS::SSM::Parameter
+    Properties:
+      DataType: text
+      Type: String
+      Name:  !Sub /${GlobalTag}/${Landscape}/email/from
+      Value: kualisys@bu.edu
+      Description: Emails with s3 report links will be sent to recipients from this address
+      Tags: 
+        Name: !Sub /${GlobalTag}/${Landscape}/email/from
+        Service: !Ref Service
+        Function: !Ref Function
+      
+  ParameterEmailGreeting:
+    Type: AWS::SSM::Parameter
+    Properties:
+      DataType: text
+      Type: String
+      Name:  !Sub /${GlobalTag}/${Landscape}/email/greeting
+      Value: |
+        Hi,
+        
+
+      Description: The initial greeting in the email body sent to s3 report link recipients
+      Tags: 
+        Name: !Sub /${GlobalTag}/${Landscape}/email/greeting
+        Service: !Ref Service
+        Function: !Ref Function
+      
+  ParameterEmailReplyTo:
+    Type: AWS::SSM::Parameter
+    Properties:
+      DataType: text
+      Type: String
+      Name:  !Sub /${GlobalTag}/${Landscape}/email/reply-to
+      Value: !Ref EmailReplyTo
+      Description: Reply To value for s3 report link emails
+      Tags: 
+        Name: !Sub /${GlobalTag}/${Landscape}/email/reply-to
+        Service: !Ref Service
+        Function: !Ref Function
+      
+  ParameterEmailSignature:
+    Type: AWS::SSM::Parameter
+    Properties:
+      DataType: text
+      Type: String
+      Name:  !Sub /${GlobalTag}/${Landscape}/email/signature
+      Value: |
+        
+        
+        If you have questions regarding this report, please contact Dean Haywood ( dhaywood@bu.edu ).
+        
+        Thanks,
+        Kuali Support Team
+        
+        Use links below to retrieve reports. Links expire in 30 days."
+      Description: The conclusion/signature at the end of the email body sent to s3 report link recipients
+      Tags: 
+        Name: !Sub /${GlobalTag}/${Landscape}/email/signature
+        Service: !Ref Service
+        Function: !Ref Function
+      
+  ParameterOracleUser:
+    Type: AWS::SSM::Parameter
+    Properties:
+      DataType: text
+      Type: String
+      Name:  !Sub /${GlobalTag}/${Landscape}/oracle/user
+      Value: !Ref DbUser
+      Description: The oracle user that has access to run the reports
+      Tags: 
+        Name: !Sub /${GlobalTag}/${Landscape}/oracle/user
+        Service: !Ref Service
+        Function: !Ref Function
+      
+  ParameterOracleHost:
+    Type: AWS::SSM::Parameter
+    Properties:
+      DataType: text
+      Type: String
+      Name:  !Sub /${GlobalTag}/${Landscape}/oracle/host
+      Value: !Ref DbHost
+      Description: The oracle database host name
+      Tags: 
+        Name: !Sub /${GlobalTag}/${Landscape}/oracle/host
+        Service: !Ref Service
+        Function: !Ref Function

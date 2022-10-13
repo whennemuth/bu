@@ -1,0 +1,1415 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- saved from url=(0065)https://res-demo2.kuali.co/kc-dev/kew/RouteLog.do?documentId=9251 -->
+<html class=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+
+
+	
+
+
+	<script type="text/javascript">var jsContextPath = "/kc-dev";</script>
+	<title>Kuali :: Route Log</title>
+	
+
+			<link href="./kuali.css" rel="stylesheet" type="text/css">
+
+
+
+			<link href="./calendar-win2k-1.css" rel="stylesheet" type="text/css">
+
+
+
+			<link href="./jquery.fancybox.css" rel="stylesheet" type="text/css">
+
+
+
+			<link href="./kuali_application.css" rel="stylesheet" type="text/css">
+
+
+
+			<link href="./bootstrap-skinned.css" rel="stylesheet" type="text/css">
+
+
+	
+
+			<script language="JavaScript" type="text/javascript" src="./jquery-1.8.3.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./jquery.cookie.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./core.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./dhtml.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./my_common.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./calendar.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./calendar-en.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./calendar-setup.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./engine.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./util.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./PersonService.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./StateService.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./objectInfo.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./CustomAttributeService.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./BudgetService.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./AwardTemplateReportTermService.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./jquery.fancybox.pack.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./jquery.blockUI.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./kuali_application.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./bootstrap.js"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./person.js"></script>
+
+
+
+<!-- new iframe resize logic -->
+<script type="text/javascript">
+
+var jq = jQuery.noConflict();
+var bodyHeight;
+function publishHeight(){
+    var parentUrl = "";
+    if(navigator.cookieEnabled){
+        parentUrl = jQuery.cookie('parentUrl');
+        var passedUrl = decodeURIComponent( document.location.hash.replace( /^#/, '' ) );
+        if(passedUrl && passedUrl.substring(0, 4) === "http"){
+            jQuery.cookie('parentUrl', passedUrl, {path: '/'});
+            parentUrl = passedUrl;
+        }
+    }
+
+    if(parentUrl === ""){
+        //make the assumption for not cross-domain, will have no effect if cross domain (message wont be
+        //received)
+        parentUrl = window.location;
+        parentUrl = decodeURIComponent(parentUrl);
+    }
+
+    var height = jQuery("body").outerHeight();
+    jQuery("body").attr("style", "overflow-x: auto; padding-right: 20px;");
+    if (parentUrl && !isNaN(height) && height > 0) {
+        jQuery.postMessage({ if_height: height}, parentUrl, parent);
+        bodyHeight = height;
+    }
+}
+
+jQuery(function(){
+  publishHeight();
+  window.onresize = publishHeight;
+  window.setInterval(publishHeight, 249);
+});
+</script>
+
+    
+    
+    
+      
+    
+  
+<style type="text/css">.fancybox-margin{margin-right:0px;}</style></head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+		
+		
+		  
+		
+		<body onload="if ( !restoreScrollPosition() ) { placeFocus(); }" onkeypress="return isReturnKeyAllowed(&#39;methodToCall.&#39; , event);" style="overflow-x: auto; padding-right: 20px;">
+    <div id="Uif-Application">
+			
+			<div class="lookupcreatenew" title="Refresh"><a href="https://res-demo2.kuali.co/kc-dev/kew/RouteLog.do?showNotes=&amp;documentId=9251&amp;showFuture="><img src="./tinybutton-refresh.gif" alt="refresh"></a></div>
+	
+
+
+
+
+
+<form name="KualiForm" id="kualiForm" method="post" action="https://res-demo2.kuali.co/kc-dev/kew/RouteLog.do" accept-charset="utf-8" enctype="" onsubmit="return hasFormAlreadyBeenSubmitted();">
+
+	
+	
+		<a name="topOfForm"></a>
+		<div class="headerarea" id="headerarea">
+				<h1>
+					Route Log&nbsp;
+					
+						
+						
+							
+						
+					
+				</h1>
+			
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+	
+
+
+<!-- DOCUMENT INFO HEADER BOX -->
+	
+
+
+
+	
+	
+
+		</div>
+		
+		<div class="msg-excol">
+		  <div class="left-errmsg">
+			 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+			 
+			 
+                 
+                 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+			 
+			 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+		  </div>
+		  <div class="right">
+		    <div class="excol">
+		  	   
+			   
+			   
+		  	 </div>
+		  </div>
+		</div>
+
+        
+        <script type="text/javascript">
+            //if no error exists then render the error as a message
+            jQuery( document ).ready(function() {
+                if(jQuery(".error").length === 0) {
+                    jQuery(".kul-error").addClass("kul-message");
+                }
+            });
+        </script>
+
+		<table class="page-main" width="100%" cellpadding="0" cellspacing="0">
+			<tbody><tr>
+											<td width="1%">
+												<img src="./pixel_clear.gif" alt="" width="20" height="20">
+											</td>
+				<td>
+
+	
+
+					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+        
+    
+    
+
+
+
+<input type="hidden" name="tabStates(ID9251)" value="OPEN">
+<!-- TAB -->
+
+<div id="workarea">
+
+<table width="100%" class="tab" cellpadding="0" cellspacing="0" summary="">
+	<tbody><tr>
+		<td class="tabtable1-left">
+		    <img src="./tab-topleft.gif" alt="" width="12" height="29" align="middle">
+            
+              
+              
+                <h2>ID: 9251</h2>
+              
+            
+		</td>
+		<td class="tabtable1-mid">
+            
+			    <input type="image" name="methodToCall.toggleTab.tabID9251" src="./tinybutton-hide.gif" tabindex="-1" onclick="javascript: return toggleTab(document, &#39;ID9251&#39;); " id="tab-ID9251-imageToggle" class="tinybutton" title="close ID: 9251" alt="close ID: 9251">
+		    
+		    
+		</td>
+		<td class="tabtable1-right">
+		    <img src="./tab-topright.gif" alt="" width="12" height="29" align="middle">
+		</td>
+	</tr>
+</tbody></table>
+
+
+
+<div style="display: block;" id="tab-ID9251-div">
+
+
+        
+        
+        <div class="tab-container" align="center">
+        <table width="100%" border="0" cellpadding="0" cellspacing="0" class="datatable">
+            <tbody><tr>
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col" align="left">&nbsp;
+    
+    
+    
+        
+        
+            
+        
+        
+    
+    Title  
+</th>
+<td class="datacell" colspan="3">&nbsp;</td>
+
+            </tr>
+            <tr>
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col" align="left">&nbsp;
+    
+    
+    
+        
+        
+            
+        
+        
+    
+    Type  
+</th>
+<td width="25%" class="datacell">
+                      <a href="https://res-demo2.kuali.co/kc-dev/kew/DocumentConfigurationView.do?methodToCall=start&amp;documentTypeName=ProposalLogMaintenanceDocument" target="_blank">Proposal Log</a>
+                </td>
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col" align="left">&nbsp;
+    
+    
+    
+        
+        
+            
+        
+        
+    
+    Created  
+</th>
+<td class="datacell" width="25%">07:45 PM 08/07/2016&nbsp;</td>
+            </tr>
+            <tr>
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col" align="left">&nbsp;
+    
+    
+    
+        
+        
+            
+        
+        
+    
+    Initiator  
+</th>
+<td class="datacell" width="25%">
+                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a href="https://res-demo2.kuali.co/kc-dev/kr/inquiry.do?methodToCall=start&amp;businessObjectClassName=org.kuali.rice.kim.api.identity.Person&amp;principalId=10000000001" target="_blank">
+
+        McGregor, Geoff
+
+    </a>
+
+
+                    &nbsp;</td>
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col" align="left">&nbsp;
+    
+    
+    
+        
+        
+            
+        
+        
+    
+    Last Modified  
+</th>
+<td class="datacell" width="25%">07:45 PM 08/07/2016&nbsp;</td>
+
+            </tr>
+            <tr>
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col" align="left">&nbsp;
+    
+    
+    
+        
+        
+            
+        
+        
+    
+    Route Status  
+</th>
+<td class="datacell" width="25%"><b>
+                  	INITIATED</b>&nbsp;</td>
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col" align="left">&nbsp;
+    
+    
+    
+        
+        
+            
+        
+        
+    
+    Last Approved  
+</th>
+<td class="datacell" width="25%">&nbsp;</td>
+
+            </tr>
+          <tr>
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col" align="left">&nbsp;
+    
+    
+    
+        
+        
+            
+        
+        
+    
+    Node(s)  
+</th>
+<td class="datacell">Initiated&nbsp;</td>
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col" align="left">&nbsp;
+    
+    
+    
+        
+        
+            
+        
+        
+    
+    Finalized  
+</th>
+<td class="datacell" width="25%">&nbsp;</td>
+
+            </tr>
+        </tbody></table>
+        </div>
+    
+        
+
+</div>
+<!-- Need to do this in order to pass the value into a tag attribute -->
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+        
+    
+
+
+<!--  hit form method to increment tab index -->
+
+
+
+
+    
+        
+    
+    
+
+
+<!-- if the section has errors, override and set isOpen to true -->
+
+
+
+
+
+
+<input type="hidden" name="tabStates(FutureActionRequests)" value="OPEN">
+<!-- TAB -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <table width="100%" class="tab" cellpadding="0" cellspacing="0" summary="" border="1">
+          <tbody><tr>
+              
+	          
+			  
+			  	<td class="tabtable1-left">
+			  
+			  
+
+              <img src="./tab-topleft1.gif" alt="" width="12" height="29" align="absmiddle">
+              
+              <a name="FutureActionRequests"></a>
+              
+                
+                
+                  <h2>Future Action Requests</h2>
+                
+              
+              
+              
+              
+            </td>
+            
+
+            
+
+      		
+
+            <td class="tabtable2-mid">
+
+            
+    		
+                
+                	<a href="https://res-demo2.kuali.co/kc-dev/kew/RouteLog.do?showFuture=true&amp;showNotes=false&amp;documentId=9251">
+                                    <img src="./tinybutton-show(1).gif" title="show">
+                                    </a>
+                
+                
+
+            </td>
+            <td class="tabtable2-right"><img src="./tab-topright1.gif" alt="" width="12" height="29" align="middle"></td>
+          </tr>
+        </tbody></table>
+
+
+
+
+<div style="display: block;" id="tab-FutureActionRequests-div">
+
+
+
+
+
+        <!-- display errors for this tab -->
+        
+
+        <!-- comment for reference by KRA devs during KNS extraction -->
+        
+
+
+        <!-- Before the jsp:doBody of the kul:tab tag -->
+        <div class="tab-container" align="center">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+
+                    <tbody><tr>
+                        </tr>
+                </tbody></table>
+        </div>
+        
+        <!-- After the jsp:doBody of the kul:tab tag -->
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+   
+        <table width="100%" border="0" cellpadding="0" cellspacing="0" class="b3" summary="">
+          <tbody><tr>
+            <td align="left" class="footer"><img src="./pixel_clear.gif" alt="" width="12" height="14" class="bl3"></td>
+            <td align="right" class="footer-right"><img src="./pixel_clear.gif" alt="" width="12" height="14" class="br3"></td>
+          </tr>
+        </tbody></table>
+
+
+
+	
+	
+					<div class="left-errmsg">
+															
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+					</div>
+					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+		<!-- footer -->
+		
+			
+				
+			
+		
+		
+					<p>&nbsp;</p>
+				</div></td>
+				<!-- KULRICE-8093: Horizontal scrolling for maintenance documents with errors listed  -->
+				<td width="21"><img src="./pixel_clear.gif" alt="" width="20" height="20"></td>
+			</tr>
+		</tbody></table>
+	
+
+
+
+
+					<!-- So that JS expandAllTab / collapseAllTab know the tabStates size. Subtract 1 because currentTabIndex = size + 1. -->
+														<input type="hidden" name="tabStatesSize" value="1">
+
+
+					<!-- state maintenance for returning the user to the action list if they started there -->
+														
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<input type="hidden" name="actionEditablePropertiesGuid" value="a52c547b-c541-4f89-81e9-e9f16bc57c95">
+
+
+
+</form>
+<div id="formComplete"></div>
+</div>
+
+
+
+</body></html>

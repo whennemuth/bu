@@ -1,0 +1,262 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>THIS JOB TRIGGERS THE PRODUCTION DEPLOYMENT OF KUALI RESEARCH PORTAL&#xd;
+&#xd;
+It is assumed that the build artifact, a docker image residing in our AWS docker registry, has already been built.&#xd;
+The job deploy to our production ec2 instances the most recent artifact in that registry.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>LANDSCAPE</name>
+          <description></description>
+          <randomName>choice-parameter-44314703474502166</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>def sb = new StringBuilder(&quot;&lt;div style=&apos;padding-left:20px; margin-bottom:30px;&apos;&gt;What landscape do you want to deploy to?&lt;br&gt;&lt;select name=&apos;value&apos; style=&apos;width:200px;font-family:monospace; margin-top:8px;&apos;&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;sb&apos;&gt;sb&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;ci&apos;&gt;ci&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option selected=true value=&apos;qa&apos;&gt;qa&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;stg&apos;&gt;stg&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;prod&apos;&gt;prod&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;/select&gt;&lt;/div&gt;&quot;)
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;div style=&apos;padding-left:20px; margin-bottom:30px;&apos;&gt;What landscape do you want to deploy to?&lt;br&gt;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&lt;/div&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-dashboard-release</projectName>
+          <projectFullName>kuali-dashboard-release</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>NOTIFY_EMAIL</name>
+          <description></description>
+          <randomName>choice-parameter-44314703476364726</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>return &quot;&lt;div style=&apos;padding-left:20px; margin-bottom:30px;&apos;&gt;Who gets notified when build succeeds/fails?&lt;br&gt;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;kcrmproj@bu.edu&apos; style=&apos;width:200px;font-family:monospace;margin-top:8px;&apos;&gt;&lt;/div&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;div style=&apos;padding-left:20px; margin-bottom:30px;&apos;&gt;Who gets notified when build succeeds/fails?&lt;br&gt;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:200px;font-family:monospace;margin-top:8px;&apos; disabled=true&gt;&lt;/div&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-dashboard-release</projectName>
+          <projectFullName>kuali-dashboard-release</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>INFO</name>
+          <description></description>
+          <randomName>choice-parameter-16660555557894798</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>return new URL(
+   &quot;http&quot;, 
+    &quot;127.0.0.1&quot;, 
+   8002, 
+   &quot;/active-choices?&quot; + 
+      &quot;parameter-name=release_info&amp;&quot; + 
+      &quot;git-ref-type=branch&amp;&quot; +
+      &quot;git-ref=master&amp;&quot; +
+      &quot;git-ssh-key=bu_github_id_research_portal_rsa&amp;&quot; +
+      &quot;git-remote-url=git@github.com:bu-ist/kuali-research-portal.git&amp;&quot; +
+      &quot;docker-repository-name=kuali-portal&quot;).text;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;div style=&apos;padding-left:20px&apos;&gt;Who gets notified when build succeeds/fails?&lt;br&gt;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:200px;font-family:monospace&apos; disabled=true&gt;&lt;/div&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-dashboard-release</projectName>
+          <projectFullName>kuali-dashboard-release</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+
+# Static and private variables
+CLI=/var/lib/jenkins/jenkins-cli.jar
+HOST=http://localhost:8080/
+DOCKER_PUSH_LOG_FILE=/var/lib/jenkins/jobs/kuali-dashboard-3-push-docker-image/lastSuccessful/log
+EC2_IDS=(&quot;i-0534c4e38e6a24009&quot; &quot;i-07d7b5f3e629e89ae&quot;);
+ECR_REGISTRY_URL=770203350335.dkr.ecr.us-east-1.amazonaws.com
+GIT_SCRIPT_URL=git@github.com:bu-ist/kuali-research-docker.git
+GIT_SCRIPT_BRANCH=master
+
+
+source /var/lib/jenkins/cli-credentials.sh
+
+LANDSCAPE=&quot;$(echo $LANDSCAPE | sed &apos;s/,//g&apos;)&quot;
+VERSION=$(cat ${DOCKER_PUSH_LOG_FILE} | grep -P &apos;digest&apos; | cut -d &apos;:&apos; -f 1 | tr -d &apos;[[:space:]]&apos;);
+
+case &quot;$LANDSCAPE&quot; in
+   &quot;sb&quot;)
+      EC2_IDS=(&quot;i-099de1c5407493f9b&quot; &quot;i-0c2d2ef87e98f2088&quot;);;
+   &quot;ci&quot;)
+      EC2_IDS=(&quot;i-0258a5f2a87ba7972&quot; &quot;i-0511b83a249cd9fb1&quot;);;
+   &quot;qa&quot;)
+      EC2_IDS=(&quot;i-011ccd29dec6c6d10&quot;);;
+   &quot;stg&quot;)
+      EC2_IDS=(&quot;i-090d188ea237c8bcf&quot; &quot;i-0cb479180574b4ba2&quot;);;
+   &quot;prod&quot;)
+      EC2_IDS=(&quot;i-0534c4e38e6a24009&quot; &quot;i-07d7b5f3e629e89ae&quot;);;
+esac
+
+for i in $(seq ${#EC2_IDS[@]}); do 
+	EC2_ID=${EC2_IDS[i-1]}
+      
+    CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;kuali-dashboard-4-run-docker-container&apos; -v -f \
+     -p VERBOSE=false \
+     -p GIT_REPO_URL=${GIT_SCRIPT_URL} \
+     -p GIT_BRANCH=${GIT_SCRIPT_BRANCH} \
+     -p ECR_REGISTRY_URL=${ECR_REGISTRY_URL} \
+     -p REGISTRY_REPO_NAME=portal \
+     -p VERSION=${VERSION} \
+     -p LANDSCAPE=${LANDSCAPE} \
+     -p BLAST_IMAGE=true \
+     -p EC2_INSTANCE_ID=${EC2_ID}&quot;
+
+    CMD_PRINTABLE=&quot;$(echo &quot;$CMD&quot; | sed &apos;s/[[:space:]][[:space:]]*\-p/\n\0/g&apos;)&quot;
+    printf &quot;\n$CMD_PRINTABLE\n&quot;
+    
+    # echo &quot;$CMD&quot;
+    eval &quot;$CMD&quot;  
+    
+done
+
+printf &quot;\n&quot;
+
+set -x</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.85">
+      <recipientList></recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD SUCCESS! (kuali-research for $LANDSCAPE)</subject>
+            <body>The build succeeded!
+Ready for smoke test.
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD FAILURE! (kuali-research for $LANDSCAPE)</subject>
+            <body>The build failed.
+See attached file for console output
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>true</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+        <hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD FIXED SUCCESSFULLY! (kuali-research for $LANDSCAPE)</subject>
+            <body>After recent issue, the Kuali Research has been corrected and sucessfully run.
+Ready for smoke test.
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+        <hudson.plugins.emailext.plugins.trigger.UnstableTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD UNSTABLE! (kuali-research for $LANDSCAPE)</subject>
+            <body>The build successfully deployed, but with automated test failures.
+See attached file for console output
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>true</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.UnstableTrigger>
+      </configuredTriggers>
+      <contentType>text/plain</contentType>
+      <defaultSubject></defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+      <presendScript>def landscape = build.getBuildVariables().get(&quot;LANDSCAPE&quot;)
+
+if(&quot;ci&quot;.equalsIgnoreCase(landscape) || &quot;sandbox&quot;.equalsIgnoreCase(landscape)) {
+    logger.println(&quot;Cancelling notification email. &quot; + landscape + &quot; landscape not configured for email notifications&quot;)
+    cancel = true
+}</presendScript>
+      <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
+      <attachBuildLog>false</attachBuildLog>
+      <compressBuildLog>false</compressBuildLog>
+      <replyTo></replyTo>
+      <from></from>
+      <saveOutput>false</saveOutput>
+      <disabled>true</disabled>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+  </publishers>
+  <buildWrappers/>
+</project>

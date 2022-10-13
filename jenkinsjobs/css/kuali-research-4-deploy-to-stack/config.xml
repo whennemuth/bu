@@ -1,0 +1,237 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>This job shells into a specified target EC2 instance and executes docker commands.&#xd;
+1) Remove the existing image from the local docker repository if it exists&#xd;
+2) Log into our AWS docker registry using an AWS API call&#xd;
+3) Pull an updated docker image from the registry to the local docker repository.&#xd;
+4) Run a new container based on the new image.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DEBUG</name>
+          <description>Makes all console output verbose (puts in debug mode with set -x)</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>LANDSCAPE</name>
+          <description>The landscape to deploy to (will auto-fill the STACK_NAME field)</description>
+          <randomName>choice-parameter-2403999708663</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; style=&apos;width:400px;font-family:monospace&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research-4-deploy-to-stack</projectName>
+          <projectFullName>kuali-research-4-deploy-to-stack</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>STACK_NAME</name>
+          <description>The name of the stack to deploy to.</description>
+          <randomName>choice-parameter-2404002839331</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>return new URL(
+   &quot;http&quot;, 
+    &quot;127.0.0.1&quot;, 
+   8002, 
+   &quot;/active-choices?&quot; + 
+      &quot;parameter-name=stack_name&amp;&quot; + 
+      &quot;landscape=&quot; +LANDSCAPE).text;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research-4-deploy-to-stack</projectName>
+          <projectFullName>kuali-research-4-deploy-to-stack</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>LANDSCAPE</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>ECR_REGISTRY_URL</name>
+          <description>Indicates the location of the elastic container registry (ECR) where the docker image to be pulled resides.
+Combined with the POM_VERSION, this value also serves to identify the docker image in the registry.</description>
+          <randomName>choice-parameter-17427311411497442</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>return new URL(&quot;http&quot;, &quot;127.0.0.1&quot;, 8002, &quot;/active-choices?parameter-name=ecr_url&quot;).text;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research-4-deploy-to-stack</projectName>
+          <projectFullName>kuali-research-4-deploy-to-stack</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <hudson.model.StringParameterDefinition>
+          <name>POM_VERSION</name>
+          <description>The maven version number for the war file the docker image being pulled is based on.
+Combined with ECR_URL, this value serves to identify the docker image in the registry.
+Look in the pom file of what was built to determine what this should be.</description>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REGISTRY_REPO_NAME</name>
+          <description>This value comes from the maven artifact id (except for sandbox builds).
+Look in the pom file of what was built to determine what this should be.
+This is used to identify the name of the docker registry repository that this image is going to be pulled from.
+The value is &quot;coeus&quot; by default, but remember that any sandbox images should go to a registry repository called &quot;coeus-sandbox&quot;</description>
+          <defaultValue>kuali-coeus</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ATTACHMENTS_DIR</name>
+          <description>Directory where files uploaded by users are deposited by the webapp</description>
+          <defaultValue>/var/log/kuali/attachments</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>JAVAMELODY_DIR</name>
+          <description>Directory where files saved by javamelody are located.</description>
+          <defaultValue>/var/log/kuali/javamelody</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PRINTING_DIR</name>
+          <description>Directory where printing job artifacts are stored for download to user.</description>
+          <defaultValue>/var/log/kuali/printing</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>NEW_RELIC_LOGGING</name>
+          <description>Select this to enable the new relic java agent.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>LOGJ2_CATALINA_LEVEL</name>
+          <description>Determines the logging level of output that goes to catalina.log</description>
+          <randomName>choice-parameter-3464623146683867</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>def sb = new StringBuilder(&quot;&lt;select name=&apos;value&apos; style=&apos;width:400px;font-family:monospace;&apos;&gt;&quot;)
+sb.append(&quot;&lt;option selected=true value=&apos;default&apos;&gt;default&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;trace&apos;&gt;trace&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;debug&apos;&gt;debug&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;info&apos;&gt;info&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;warn&apos;&gt;warn&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;error&apos;&gt;error&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;all&apos;&gt;all&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;off&apos;&gt;off&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;/select&gt;&quot;)
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research-4-deploy-to-stack</projectName>
+          <projectFullName>kuali-research-4-deploy-to-stack</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>LOGJ2_LOCALHOST_LEVEL</name>
+          <description>Determines the logging level of output that goes to localhost.log</description>
+          <randomName>choice-parameter-3464962622680001</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>def sb = new StringBuilder(&quot;&lt;select name=&apos;value&apos; style=&apos;width:400px;font-family:monospace;&apos;&gt;&quot;)
+sb.append(&quot;&lt;option selected=true value=&apos;default&apos;&gt;default&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;trace&apos;&gt;trace&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;debug&apos;&gt;debug&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;info&apos;&gt;info&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;warn&apos;&gt;warn&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;error&apos;&gt;error&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;all&apos;&gt;all&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;off&apos;&gt;off&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;/select&gt;&quot;)
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research-4-deploy-to-stack</projectName>
+          <projectFullName>kuali-research-4-deploy-to-stack</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+echo &apos;Pulling kuali-infrastructure github repository...&apos;
+source $JENKINS_HOME/cli-credentials.sh
+java -jar $JENKINS_HOME/jenkins-cli.jar -s http://localhost:8080/ build fetch-and-reset-kuali-infrastructure -v -f
+source $JENKINS_HOME/kuali-infrastructure/scripts/common-functions.sh
+if isDebug ; then
+  set -x
+fi
+source $JENKINS_HOME/kuali-infrastructure/kuali_jenkins/bash-scripts/job/kuali-research-deploy.sh</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.27">
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.StringBinding>
+          <credentialsId>credentials.newrelic.license.key</credentialsId>
+          <variable>NEW_RELIC_LICENSE_KEY</variable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.StringBinding>
+      </bindings>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
+  </buildWrappers>
+</project>

@@ -1,0 +1,232 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>THIS JOB TRIGGERS THE PRODUCTION DEPLOYMENT OF APACHE-SHIBBOLETH&#xd;
+&#xd;
+It is assumed that the build artifact, a docker image residing in our AWS docker registry, has already been built.&#xd;
+The job deploy to our production ec2 instances the most recent artifact in that registry.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>LANDSCAPE</name>
+          <description></description>
+          <randomName>choice-parameter-44314703474502166</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def sb = new StringBuilder(&quot;&lt;div style=&apos;padding-left:20px; margin-bottom:30px;&apos;&gt;What landscape do you want to deploy to?&lt;br&gt;&lt;select name=&apos;value&apos; style=&apos;width:200px;font-family:monospace; margin-top:8px;&apos;&gt;&quot;)
+sb.append(&quot;&lt;option selected=true value=&apos;qa&apos;&gt;qa&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;stage&apos;&gt;stage&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;prod&apos;&gt;prod&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;/select&gt;&lt;/div&gt;&quot;)
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;div style=&apos;padding-left:20px; margin-bottom:30px;&apos;&gt;What landscape do you want to deploy to?&lt;br&gt;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&lt;/div&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>apache-shibboleth-release</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>NOTIFY_EMAIL</name>
+          <description></description>
+          <randomName>choice-parameter-44314703476364726</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>return &quot;&lt;div style=&apos;padding-left:20px; margin-bottom:30px;&apos;&gt;Who gets notified when build succeeds/fails?&lt;br&gt;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;kcrmproj@bu.edu&apos; style=&apos;width:200px;font-family:monospace;margin-top:8px;&apos;&gt;&lt;/div&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;div style=&apos;padding-left:20px; margin-bottom:30px;&apos;&gt;Who gets notified when build succeeds/fails?&lt;br&gt;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:200px;font-family:monospace;margin-top:8px;&apos; disabled=true&gt;&lt;/div&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>apache-shibboleth-release</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>INFO</name>
+          <description></description>
+          <randomName>choice-parameter-44320856798820460</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def GIT_REPO_URL=&quot;git@github.com:bu-ist/kuali-core-main.git&quot;
+def sb = new StringBuilder(&quot;&lt;div style=&apos;padding-left:20px&apos;&gt;Details&lt;br&gt;&quot;)
+sb.append(&quot;&lt;pre style=&apos;width: 650px; background-color:#ebe0e0; padding:10px; border:1px solid black; margin:5px;&apos;name=&apos;value&apos;&gt;&quot;)
+    .append(&quot;DOCKER REGISTRY:\n(deploying from the following docker registry URI): &quot;)
+    .append(&quot;\n\n    730096353738.dkr.ecr.us-east-1.amazonaws.com/apache-shibboleth:latest&quot;)
+    .append(&quot;\n\n&quot;)
+    .append(&quot;&lt;/pre&gt;&quot;)
+
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;div style=&apos;padding-left:20px&apos;&gt;Who gets notified when build succeeds/fails?&lt;br&gt;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:200px;font-family:monospace&apos; disabled=true&gt;&lt;/div&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>apache-shibboleth-release</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+
+echo &quot;NOT READY YET!!!&quot;
+exit 1
+
+CLI=/var/lib/jenkins/jenkins-cli.jar
+HOST=http://localhost:8080/
+EC2_IDS=(&quot;i-0534c4e38e6a24009&quot; &quot;i-07d7b5f3e629e89ae&quot;)
+
+source /var/lib/jenkins/cli-credentials.sh
+
+case &quot;$LANDSCAPE&quot; in
+   &quot;qa&quot;)
+      EC2_IDS=(&quot;i-011ccd29dec6c6d10&quot;);;
+   &quot;stage&quot;)
+      EC2_IDS=(&quot;i-090d188ea237c8bcf&quot; &quot;i-0cb479180574b4ba2&quot;);;
+   &quot;prod&quot;)
+      EC2_IDS=(&quot;i-0534c4e38e6a24009&quot; &quot;i-07d7b5f3e629e89ae&quot;);;
+esac
+
+for i in $(seq ${#EC2_IDS[@]}); do 
+	EC2_ID=${EC2_IDS[i-1]}
+
+	java -jar ${CLI} \
+      -s ${HOST} build &apos;apache-shibboleth-3-docker-run-container&apos; -v -f \
+      -p EC2_INSTANCE_ID=${EC2_ID}
+  
+	eval $CMD
+
+done
+
+set -x</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
+      <recipientList></recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD SUCCESS! (kuali-research for $LANDSCAPE)</subject>
+            <body>The build succeeded!
+Ready for smoke test.
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD FAILURE! (kuali-research for $LANDSCAPE)</subject>
+            <body>The build failed.
+See attached file for console output
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>true</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+        <hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD FIXED SUCCESSFULLY! (kuali-research for $LANDSCAPE)</subject>
+            <body>After recent issue, the Kuali Research has been corrected and sucessfully run.
+Ready for smoke test.
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+        <hudson.plugins.emailext.plugins.trigger.UnstableTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD UNSTABLE! (kuali-research for $LANDSCAPE)</subject>
+            <body>The build successfully deployed, but with automated test failures.
+See attached file for console output
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>true</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.UnstableTrigger>
+      </configuredTriggers>
+      <contentType>text/plain</contentType>
+      <defaultSubject></defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+      <presendScript>def landscape = build.getBuildVariables().get(&quot;LANDSCAPE&quot;)
+
+if(&quot;ci&quot;.equalsIgnoreCase(landscape) || &quot;sandbox&quot;.equalsIgnoreCase(landscape)) {
+    logger.println(&quot;Cancelling notification email. &quot; + landscape + &quot; landscape not configured for email notifications&quot;)
+    cancel = true
+}</presendScript>
+      <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
+      <attachBuildLog>false</attachBuildLog>
+      <compressBuildLog>false</compressBuildLog>
+      <replyTo></replyTo>
+      <from></from>
+      <saveOutput>false</saveOutput>
+      <disabled>false</disabled>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+  </publishers>
+  <buildWrappers/>
+</project>

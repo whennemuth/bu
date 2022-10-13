@@ -1,0 +1,83 @@
+<html>
+<head>
+<style>
+	body { font: normal bold 12px verdana; }
+	td, th {
+		padding:5px;
+		background-color:#CCCCCC;
+		font: normal bold 12px verdana;
+		border-bottom: solid 1px blue;
+		border-right: solid 1px blue;
+	}
+	table {
+		border-spacing: 0px;
+		border-top: solid 1px blue;
+		border-left: solid 1px blue;
+		margin: 5px;
+	}
+</style>
+<script type="text/javascript" src="TableCellAncestry.js"></script>
+
+</head>
+
+<body leftmargin=20 topmargin=20>
+
+	<input type="button" value="TEST" onclick="doTest();">
+	
+	<table>
+	<tr>
+		<td><div id="div1">column1</div></td>
+		<td><div id="div2">column2</div></td>
+		<td><div id="div3">column3</div></td>
+	</tr>
+	<tr>
+		<td><input id="txt1" type="text" value="txt1"></td>
+		<td>
+			<input id="txt2" type="text" value="txt2">
+			<table>
+			<tr>
+				<td><div id="div7">column7</div></td>
+				<td><div id="div8">column8</div></td>
+				<td><div id="div9">column9</div></td>
+			</tr>
+			<tr>
+				<td><input id="txt7" type="text" value="txt7"></td>
+				<td><input id="txt8" type="text" value="txt8"></td>
+				<td><input id="txt9" type="text" value="txt9"></td>
+			</tr>
+			<tr>
+				<td><input id="txt10" type="text" value="txt10"></td>
+				<td><input id="txt11" type="text" value="txt11"></td>
+				<td><input id="txt12" type="text" value="txt12"></td>
+			</tr>
+			</table>
+		</td>
+		<td><input id="txt3" type="text" value="txt3"></td>
+	</tr>
+	<tr>
+		<td><input id="txt4" type="text" value="txt4"></td>
+		<td><input id="txt5" type="text" value="txt5"></td>
+		<td>
+			<input id="txt6" type="text" value="txt6">
+			<table>
+			<tr>
+				<td><div id="div13">column13</div></td>
+				<td><div id="div14">column14</div></td>
+				<td><div id="div15">column15</div></td>
+			</tr>
+			<tr>
+				<td><input id="txt13" type="text" value="txt13"></td>
+				<td><input id="txt14" type="text" value="txt14"></td>
+				<td><input id="txt15" type="text" value="txt15"></td>
+			</tr>
+			<tr>
+				<td><input id="txt16" type="text" value="txt16"></td>
+				<td><input id="txt17" type="text" value="txt17"></td>
+				<td><input id="txt18" type="text" value="txt18"></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>	
+</body>
+</html>

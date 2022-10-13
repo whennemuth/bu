@@ -1,0 +1,231 @@
+<div class="section">
+	<div class="section suitelist"">
+		<div class=sectionlabel>Kerberos User and Password</div>
+		<div class=sectionarea>
+			<div class=fieldlabel>Weblogin username</div>
+			<div><input type='text' ng-model="cycle.kerberosLoginParms.username" ng-disabled="!cycle"></div>
+			<div class=fieldlabel>Weblogin password</div>
+			<div><input type='password' ng-model="cycle.kerberosLoginParms.password" ng-disabled="!cycle"></div>
+			<div style="font-size:8px; font-family:verdana;">
+				login to 
+				<span>{{config.currentEnvironment.name}}</span> 
+				(id: 
+				<span ng-model="cycle.kerberosLoginParms.configEnvironmentId">{{config.currentEnvironment.id}}</span>)
+			</div>
+		</div>
+		
+		<div class=sectionLabel>Environment to run in</div>
+		<div class=sectionarea>
+			<select 
+				required
+				name="server" 
+				style="width:180px;"
+				ng-change="setConfig();"
+				ng-model="config.currentEnvironment"
+				ng-options="environment as environment.name 
+							for environment in config.configEnvironments 
+							track by environment.url">
+			</select>
+		
+		</div>
+		<div class=sectionlabel>Cycles</div>
+		<div class=sectionarea>
+			<select 
+				name="cycleChoices"
+				size="15" 
+				style="width:180px;"
+				ng-model="cycle"
+				ng-change="backupCycle()"
+				ng-disabled="!config || !config.user || !config.user.id || !isInitialized()" 
+				ng-options="cycle.name for cycle in cycles">
+				<option value="" ng-if="false"></option>
+			</select>
+			<div align=right style='margin: 5px;'>
+				<input 
+					type='button' 
+					value=" New " 
+					style='padding:5px;' 
+					ng-click="newCycle();" 
+					ng-disabled="!isInitialized()">
+				<input 
+					type='button' 
+					value=" Remove " 
+					style='padding:5px;' 
+					ng-click="removeCycle();" 
+					ng-show="cycle || !isInitialized()">
+			</div>
+		</div>
+	</div>
+	<div class="section suite">
+		<div class=sectionlabel>Add/Edit Cycle</div>
+		<textarea cols="80" rows=15 ng-show="showJson()">{{getCycleJson()}}</textarea>
+		<div class="sectionarea" style="height:800px;">
+			<div class="cycleWrap" ng-show='cycle' style="font-weight:bold;">
+				Cycle name: <input type="text" ng-model="cycle.name" class="boldpad">
+				<input type="button" value=" Cancel " ng-click="cancelNewCycle();" class="boldpad">					
+				<input type="button" value=" Save " ng-click="saveCycle();" class="boldpad">					
+				<div style="display:inline" ng-show="cycle && cycle.id">
+					<input type="button" value=" Clone " ng-click="cloneCycle();" class="boldpad">
+					&nbsp;&nbsp;&nbsp;
+					<input type="button" value=" Launch " ng-click="launch(cycle.id, 'cycle');" class="boldpad">	
+					<select ng-model="cycle.repeat" ng-options="idx as idx for idx in [1,2,3,4,5,6,7,8,9,10]" class="boldpad">
+						<option value="" ng-if="false"></option>
+					</select>
+					&nbsp;times		
+				</div>
+			</div>
+			<div class="sectionarea noborder">	
+				<div ng-repeat="suite in cycle.suites">		
+					<div class="cycleWrap">
+						{{suite.sequence}}) Suite name: <input type="text" value="{{suite.name}}" ng-model="suite.name"">
+						<input type="button" value="add" 
+							ng-click="addSuite(cycle, $index);">
+						<input 
+							type="button" 
+							value="remove" 
+							ng-show="cycle.suites.length > 1"
+							ng-click="removeSuite(cycle, $index);">
+						<div style="display:inline; padding-left:50px; width:200px;" ng-show="cycle && cycle.suites[$index].id">
+							<input type='button' value=' Launch ' onclick="alert('Not implemented yet');">
+							<select 
+								ng-model="suite.repeat" 
+								ng-options="idx as idx for idx in [1,2,3,4,5,6,7,8,9,10]">
+								<option value="" ng-if="false"></option>
+							</select>
+							&nbsp;times
+						</div>
+					</div>
+					<div  class="sectionarea">
+						<div ng-repeat="lv in suite.labelAndValues" style="background-color: #b3e0ff;">
+								<div class="cycleWrap"">
+									<div class="{{lv.navigates ? 'suiteRowHighlighted' : ''}}">
+										<div class=expandCollapse title="expand" ng-show="!lv.checked" ng-click="lv.checked = !lv.checked">&nbsp;edit</div>
+										<div class=expandCollapse title="collapse" ng-show="lv.checked" ng-click="lv.checked = !lv.checked">close</div>
+										<input 
+											type="button" 
+											value="add" 
+											ng-click="addLabelAndValue(suite, $index);">
+										<input 
+											type="button" 
+											value="remove" 
+											ng-show="cycle.suites[$parent.$index].labelAndValues.length > 1"
+											ng-click="removeLabelAndValue(suite, $index);">
+										<div style="display:inline;" class="basicfont">{{ getLvLabel(lv) }}</div>
+									</div>
+									<div ng-show="lv.checked" style="padding-left:30px;">
+									
+										<div style="padding-top:5px;">
+											type<br> 
+											<select ng-model="lv.elementType" ng-change="lvChange(lv)">
+												<option value=""><- Select One -></option>
+												<option value="{{et}}" title="{{desc}}" ng-repeat="(et, desc) in getElementTypes()">{{et}}</option>
+											</select>
+										</div>
+									
+										<div ng-show="lvShow(lv, 'screenscrape')" style="padding-top:5px;">
+											What are you scraping?<br> 
+											<select ng-model="lv.screenScrapeType" ng-change="lv.value = lv.screenScrapeType">
+												<option value="{{ss.id}}" title="{{ss.description}}" 
+													ng-repeat="ss in getScreenScrapeTypes()">{{ss.name}}</option>
+											</select>
+										</div>
+									
+										<div ng-show="lvShow(lv, 'label')" style="padding-top:5px;">
+											label<br>
+											<input type="text" value="{{lv.label}}" ng-model="lv.label">
+										</div>
+									
+										<div ng-show="lvShow(lv, 'identifier')" style="padding-top:5px;">
+											other identifier<br>
+											<input type="text" value="{{lv.identifier}}" ng-model="lv.identifier">
+										</div>
+									
+										<div ng-show="lvShow(lv, 'value')" style="padding-top:5px;">
+											<table cellpadding=0; cellspacing=0 border=0 class="valuerow">
+												<tr>
+													<td>value <span ng-show="lv.screenScrapeId == -1" id="computedDate{{lv.sequence}}"></span></td>
+													<td>type</td>
+													<td><div ng-show="lv.screenScrapeId == -1">quantity</div></td>
+													<td><div ng-show="lv.screenScrapeId == -1">units</div></td>
+													<td><div ng-show="lv.screenScrapeId == -1">format</div></td>
+													<td><div ng-show="lv.screenScrapeId == -1 && lv.dateFormatChoice == 'CUSTOM'">(MDY-/., only)</div></td>
+												</tr>
+												<tr>
+													<td>
+														<input type="text" value="{{lv.value}}" ng-model="lv.value" ng-disabled="lv.screenScrapeId != 0">
+													</td>
+													<td>
+														<select 
+															ng-model="lv.screenScrapeId" 
+															ng-change="screenScrapeIdChange(lv);"
+															ng-options="ss.id as getScreenScrapeInfo(ss) for ss in screenscrapes | filter:filterScreenScrapes(suite, lv)">
+														</select>											
+													</td>
+													<td><div ng-show="lv.screenScrapeId == -1">
+														<input 
+															type="text" 
+															ng-model="lv.dateUnits" 
+															ng-blur="dateBlur(lv);" 
+															ng-keypress="plusMinusIntegersOnly($event, lv.dateUnits);"  
+															maxlength=4 
+															style="width:60px;">											
+													</div></td>
+													<td><div ng-show="lv.screenScrapeId == -1">
+														<select ng-model="lv.datePart" ng-change="dateBlur(lv);">
+															<option 
+																value="{{part}}" 
+																title="{{desc}}" 
+																ng-repeat="(part, desc) in getDateParts();">{{desc}}</option>	
+														</select>										
+													</div></td>
+													<td><div ng-show="lv.screenScrapeId == -1">
+														<select 
+															ng-model="lv.dateFormatChoice" 
+															ng-change="dateFormatChange(lv);">
+															<option value="{{format}}" title="{{desc}}" ng-repeat="(format, desc) in getDateFormats()">{{desc}}</option>	
+														</select>										
+													</div></td>
+													<td><div ng-show="lv.screenScrapeId == -1 && lv.dateFormatChoice == 'CUSTOM'">
+														<input 
+															type="text" 
+															ng-model="lv.dateFormat" 
+															ng-blur="dateBlur(lv);" 
+															ng-keypress="dateFormatCharsOnly($event)"
+															style="width:100px;">	
+													</div></td>
+												</tr>
+											</table>
+										</div>
+									
+										<div ng-show="lvShow(lv, 'navigates')" style="padding-top:5px;">
+											navigates to another page
+											<input type="checkbox" ng-model="lv.navigates">
+										</div>
+									
+										<div ng-show="lvShow(lv, 'state')" style="padding-top:5px;">
+											state<br>
+											<select 
+													ng-model="lv.booleanValue" ng-change="lvChange(lv)" 
+													ng-options="key as val for (key, val) in {true:'checked', false:'unchecked'}">
+												<option value=""><- Select One -></option>
+											</select>
+										</div>
+										
+										<div ng-show="lvShow(lv, 'shortcut')" style="padding-top:5px;">
+											shortcut selection<br>
+											<select ng-model="lv.configShortcut" style="font-size:10px; height:20px;"
+												ng-change="lvChange(lv)" 
+												ng-options="shortcut as getHierarchyLabel(shortcut) for shortcut in getShortcuts() track by shortcut.id">
+												<option value=""><- Select One -></option>
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>							
+					</div>
+				</div>					
+			</div>
+		</div>
+	</div>
+</div>

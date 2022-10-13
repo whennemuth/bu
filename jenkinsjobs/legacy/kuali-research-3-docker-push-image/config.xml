@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>This job uploads a specified docker image from the local repository to a specified docker registry</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>ECR_REGISTRY_URL</name>
+          <description>Indicates the location of the elastic container registry (ECR) where the docker image is to be pushed to.</description>
+          <defaultValue>730096353738.dkr.ecr.us-east-1.amazonaws.com</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POM_VERSION</name>
+          <description>The maven version number for the war file the docker image being pushed is based on.
+Combined with ECR_URL, this value serves to identify the docker image as it will have been already tagged accordingly.</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REGISTRY_REPO_NAME</name>
+          <description>This value comes from the maven artifact id (except for sandbox builds).
+This is used to identify the name of the docker registry repository that this image is going to be pushed to.
+The value is &quot;coeus&quot; by default, but remember that any sandbox images should go to a registry repository called &quot;coeus-sandbox&quot;</description>
+          <defaultValue>coeus</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+
+DOCKER_TAG=&quot;${ECR_REGISTRY_URL}/${REGISTRY_REPO_NAME}:${POM_VERSION}&quot;
+
+# Login to the registry
+# NOTE: info on how to store credentials can be found at: 
+#       http://docs.aws.amazon.com/cli/latest/topic/config-vars.html
+#       requires ~/.aws/config
+
+evalstr=&quot;$(aws ecr get-login)&quot;
+# NOTE: The ecr get-login command of the aws cli returns a docker command that includes a removed switch.
+# The -e (email) switch will be rejected by the newer version of docker that we have installed on our aws
+# ec2 instances to accomodate cloud watch logging from our containers. Therefore I am removing the offending
+# &quot;-e none&quot; portion of the command with the stream editor.
+evalstr=&quot;$(echo $evalstr | sed &apos;s/ -e none//&apos;)&quot;
+eval $evalstr
+
+# Push the newly created image to the registry
+docker push ${DOCKER_TAG}
+
+set -x</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

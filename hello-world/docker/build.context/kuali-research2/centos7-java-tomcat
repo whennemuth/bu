@@ -1,0 +1,82 @@
+#################################################################################################
+#
+#  For explanation of $pkg below see: http://openjdk.java.net/install/
+#
+#  Tomcat directories/symlinks are as follows:
+#  bin
+#  conf -> /etc/tomcat
+#  lib -> /usr/share/java/tomcat
+#  logs -> /var/log/tomcat
+#  temp -> /var/cache/tomcat/temp
+#  webapps -> /var/lib/tomcat/webapps
+#  work -> /var/cache/tomcat/work
+#
+#  Example builds (this file saved as "bu-centos7-tomcat"):
+#    jdk8: docker build \
+#              -f bu-centos7-tomcat \
+#              -t bu-ist/centos7-java-tomcat \
+#              --build-arg JAVA_VERSION=8 \
+#              --build-arg JAVA_RELEASE=JDK \
+#              --build-arg TOMCAT_VERSION=7 .
+#    jre7: docker build \
+#              -f bu-centos7-tomcat \
+#              -t bu-ist/centos7-java-tomcat \
+#              --build-arg JAVA_VERSION=7 \
+#              --build-arg JAVA_RELEASE=JRE \
+#              --build-arg TOMCAT_VERSION=7 .
+#
+#  Run container detached:
+#    docker run -t -d --name tomcatcontainer bu-ist/centos7-java-tomcat
+#    NOTE: you cannot run without -t because all containers exit automatically without a continually
+#          running process (/bin/bash is not a continually running background process).
+#  Run container interactive:
+#    docker run -t -d --name tomcatcontainer bu-ist/centos7-java-tomcat
+#    docker exec -ti tomcatcontainer bash
+#    or...
+#    docker run -ti --name tomcatcontainer bu-ist/centos7-java-tomcat bash
+#
+#################################################################################################
+
+FROM centos:7
+MAINTAINER Warren H (wrh@bu.edu)
+
+ARG JAVA_VERSION=8
+ARG JAVA_RELEASE=JDK
+
+# Centos only comes with RPM for Tomcat7 and calls it "tomcat". 
+# Restore this arg if that changes and RPMS are available as "tomcat7", "tomcat8", etc.
+# ARG TOMCAT_VERSION=7
+ENV TOMCAT_VERSION=""
+
+LABEL \
+    Vendor="Boston University" \
+    Department=IST \
+    Platform="Centos 7" \
+    OpenJDK\ Version="$JAVA_VERSION" \
+    OpenJDK\ Release="$JAVA_RELEASE" \
+    Tomcat\ Version="$TOMCAT_VERSION"
+
+ENV JAVA_HOME=/usr
+
+# Install Java
+RUN \
+    echo "Building Boston University centos7-java image"; \
+    pkg="java-1.$JAVA_VERSION.0-openjdk"; \
+    if [ "$JAVA_RELEASE" = "JDK" ]; then \
+        pkg="$pkg-devel"; \
+    else \
+        pkg="$pkg-headless"; \
+    fi; \
+    yum install -y "$pkg" && \
+    yum clean all
+
+# Install Tomcat
+RUN \
+    echo "Building tomcat $TOMCAT_VERSION"; \
+    yum update -y && \
+    yum install -y "tomcat$TOMCAT_VERSION" && \
+    yum clean all
+
+EXPOSE 8080
+
+CMD ["sh", "/usr/libexec/tomcat/server", "start"]

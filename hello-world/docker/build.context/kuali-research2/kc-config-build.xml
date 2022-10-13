@@ -1,0 +1,8 @@
+<!--
+This config file only contains properties that are set by the maven build process using property replacement.
+-->
+<config>
+    <param name="version">${build.version}</param>
+    <param name="spring.profiles.active" system="true">${build.spring.profiles.active}</param>
+    <param name="alt.config.location">/opt/kuali/main/config/kc-config.xml</param>
+</config>

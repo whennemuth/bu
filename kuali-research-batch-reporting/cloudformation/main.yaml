@@ -1,0 +1,280 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  Create the resources that comprise the batch mechanism for research admin reporting
+
+
+Parameters:
+
+  GlobalTag:
+    Type: String
+    Description: >
+      A common value that all resources in this template will have prefixed to
+      their name and attached as a tag to establish a bundling through naming convention.
+    Default: research-admin-reports
+  
+  TemplateBucketName:
+    Type: String
+    Description: The S3 bucket where the yaml templates for this stack reside.
+    Default: kuali-conf
+    
+  Service:
+    Description: Service catalog name
+    Type: String
+    Default: research-administration
+
+  Function:
+    Description: The Function within the Service
+    Type: String
+    Default: kuali
+
+  DockerImage:
+    Description: The name of the docker image upon which the job task containers are based
+    Type: String
+    Default: 770203350335.dkr.ecr.us-east-1.amazonaws.com/research-admin-reports:latest
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: The id of the vpc to deploy to.
+
+  CampusSubnet1:
+    Type: AWS::EC2::Subnet::Id
+    Description: The first private subnet where fargate compute resources are launched.
+
+  CampusSubnet2:
+    Type: AWS::EC2::Subnet::Id
+    Description: The second private subnet where fargate compute resources are launched.
+
+  # arn:aws:iam::770203350335:role/aws-service-role/batch.amazonaws.com/AWSServiceRoleForBatch
+  BatchServiceRoleArn:
+    Type: String
+    Description: The ARN of the service linked role used by the compute environment
+    Default: empty
+
+  JobQueueState:
+    Type: String
+    Description: >
+      The state of the job queue. If the job queue state is ENABLED, it is able to accept jobs. 
+      If the job queue state is DISABLED, new jobs cannot be added to the queue, but jobs already in the queue can finish.
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Default: DISABLED
+
+  EventRuleState:
+    Type: String
+    Description: >
+      The initial state of each event rule that triggers a batch job. If equal to DISABLED, no events will be triggered
+      and no jobs will run. If ENABLED, the JobQueue must also be ENABLED for jobs to run.
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Default: DISABLED
+
+  LogGroupRetentionDays:
+    Type: String
+    Description: How long before logs are aged out and removed in days.
+    Default: 90
+
+  PublicKey:
+    Type: String
+    Description: >
+      A public key value in PEM format used in the cloudfront keygroup.
+      The counterpart to the private key stored in ssm parameter store.
+    NoEcho: true
+
+  SnsSubscriptionEmail:
+    Type: String
+    Description: The email of the person/group that is sent failed job report messages
+    # Default: dhaywood@bu.edu
+
+  Landscape:
+    Description: The landscape of the database.
+    Type: String
+
+  DbUser:
+    Description: The database user for batch.
+    Type: String
+    Default: KCBATCH
+
+  DbHost:
+    Description: The database host value.
+    Type: String
+    # Example1, direct: kuali-oracle-stg.clb9d4mkglfd.us-east-1.rds.amazonaws.com
+    # Example2, route53: stg.db.kuali.research.bu.edu
+      
+  EmailReplyToParameter:
+    Type: String
+    Description: The email of the person/group that is sent failed job report messages
+    Default: dhaywood@bu.edu
+      
+  ReportBucketName:
+    Description: Overrides the default naming of the s3 bucket.
+    Type: String
+    Default: empty
+
+  CreateReportBucket:
+    Description: Indicates if the bucket already exists (false), or not (true)
+    Type: String
+    Default: "true"
+
+  # Related rds instance pre-exists (is NOT part of this stack).
+  RdsVpcSecurityGroupId:
+    Type: String
+    Description: The id of the vpc security group associated with the existing rds instance
+
+
+Conditions:
+  BucketNameProvided: !Not [!Equals [!Ref ReportBucketName, empty]]
+
+
+Resources:
+
+  Roles:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 
+        !Sub https://s3.amazonaws.com/${TemplateBucketName}/cloudformation/${GlobalTag}/roles.yaml
+      Parameters:
+        GlobalTag: !Ref GlobalTag
+        Service: !Ref Service
+        Function: !Ref Function
+        Landscape: !Ref Landscape
+
+  Cloudfront:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 
+        !Sub https://s3.amazonaws.com/${TemplateBucketName}/cloudformation/${GlobalTag}/cloudfront.yaml
+      Parameters:
+        GlobalTag: !Ref GlobalTag
+        Service: !Ref Service
+        Function: !Ref Function
+        Landscape: !Ref Landscape
+        PublicKey: !Ref PublicKey
+
+  Job:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 
+        !Sub https://s3.amazonaws.com/${TemplateBucketName}/cloudformation/${GlobalTag}/job.yaml
+      Parameters:
+        GlobalTag: !Ref GlobalTag
+        Service: !Ref Service
+        Function: !Ref Function
+        Landscape: !Ref Landscape
+        ReportBucketName: 
+          !If
+            - BucketNameProvided
+            - !Ref ReportBucketName
+            - !Sub bu-${GlobalTag}-${Landscape}-archive
+        DockerImage: !Ref DockerImage
+        VpcId: !Ref VpcId
+        CampusSubnet1: !Ref CampusSubnet1
+        CampusSubnet2: !Ref CampusSubnet2
+        BatchServiceRoleArn: !GetAtt Roles.Outputs.BatchServiceRoleArn
+        TaskExecutionRoleArn: !GetAtt Roles.Outputs.TaskExecutionRoleArn
+        JobRoleArn: !GetAtt Roles.Outputs.JobRoleArn
+        JobQueueState: !Ref JobQueueState
+        LogGroupRetentionDays: !Ref LogGroupRetentionDays
+        RdsVpcSecurityGroupId: !Ref RdsVpcSecurityGroupId
+        CloudfrontPublicKeyId: !GetAtt Cloudfront.Outputs.PublicKeyId
+        CloudfrontUrl:
+          !Sub
+            - 'https://${domain}/'
+            - domain: !GetAtt Cloudfront.Outputs.DomainName
+
+  Bucket:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 
+        !Sub https://s3.amazonaws.com/${TemplateBucketName}/cloudformation/${GlobalTag}/bucket.yaml
+      Parameters:
+        GlobalTag: !Ref GlobalTag
+        Service: !Ref Service
+        Function: !Ref Function
+        Landscape: !Ref Landscape
+        CreateReportBucket: !Ref CreateReportBucket
+        ReportBucketName: 
+          !If
+            - BucketNameProvided
+            - !Ref ReportBucketName
+            - !Sub bu-${GlobalTag}-${Landscape}-archive
+        CloudfrontOriginAccessIdentity: !GetAtt Cloudfront.Outputs.OriginAccessIdentity
+
+  Parameters:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 
+        !Sub https://s3.amazonaws.com/${TemplateBucketName}/cloudformation/${GlobalTag}/parameters.yaml
+      Parameters:
+        GlobalTag: !Ref GlobalTag
+        Service: !Ref Service
+        Function: !Ref Function
+        Landscape: !Ref Landscape
+        DbUser: !Ref DbUser
+        DbHost: !Ref DbHost
+        EmailReplyTo: !Ref EmailReplyToParameter
+
+  Sns:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 
+        !Sub https://s3.amazonaws.com/${TemplateBucketName}/cloudformation/${GlobalTag}/sns.yaml
+      Parameters:
+        GlobalTag: !Ref GlobalTag
+        Service: !Ref Service
+        Function: !Ref Function
+        Landscape: !Ref Landscape
+        SnsSubscriptionEmail: !Ref SnsSubscriptionEmail
+
+  EventRules:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: Sns
+    Properties:
+      TemplateURL: 
+        !Sub https://s3.amazonaws.com/${TemplateBucketName}/cloudformation/${GlobalTag}/event-rules.yaml
+      Parameters:
+        GlobalTag: !Ref GlobalTag
+        Service: !Ref Service
+        Function: !Ref Function
+        Landscape: !Ref Landscape
+        JobQueueArn: !GetAtt Job.Outputs.JobQueueArn
+        JobDefinitionArn: !GetAtt Job.Outputs.JobDefinitionArn
+        CloudwatchEventRoleArn: !GetAtt Roles.Outputs.CloudwatchEventRoleArn
+        FailedJobSnsTopicArn: !GetAtt Sns.Outputs.TopicArn
+        EventRuleState: !Ref EventRuleState
+    
+  DynamoDbTable:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        !Sub https://s3.amazonaws.com/${TemplateBucketName}/cloudformation/${GlobalTag}/dynamodb.yaml
+      Parameters:
+        GlobalTag: !Ref GlobalTag
+        Service: !Ref Service
+        Function: !Ref Function
+        Landscape: !Ref Landscape
+
+
+Outputs:
+
+  JobQueueArn:
+    Value: !GetAtt Job.Outputs.JobQueueArn
+
+  JobDefinitionArn:
+    Value: !GetAtt Job.Outputs.JobDefinitionArn
+
+  CloudfrontOriginAccessIdentity:
+    Value: !GetAtt Cloudfront.Outputs.OriginAccessIdentity
+
+  CloudfrontPublicKeyId:
+    Value: !GetAtt Cloudfront.Outputs.PublicKeyId
+
+  CloudfrontUrl:
+    Value: !Sub
+      - 'https://${domain}/'
+      - domain: !GetAtt Cloudfront.Outputs.DomainName
+
+  BucketArn:
+    Value: !GetAtt Bucket.Outputs.BucketArn

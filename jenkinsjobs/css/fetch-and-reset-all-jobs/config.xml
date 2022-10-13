@@ -1,0 +1,97 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Acquires all jobs backed up to a github repository&#xd;
+&#xd;
+IMPORTANT!!!  This is not really a pull, but a fetch followed by a hard reset.&#xd;
+If you have made any changes to any jobs, push those first before running this job.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>GITUSER</name>
+          <description>What user are you identifying yourself to git as?</description>
+          <defaultValue>jenkins</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REPO</name>
+          <description>What is the url of the git repo where the jenkins jobs are stored?</description>
+          <defaultValue>git@github.com:bu-ist/kuali-research-jenkins.git</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description>The branch being fetched.</description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>cd ${JENKINS_HOME}/jobs
+eval `ssh-agent -s`
+# Add the key to the agent.
+ssh-add ${JENKINS_HOME}/.ssh/bu_github_id_jenkins_rsa
+# ssh -T git@github.com
+if [ ! -d .git ] ; then
+  git init	
+  git config user.email &quot;jenkins@bu.edu&quot;
+  git config user.name $GITUSER
+  git remote add github $REPO
+fi
+
+if [ ! -f .gitignore ] ; then
+  cat &lt;&lt;EOF &gt; .gitignore
+# Ignore everything in subdirectories
+/*/*
+# ...except the config.xml file in those subdirectories
+!/**/config.xml
+#...and this file
+!.gitignore
+#...and javajobs
+!/javajobs/ContinuousIntegration/
+EOF
+fi
+
+if [ -n &quot;$(git status -s -z)&quot; ] ; then
+  echo &quot;FOUND LOCAL CHANGES! SORRY, YOUR ARE GOING TO LOSE THESE.&quot;
+fi
+
+echo &quot;Fetching from upstream and performing hard reset&quot;
+git fetch github $BRANCH
+git reset --hard FETCH_HEAD
+eval `ssh-agent -k`
+
+if [ -f config.xml.bkp ] ; then
+  dif=&quot;$(diff -w config.xml.bkp ../config.xml)&quot;
+  if [ -n &quot;$dif&quot; ] ; then
+    echo &quot;Replacing config.xml with jobs/config.xml.bkp...&quot;
+    cat ../config.xml &gt; ../config.xml.last
+    cat config.xml.bkp &gt; config.xml
+  fi
+fi</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

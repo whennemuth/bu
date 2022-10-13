@@ -1,0 +1,38 @@
+{
+  "pomUrl" : "https://raw.githubusercontent.com/bu-ist/kuali_research/master/pom.xml",
+  "gitExePath" : "C:/whennemuth/downloads/Git/bin",
+  "mavenBinPath" : "C:/whennemuth/downloads/maven/apache-maven-3.3.9/bin",
+  "workspacePath" : "C:/whennemuth/workspaces/kuali_workspace",
+  "runScript" : "false",
+  "modules" : [ {
+    "gitUrl" : "https://github.com/kuali/schemaspy.git",
+    "tagPrefix" : "schemaspy-",
+    "versionElement" : "<schemaspy.version>",
+    "buildOrder" : 1,
+    "runInstall" : "true"
+  }, {
+    "gitUrl" : "https://github.com/kuali/kc-rice.git",
+    "tagPrefix" : "rice-",
+    "versionElement" : "<rice.version>",
+    "buildOrder" : 2,
+    "runInstall" : "true"
+  }, {
+    "gitUrl" : "https://github.com/kuali/kc-api.git",
+    "tagPrefix" : "coeus-api-",
+    "versionElement" : "<coeus-api-all.version>",
+    "buildOrder" : 3,
+    "runInstall" : "true"
+  }, {
+    "gitUrl" : "https://github.com/kuali/kc-s2sgen.git",
+    "tagPrefix" : "coeus-s2sgen-",
+    "versionElement" : "<coeus-s2sgen.version>",
+    "buildOrder" : 4,
+    "runInstall" : "true"
+  }, {
+    "gitUrl" : "https://github.com/kuali/kc.git",
+    "tagPrefix" : "",
+    "versionElement" : "<version>",
+    "buildOrder" : 5,
+    "runInstall" : "true"
+  } ]
+}

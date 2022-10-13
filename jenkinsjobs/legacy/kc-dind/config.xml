@@ -1,0 +1,293 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<maven2-moduleset plugin="maven-plugin@3.2">
+  <actions/>
+  <description>This build:&#xd;
+   1) Creates the application war file from the HEAD reference of the git master branch.&#xd;
+   2) Wraps the war file into the image during its creation&#xd;
+   3) Uploads the new image to a docker registry&#xd;
+   4) Issues a command over SSH to docker on the application host to remove any existing container that is running and run a new one based on the new image.&#xd;
+&#xd;
+ISSUE:&#xd;
+If you see any node errors that mention &quot;ECONNRESET or EPIPE&quot;, this is probably due to the following known bug:&#xd;
+https://github.com/npm/npm/issues/7945&#xd;
+This issue is intermittent and not actually related to proxy configuration.&#xd;
+Running the build again usually goes successfully.&#xd;
+&#xd;
+TODO:&#xd;
+Have a pre-build step build the other dependencies if they are not in the local .m2 repo.&#xd;
+For example, if rice or s2sgen versions indicated in the pom file are not present, this could be detected by the following command:&#xd;
+mvn dependency:get -Dartifact=g:a:v -o -DrepoUrl=file://path/to/your/repo&#xd;
+See also:&#xd;
+https://wiki.jenkins-ci.org/display/JENKINS/Jenkins+CLI&#xd;
+https://wiki.jenkins-ci.org/display/JENKINS/Conditional+BuildStep+Plugin&#xd;
+https://wiki.jenkins-ci.org/display/JENKINS/Run+Condition+Plugin&#xd;
+https://www.cloudbees.com/blog/how-use-jenkins-job-chaining-and-visualizations</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description>This value specifies any branch that has a ref matching the pattern specified here.
+For example, if you tagged a ref as follows: 
+     &quot;git tag release/2015.3.1.R a2d8a71&quot;
+Then this job would build kuali-research from ref &quot;a2d8a71&quot;
+To simply specify the HEAD ref of the master branch use:
+     refs/heads/master</description>
+          <defaultValue>*/tags/release/*</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REFSPEC</name>
+          <description>Specifies references to pull must be tagged and the tag value must start with &quot;release/&quot;
+To instead pull the latest from the master branch use:
+     +refs/heads/master:refs/remotes/origin/master
+
+Tag the codebase accordingly. For example:
+     git tag release/coeus-1603.49 tags/coeus-1603.49
+     git tag release/coeus-1603.49 HEAD
+     git tag release/coeus-1603.49 a2d8a71
+     etc.</description>
+          <defaultValue>+refs/tags/release/*:refs/remotes/origin/tags/release/*</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.3">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <refspec>+refs/tags/release/*:refs/remotes/origin/tags/release/*</refspec>
+        <url>https://github.com/whennemuth/kc</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/tags/release/*</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers>
+    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.29.4">
+      <spec></spec>
+    </com.cloudbees.jenkins.GitHubPushTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <rootModule>
+    <groupId>org.kuali.coeus</groupId>
+    <artifactId>coeus</artifactId>
+  </rootModule>
+  <goals>clean compile install -Dgrm.off=true</goals>
+  <aggregatorStyleBuild>true</aggregatorStyleBuild>
+  <incrementalBuild>false</incrementalBuild>
+  <ignoreUpstremChanges>true</ignoreUpstremChanges>
+  <ignoreUnsuccessfulUpstreams>false</ignoreUnsuccessfulUpstreams>
+  <archivingDisabled>false</archivingDisabled>
+  <siteArchivingDisabled>false</siteArchivingDisabled>
+  <fingerprintingDisabled>false</fingerprintingDisabled>
+  <resolveDependencies>false</resolveDependencies>
+  <processPlugins>false</processPlugins>
+  <mavenValidationLevel>-1</mavenValidationLevel>
+  <runHeadless>false</runHeadless>
+  <disableTriggerDownstreamProjects>false</disableTriggerDownstreamProjects>
+  <blockTriggerWhenBuilding>true</blockTriggerWhenBuilding>
+  <settings class="jenkins.mvn.DefaultSettingsProvider"/>
+  <globalSettings class="jenkins.mvn.DefaultGlobalSettingsProvider"/>
+  <reporters/>
+  <publishers/>
+  <buildWrappers/>
+  <prebuilders>
+    <hudson.tasks.Shell>
+      <command>set +x
+echo &quot; &quot;
+echo &quot;----------------------------------------------------------------------------&quot;
+echo &quot;          M2 DEPENDENCY CHECK (schemaspy, rice, coeus-api, s2sgen)&quot;
+echo &quot;----------------------------------------------------------------------------&quot;
+echo &quot; &quot;
+echo &quot;1) Analyzing pom for versions...&quot;
+
+# Get the content of the pom file with all return/newline characters removed.
+content=$(cat pom.xml | sed &apos;:a;N;$!ba;s/\n//g&apos;)
+
+# Get versions of dependencies, use a zero width lookbehind for the open element and capture 
+# all following characters thereafter until a closing element character is encountered
+ 
+schemaspy_version=$(echo &quot;$content&quot; | grep -Po &apos;(?&lt;=&lt;schemaspy\.version&gt;)([^&lt;]+)&apos;)
+echo &quot;schemaspy version: ${schemaspy_version}&quot;
+ 
+rice_version=$(echo &quot;$content&quot; | grep -Po &apos;(?&lt;=&lt;rice\.version&gt;)([^&lt;]+)&apos;)
+echo &quot;rice version: ${rice_version}&quot;
+ 
+api_version=$(echo &quot;$content&quot; | grep -Po &apos;(?&lt;=&lt;coeus\-api\-all\.version&gt;)([^&lt;]+)&apos;)
+echo &quot;coeus-api version: ${api_version}&quot;
+ 
+s2sgen_version=$(echo &quot;$content&quot; | grep -Po &apos;(?&lt;=&lt;coeus\-s2sgen\.version&gt;)([^&lt;]+)&apos;)
+echo &quot;s2sgen version: ${s2sgen_version}&quot;
+
+echo &quot; &quot;
+echo &quot;2) Searching .m2 directory for dependencies installed for above versions...&quot;
+
+repo=&quot;/home/jenkins/.m2/repository&quot;
+
+# file extension, group, version, artifactid, parent_artifactid, job
+m2_items=(
+   &quot;jar,co/kuali/schemaspy,${schemaspy_version},schemaspy,schemaspy,schemaspy&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-archetype-quickstart,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-core-api,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-db-config,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-deploy,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-development-tools,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-impex-client-bootstrap,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-impex-master,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-impex-server-bootstrap,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-impl,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-it-config,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-ken-api,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-kew-api,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-kim-api,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-kns,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-krad-app-framework,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-krms-api,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-ksb-api,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-legacy-web,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-location-api,rice,kc-rice&quot;
+   &quot;war,org/kuali/rice,${rice_version},rice-serviceregistry,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-sql,rice,kc-rice&quot;
+   &quot;war,org/kuali/rice,${rice_version},rice-standalone,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-tools-test,rice,kc-rice&quot;
+   &quot;war,org/kuali/rice,${rice_version},rice-web,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-xml,rice,kc-rice&quot;
+   &quot;jar,org/kuali/coeus,${api_version},coeus-api-all,coeus-api,kc-api&quot;
+   &quot;jar,org/kuali/coeus,${s2sgen_version},coeus-s2sgen-api,coeus-s2sgen,kc-s2sgen&quot;
+   &quot;jar,org/kuali/coeus,${s2sgen_version},coeus-s2sgen-impl,coeus-s2sgen,kc-s2sgen&quot;
+)
+
+jobs_to_run=()
+git_tags=()
+
+for i in ${m2_items[@]}; do
+
+   IFS=&apos;,&apos; read -ra parts &lt;&lt;&lt; &quot;${i}&quot;
+
+   ext=${parts[0]}
+   group=${parts[1]}
+   version=${parts[2]}
+   artifactid=${parts[3]}
+   parentartifactid=${parts[4]}
+   job=${parts[5]}
+
+   artifact=&quot;${repo}/${group}/${artifactid}/${version}/${artifactid}-${version}.${ext}&quot;
+   if [ -f $artifact ] ; then
+      echo &quot;found: ${artifact}&quot;;
+   else
+      echo &quot;MISSING: ${artifact}&quot;;
+      if [ -z &quot;$(echo $jobs_to_run[*]} | grep ${job})&quot; ] ; then
+         jobs_to_run+=(${job});
+         git_tags+=(&quot;${parentartifactid}-${version}&quot;);
+      fi
+   fi
+done
+
+echo &quot; &quot;
+
+if [ ${#jobs_to_run[@]} -eq 0 ] ; then
+   echo &quot;All dependencies accounted for&quot;;
+else
+   source /var/lib/jenkins/cli-credentials.sh
+   echo &quot;DEPENDENCIES MISSING. Must build the following: ${jobs_to_run[*]}&quot;;
+   echo &quot; &quot;
+   for ((i=0; i&lt;${#jobs_to_run[*]}; i++));
+   do
+      # java -jar /home/jenkins/jenkins-cli.jar -s http://localhost:8080/ build &apos;jenkins-cli test2&apos; -v -f -p PARM1=hello --username=warren --password=password
+      java -jar /home/jenkins/jenkins-cli.jar -s http://localhost:8080/ build ${jobs_to_run[i]} -v -f -p version=${git_tags[i]}
+      # echo &quot;java -jar /home/jenkins/jenkins-cli.jar -s http://localhost:8080/ build ${jobs_to_run[i]} -v -f -p version=${git_tags[i]}&quot;
+   done
+fi
+
+echo &quot; &quot;
+echo &quot;----------------------------------------------------------------------------&quot;
+echo &quot;                      FINISHED M2 DEPENDENCY CHECK&quot;
+echo &quot;----------------------------------------------------------------------------&quot;
+echo &quot; &quot;
+
+
+set -x
+</command>
+    </hudson.tasks.Shell>
+  </prebuilders>
+  <postbuilders>
+    <hudson.tasks.Shell>
+      <command># Remove any dangling items
+if [ -n &quot;$(docker images --filter dangling=true -q)&quot; ] ; then 
+   docker rmi -f $(docker images --filter dangling=true -q); 
+   echo &quot;Removed dangling image(s)&quot;;
+else
+   echo &quot;No dangling images to remove&quot;;
+fi
+if [ -n &quot;$(docker ps --filter dangling=true -q)&quot; ] ; then 
+   docker rm $(docker ps --filter dangling=true -q); 
+   echo &quot;Removed dangling container(s)&quot;;
+else
+   echo &quot;No dangling containers to remove&quot;;
+fi
+if [ -n &quot;$(docker volume ls -qf dangling=true)&quot; ] ; then 
+   docker volume rm $(docker volume ls -qf dangling=true); 
+   echo &quot;Removed dangling volume(s)&quot;;
+else 
+   echo &quot;No dangling volumes to remove&quot;;
+fi
+
+# Build the app image (the image will curl the jenkins war artifact into itself while it is building).
+docker build \
+   -f kuali_research_docker_file_bundlewar \
+   -t ec2-52-25-226-38.us-west-2.compute.amazonaws.com:5000/bu-ist/kuali-research-dind:${POM_VERSION} \
+   --build-arg SOURCE_WAR=ec2-52-37-165-82.us-west-2.compute.amazonaws.com:8080/job/kc-dind/ws/coeus-webapp/target/coeus-webapp-${POM_VERSION}.war \
+   https://github.com/whennemuth/hello-world.git#master:docker/build.context/kuali-research
+   
+# Push the newly created image to the registry (Assumes the directory containing the sa.crt file is mounted into this jenkins container).
+docker push ec2-52-25-226-38.us-west-2.compute.amazonaws.com:5000/bu-ist/kuali-research-dind:${POM_VERSION}
+
+## Execute a docker command over ssh on the application host to run a container against the new image in the registry
+ssh \
+   jenkins@ec2-52-37-253-82.us-west-2.compute.amazonaws.com \
+   -i /var/lib/jenkins/.ssh/ec2_rsa &quot;set -x &amp;&amp; docker ps &amp;&amp; &quot; \
+   &quot;docker rm -f kcdindcontainer || echo &apos;No container to remove.&apos; &amp;&amp; &quot; \
+   &quot;docker pull ec2-52-25-226-38.us-west-2.compute.amazonaws.com:5000/bu-ist/kuali-research-dind:${POM_VERSION} &amp;&amp; &quot; \
+   &quot;docker run&quot; \
+   &quot; -d&quot; \
+   &quot; -u root&quot; \
+   &quot; -p 80:8080&quot; \
+   &quot; -p 3306:3306&quot; \
+   &quot; --restart unless-stopped&quot; \
+   &quot; --name kcdindcontainer&quot; \
+   &quot; -v /var/jenkins/kc/logs:/usr/local/tomcat/logs &quot; \
+   &quot; -v /home/kc/kuali:/root/kuali &quot; \
+   &quot;ec2-52-25-226-38.us-west-2.compute.amazonaws.com:5000/bu-ist/kuali-research-dind:${POM_VERSION} &amp;&amp; &quot; \
+   &quot;docker ps&quot;
+</command>
+    </hudson.tasks.Shell>
+  </postbuilders>
+  <runPostStepsIfResult>
+    <name>SUCCESS</name>
+    <ordinal>0</ordinal>
+    <color>BLUE</color>
+    <completeBuild>true</completeBuild>
+  </runPostStepsIfResult>
+</maven2-moduleset>

@@ -1,0 +1,89 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>REGISTRY_REPO_NAME</name>
+          <description>This is used to identify the name of the docker registry repository that this image is going to be pushed to</description>
+          <defaultValue>apache-shibboleth</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ECR_REGISTRY_URL</name>
+          <description>The url of the elastic container registry (ECR) where the newly created image is to be pushed to from this server and pulled from by the target docker host</description>
+          <defaultValue>730096353738.dkr.ecr.us-east-1.amazonaws.com</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DOCKER_BUILD_CONTEXT_GIT_BRANCH</name>
+          <description>You can modify this value to pull a build context stored in a branch other than master.</description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DOCKER_TAG_VERSION</name>
+          <description>The value the image being built is to tagged with for identification within the local and registry repositories.</description>
+          <defaultValue>latest</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command># 1) Remove any dangling items
+if [ -n &quot;$(docker images --filter dangling=true -q)&quot; ] ; then 
+   docker rmi -f $(docker images --filter dangling=true -q); 
+   echo &quot;Removed dangling image(s)&quot;;
+else
+   echo &quot;No dangling images to remove&quot;;
+fi
+if [ -n &quot;$(docker volume ls -qf dangling=true)&quot; ] ; then 
+   docker volume rm $(docker volume ls -qf dangling=true); 
+   echo &quot;Removed dangling volume(s)&quot;;
+else 
+   echo &quot;No dangling volumes to remove&quot;;
+fi
+
+# 2) Define variables.
+# NOTE: JENKINS_URL is the full URL of Jenkins, like http://server:port/jenkins/ 
+#       Only available if Jenkins URL is set in system configuration
+ECR_REPO_URL=&quot;${ECR_REGISTRY_URL}/${REGISTRY_REPO_NAME}&quot;
+DOCKER_TAG=&quot;${ECR_REPO_URL}:${DOCKER_TAG_VERSION}&quot;
+DOCKER_BUILD_CONTEXT=&quot;git@github.com:bu-ist/kuali-research-docker.git#${DOCKER_BUILD_CONTEXT_GIT_BRANCH}:apache-shib/build.context&quot;
+
+# 3) This is a private repo and needs ssh to access it
+eval `ssh-agent -s`
+# Add the key to the agent.
+ssh-add ${JENKINS_HOME}/.ssh/bu_github_id_docker_rsa
+
+# 4) Build the image (don&apos;t use cache - we want yum updates to run)
+docker build --no-cache -t ${DOCKER_TAG} ${DOCKER_BUILD_CONTEXT}
+
+# 5) Kill the ssh agent
+eval `ssh-agent -k`</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

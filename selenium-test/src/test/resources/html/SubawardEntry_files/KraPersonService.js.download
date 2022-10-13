@@ -1,0 +1,20 @@
+if (typeof dwr == 'undefined' || dwr.engine == undefined) throw new Error('You must include DWR engine before including this file');
+
+(function() {
+  if (dwr.engine._getObject("KraPersonService") == undefined) {
+    var p;
+    
+    p = {};
+
+    /**
+     * @param {class java.lang.String} p0 a param
+     * @param {function|Object} callback callback function or options object
+     */
+    p.getKcPersonByUserName = function(p0, callback) {
+      return dwr.engine._execute(p._path, 'KraPersonService', 'getKcPersonByUserName', arguments);
+    };
+    
+    dwr.engine._setObject("KraPersonService", p);
+  }
+})();
+

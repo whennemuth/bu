@@ -1,0 +1,171 @@
+<html>
+<!-- 
+	This provides content for unit tests that concern links that are to be located through the ShortcutElementLocator.
+	The tests focus on finding elements within parent elements, where the search for the parent produced more than
+	one result. The functionality must explore into each potential parent to find that only one has the sought child element
+ -->
+	<head>
+		<style>
+			.uif-actionLink{} 
+			.uif-boxLayoutHorizontalItem{} 
+			.icon-plus{}
+			
+			div{
+				border: solid 1px black;
+				padding: 10px;
+			}
+		</style>
+		
+		<script>
+		function showHiddenDiv(id, timeout) {
+			var code = "document.getElementById('" + id + "').style.display = 'block';";
+			if(timeout == undefined || timeout == 0) {
+				eval(code);
+			}
+			else {
+				setTimeout(function(){ eval(code); }, timeout);
+			}
+		}
+		</script>		
+	</head>
+	<body leftmargin=50 topmargin=50>
+	
+		<!-- Hierarchy level 2 finds 2 matching parent header results (only one is valid) -->
+		<div>
+			<span>headingA 1</span>
+			<div>
+				<span>headingA 2</span>
+				<div>S
+					<span>headingA 3</span>
+					<div>
+						<a href="#">target 1</a>						
+					</div>
+				</div>
+			</div>
+			<div>
+				<span>headingA 2</span>
+				<div>
+					<span>bogus 1</span>
+					<div>
+						<a href="#">bogus 2</a>						
+					</div>
+				</div>
+			</div>
+		</div>
+	
+		<!-- Hierarchy level 3 finds 2 matching parent header results (only one is valid) -->
+		<div>
+			<span>headingB 1</span>
+			<div>
+				<span>headingB 2</span>
+				<div>
+					<span>headingB 3</span>
+					<div>
+						<a href="#">target 2</a>						
+					</div>
+				</div>
+			</div>
+			<div>
+				<span>headingB 2</span>
+				<div>
+					<span>headingB 3</span>
+					<div>
+						<a href="#">bogus 3</a>						
+					</div>
+				</div>
+			</div>
+		</div>
+	
+		<!-- Hierarchy level 3 finds 2 matching parent header results (BOTH are valid) -->
+		<div>
+			<span>headingC 1</span>
+			<div>
+				<span>headingC 2</span>
+				<div>
+					<span>headingC 3</span>
+					<div>
+						<a href="#">target 3</a>						
+					</div>
+				</div>
+			</div>
+			<div>
+				<span>headingC 2</span>
+				<div>
+					<span>headingC 3</span>
+					<div>
+						<a href="#">target 3</a>						
+					</div>
+				</div>
+			</div>
+		</div>
+	
+		<!-- Hierarchy level 3 finds 2 matching parent header results (BOTH contain the sought element, but one element is disabled) -->
+		<div>
+			<span>headingD 1</span>
+			<div>
+				<span>headingD 2</span>
+				<div>
+					<span>headingD 3</span>
+					<div>
+						<a href="#">target 4</a>						
+					</div>
+				</div>
+			</div>
+			<div>
+				<span>headingD 2</span>
+				<div>
+					<span>headingD 3</span>
+					<div>
+						<a href="#" DISABLED>target 4</a>						
+					</div>
+				</div>
+			</div>
+		</div>
+	
+		<!-- Hierarchy level 3 finds 2 matching parent header results (BOTH contain the sought element, but one parent is hidden) -->
+		<div>
+			<span>headingE 1</span>
+			<div>
+				<span>headingE 2</span>
+				<div>
+					<span>headingE 3</span>
+					<div>
+						<a href="#">target 5</a>						
+					</div>
+				</div>
+			</div>
+			<div>
+				<span>headingE 2</span>
+				<div>
+					<span>headingE 3</span>
+					<div style="display:none;">
+						<a href="#">target 5</a>						
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Multiple matching parent header results found that must be clicked and waited for to see which are valid -->
+		<div>
+			<span>headingF 1</span>
+			<div>
+				<a href="#" onclick="showHiddenDiv('div1', 2000);">headingF 2</a>
+				<div id="div1" style="display:none;">
+					<span>headingF 3</span>
+					<div>
+						<a href="#">target 6</a>						
+					</div>
+				</div>
+			</div>
+			<div>
+				<span>headingF 2</span>
+				<div>
+					<a href="#" onclick="showHiddenDiv('div8', 2000);">headingF 3</a>
+					<div id="div8">
+						<a href="#">bogus 5</a>						
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,114 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>LANDSCAPE</name>
+          <description>The landscape to deploy to.</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>ci</string>
+              <string>sandbox</string>
+              <string>qa</string>
+              <string>stage</string>
+              <string>prod</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DEBUG</name>
+          <description>If true, prints out would be calls to other jobs, but does not go through with them.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+
+source /var/lib/jenkins/cli-credentials.sh
+CLI=/var/lib/jenkins/jenkins-cli.jar
+HOST=http://localhost:8080/
+LANDSCAPE=$(echo $LANDSCAPE | tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;)
+EC2_IDS=()
+
+case &quot;$LANDSCAPE&quot; in
+   &quot;sandbox&quot;)
+      EC2_IDS=(&quot;i-099de1c5407493f9b&quot; &quot;i-0c2d2ef87e98f2088&quot;);;
+   &quot;ci&quot;)
+      EC2_IDS=(&quot;i-0258a5f2a87ba7972&quot; &quot;i-0511b83a249cd9fb1&quot;);;      
+   &quot;qa&quot;)
+      EC2_IDS=(&quot;i-011ccd29dec6c6d10&quot;);;
+   &quot;stage&quot;)
+      EC2_IDS=(&quot;i-090d188ea237c8bcf&quot; &quot;i-0cb479180574b4ba2&quot;);;
+   &quot;prod&quot;)
+      EC2_IDS=(&quot;i-0534c4e38e6a24009&quot; &quot;i-07d7b5f3e629e89ae&quot;);;
+esac
+
+for i in $(seq ${#EC2_IDS[@]}); do
+   EC2_ID=${EC2_IDS[i-1]}
+   if [ $i -eq 1 ] ; then
+      # A) FULL BUILD AND DEPLOY (maven &amp; docker)
+      #    (NOTE: several parameters are ommitted to invoke their default values.)
+      CMD1=&quot;java -jar ${CLI} -s ${HOST} build &apos;apache-shibboleth-1-docker-build-image&apos; -v -f&quot;
+      
+      CMD2=&quot;java -jar ${CLI} -s ${HOST} build &apos;apache-shibboleth-2-docker-push-image&apos; -v -f&quot;
+      
+      CMD3=&quot;java -jar ${CLI} -s ${HOST} build &apos;apache-shibboleth-3-docker-run-container&apos; -v -f \
+         -p EC2_INSTANCE_ID=${EC2_ID} \
+         -p LANDSCAPE=${LANDSCAPE}&quot;
+   else
+      # B) DEPLOY ONLY (docker) 
+      #    Use aws CLI only to get new docker container running against updated image on target EC2 instance.
+      #    It is assumed the corresponding docker image is already in the registry and will be the last one put there by jenkins.
+      #    (NOTE: any parameters ommitted will invoke the default values.)
+
+      CMD1=&quot;java -jar ${CLI} -s ${HOST} build &apos;apache-shibboleth-3-docker-run-container&apos; -v -f \
+         -p EC2_INSTANCE_ID=${EC2_ID} \
+         -p LANDSCAPE=${LANDSCAPE}&quot;
+   fi
+   
+   if [ -n &quot;$CMD1&quot; ] ; then
+      [ &quot;$DEBUG&quot; == true ] &amp;&amp; echo $CMD1 || eval $CMD1
+      CMD1=&apos;&apos;
+   fi
+   
+   if [ -n &quot;$CMD2&quot; ] ; then
+      [ &quot;$DEBUG&quot; == true ] &amp;&amp; echo $CMD2 || eval $CMD2
+      CMD2=&apos;&apos;
+   fi
+   
+   if [ -n &quot;$CMD3&quot; ] ; then
+      [ &quot;$DEBUG&quot; == true ] &amp;&amp; echo $CMD3 || eval $CMD3
+      CMD3=&apos;&apos;
+   fi
+
+done
+
+set -x</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Aquires all jobs backed up to a github repository&#xd;
+&#xd;
+IMPORTANT!!!  This is not really a pull, but a fetch followed by a hard reset.&#xd;
+If you have made any changes to any jobs, push those first before running this job.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>GITUSER</name>
+          <description>What user are you identifying yourself to git as?</description>
+          <defaultValue>jenkins</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REPO</name>
+          <description>What is the url of the git repo where the jenkins jobs are stored?</description>
+          <defaultValue>git@github.com:whennemuth/kc-jenkins-jobs.git</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>cd /var/jenkins_home/jobs
+eval `ssh-agent -s`
+# Add the key to the agent.
+ssh-add /var/jenkins_ssh/github_id_jenkins_rsa
+# ssh -T git@github.com
+if [ ! -d .git ] ; then
+	git init	
+	git config user.email &quot;jenkins@bu.edu&quot;
+	git config user.name $GITUSER
+	git remote add github $REPO
+fi
+if [ ! -f .gitignore ] ; then
+    echo &gt; .gitignore &quot;# Ignore everything in subdirectories&quot;
+    echo &gt;&gt; .gitignore &quot;/*/*&quot;
+    echo &gt;&gt; .gitignore &quot;# ...except the config.xml file in those subdirectories&quot;
+    echo &gt;&gt; .gitignore &quot;!/**/config.xml&quot;
+    echo &gt;&gt; .gitignore &quot;#...and this file&quot;
+    echo &gt;&gt; .gitignore &quot;!.gitignore&quot;
+fi
+if [ -n &quot;$(git status -s -z)&quot; ] ; then
+    echo &quot;FOUND LOCAL CHANGES! SORRY, YOUR ARE GOING TO LOSE THESE.&quot;
+fi
+echo &quot;Fetching from upstream and performing hard reset&quot;
+git fetch github master
+git reset --hard FETCH_HEAD
+eval `ssh-agent -k`</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

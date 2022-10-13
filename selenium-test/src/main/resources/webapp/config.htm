@@ -1,0 +1,213 @@
+<form name="configfrm" action="" method="post" novalidate>
+<div class=floatingbox>
+	<div class=sectionlabel>Current User</div>
+	<div class=sectionarea>
+		<div class=fieldlabel align="right">
+			User ID: {{config.user.id}}
+		</div>
+		<div class=fieldlabel>First name</div>
+		<div style="padding-bottom: 5px;">
+			<input required name="firstname" type="text" ng-model="config.user.firstName">
+		</div>
+		<div class=fieldlabel>Last name</div>
+		<div style="padding-bottom: 5px;">
+			<input required name="lastname" type="text" ng-model="config.user.lastName">
+		</div>
+	</div>
+	
+	<div class=sectionlabel>Current Environment</div>
+	<div class=sectionarea>
+		<div class=fieldlabel>Servers</div>
+		<div>
+			<select 
+				required
+				name="server" 
+				size="5" 
+				style="width:180px;"
+				ng-change="setConfig();"
+				ng-model="config.currentEnvironment"
+				ng-options="environment as environment.name 
+							for environment in config.configEnvironments 
+							track by environment.url">
+			</select>
+			<!-- 
+			<select 
+				required
+				name="server" 
+				size="5" 
+				style="width:180px;"
+				ng-change="setConfig();"
+				ng-model="config.currentEnvironment"
+				ng-options="environment.name 
+							for environment in config.configEnvironments 
+							track by environment.url">
+			</select>
+			-->
+		</div>
+		<div class=fieldlabel>Name</div>
+		<div>
+			<input 
+				required 
+				name="servername" 
+				type='text' 
+				ng-keyup="syncEnvironment();"
+				ng-blur="syncEnvironment();"
+				ng-model="config.currentEnvironment.name" >
+		</div>
+		<div class=fieldlabel>URL</div>
+		<div>
+			<input 
+				required 
+				name="serverurl" 
+				type='text' 
+				ng-keyup="syncEnvironment();"
+				ng-blur="syncEnvironment();"
+				ng-model="config.currentEnvironment.url">
+		</div>
+		
+		<!-- Need to include remaining environment attributes so that config.currentEnvironment will be fully binded -->
+		<input name="serverid" type='hidden' ng-model="config.currentEnvironment.id">
+		<input name="servertrans" type='hidden' ng-model="config.currentEnvironment.transitory">
+		<input name="servercurrent" type='hidden' ng-model="config.currentEnvironment.current">
+		<input name="parentConfig" type='hidden' ng-model="config.currentEnvironment.parentConfig">
+		
+		<div align=right style='margin: 5px;'>
+			<input 
+				type='button' 
+				value='Add' 
+				style='padding:5px;'
+				ng-disabled="configfrm.servername.$error.required || 
+							 configfrm.serverurl.$error.required"
+				ng-click="setConfig('add environment');">
+								
+			<input 
+				type='button' 
+				value='Remove' 
+				style='padding:5px;'
+				ng-disabled="configfrm.server.$error.required" 
+				ng-click="setConfig('remove environment');">
+		</div>
+	</div>	
+</div>
+
+
+<div class="floatingbox width700">
+	<div class=sectionlabel>Head selection</div>
+	<div class=sectionarea>
+		<div style="float:right; width:250px; height:45px; border: solid 1px #007acc;">
+			<div class="basicfont pad5" ng-show="!config.headless">Desktop use. A browser will appear and the script will run in it as you watch.</div>
+			<div class="basicfont pad5" ng-show="config.headless">Build use. To be run by another process against a virtual, in memory browser. Use this to test how Jenkins might run scripts created for desktop use.</div>
+		</div>
+		<div class="fieldlabel"><input 
+			name="browser" 
+			type='radio'
+			ng-model="config.headless"
+			ng-value="false"
+			ng-click="setConfig();">Use Browser</div>
+		<div class="fieldlabel"><input 
+			name="browser" 
+			type='radio'
+			ng-model="config.headless"
+			ng-value="true"
+			ng-click="setConfig();">Headless Mode</div>
+	</div>
+	
+	<div class=sectionlabel>Shortcuts</div>
+	<div class=sectionarea style="overflow-y:auto; height:400px;">
+		<div style="border: solid 1px #007acc;">
+			<div class="basicfont pad5">A shortcut is a pre-defined method for locating a link for clicking. The link can be situated under a label heading, which might be under its own larger heading, and so on.</div>
+		</div>
+		<div ng-repeat="sc in config.configShortcuts">
+			
+	    	<div  
+	    		class="basicfont shortcut"
+	    		title="Add a shortcut"
+	    		ng-click="insertShortcut($index);">
+	    			{{sc.sequence}}) add
+	    	</div>	    
+			<div  href="#"
+	    		class="basicfont shortcut"
+	    		title="remove this shortcut"
+				ng-click="removeShortcut($index);">remove</div>
+			<input 
+				type="checkbox" 
+				ng-model="config.configShortcuts[$index].checked"
+				ng-click="validateShortcut($index);"> 
+			<div class="basicfont" style="display:inline; width:150px;">
+				<span ng-if="sc.elementType">{{sc.elementType}}: </span>
+			</div>
+			<div class="basicfont" style="display:inline;" ng-repeat="p in sc.labelHierarchyParts">
+				{{p}}<span ng-if="!$last">&nbsp;&nbsp;&nbsp;>&nbsp;&nbsp;&nbsp;</span>
+				     <span ng-if="$last && sc.identifier != null && sc.identifier != ''"> : <span style="color:green">["{{sc.identifier}}"]</span></span>
+			</div>
+			<div 
+				style="padding-left:50px; padding-top:5px;" 
+				ng-show="config.configShortcuts[$index].checked">
+				
+				<table cellpadding=0 cellspacing=0 class="shortcut">
+					<tr>
+						<th>ID</th>
+						<th>Element Type</th>
+						<th>Other Identifier</th>
+					</tr>
+					<tr>
+						<td>{{sc.id == 0 ? 'none' : sc.id}}</td>
+						<td>
+							<div>
+								<select ng-model="sc.elementType">
+									<option value="{{et}}" title="{{desc}}" ng-repeat="(et, desc) in getShortcutElementTypes()">{{et}}</option>
+								</select>
+							</div>
+						</td>
+						<td><input type="text" ng-model="sc.identifier"></td>
+					</tr>
+					<tr>
+						<th colspan=3>Path to shortcut link</th>
+					</tr>
+					<tr>
+						<td colspan=3>
+							<!-- NOTE: Angular reports an "ngRepeat:dupes" error on use of the "add" link despite the key used for 
+							     mapping the repeat items to their DOM elements being unique though use of "track by $index".  
+							     This does not result in a non-responsive behavior to adding and removing from the backing array 
+							     and no bad side effects seem to be evident. Therefore I am treating this error as a false report by angular. -->
+							<div ng-repeat="p in sc.labelHierarchyParts track by $index" 
+									style="padding-bottom:5px; padding-left:{{$index * 15}}px;">
+								{{$last && sc.elementType == 'HYPERLINK' ? 'hyperlink text' : 'heading'}}
+								<input type="text" ng-model="sc.labelHierarchyParts[$index]">
+								<div  
+						    		class="basicfont shortcut"
+						    		title="Add a heading label"
+						    		ng-show="sc.labelHierarchyParts[$index]" 
+						    		ng-click="sc.labelHierarchyParts.splice($index+1, 0, '');">add</div>	    
+								<div  href="#"
+						    		class="basicfont shortcut"
+									ng-click="sc.labelHierarchyParts.splice($index, 1);">remove</div>
+								<div ng-if="$last && sc.elementType == 'HOTSPOT' && sc.identifier" style="padding-left:15px; padding-top:5px;" class="fieldlabel">
+									hotspot: <i>[First hotspot found under heading <b>'{{sc.labelHierarchyParts[$index]}}'</b> with attribute matching on <b>'{{sc.identifier}}'</b>]</i>
+								</div>
+								<div ng-if="$last && sc.elementType == 'HOTSPOT' && !sc.identifier" style="padding-left:15px; padding-top:5px;" class="fieldlabel">
+									hotspot: <i>[First hotspot found under heading <b>'{{sc.labelHierarchyParts[$index]}}'</b>]</i>
+								</div>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+	
+	<div class=sectionarea align="right" style="border:none;">
+		<input 
+			type="button" 
+			value=" SAVE " 
+			class="bigbutton"
+			ng-disabled="configfrm.firstname.$error.required || 
+						 configfrm.lastname.$error.required" 
+			ng-click="setConfig('save config');">
+	</div>
+</div>
+
+<div class=floatingbox style="clear:both">
+	<textarea cols="80" rows=20 ng-show="showJson()">{{getConfigJson()}}</textarea>
+</div>
+</form>

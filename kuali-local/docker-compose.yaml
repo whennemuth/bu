@@ -1,0 +1,227 @@
+
+version: '3'
+services:
+
+  proxy: 
+    image: nginx:latest
+    restart: unless-stopped
+    container_name: reverse-proxy
+    depends_on: 
+      - cor-main
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/certs/:/etc/nginx/ssl/
+    ports:
+      - 80:80
+      - 443:443
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        set -eo pipefail
+        counter=1
+        while true ; do
+          if curl -f -L http://cor-main:3000/apps; then
+            echo "Cor-main container ready, starting up nginx..."
+            break;
+          elif [ $$counter -gt 12 ] ; then
+            echo "It has been a minute and the cor-main container is not ready. Cancelling startup."
+            exit 1
+          else
+            echo "Cor-main check $$counter, not ready. waiting 5 seconds..."
+            ((counter++))
+            sleep 5
+          fi
+        done
+        sh /docker-entrypoint.sh nginx -g "daemon off;"
+
+  cor-main:
+    image: wrh1/cor-main:2001.0040
+    container_name: cor-main
+    depends_on: 
+      - mongo-cor-main
+    environment:
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - REDIS_URI=127.0.0.1
+      - SERVICE_SECRET_1=kc.service.secret.kc.service.secret.kc.service.secret
+      - SERVICE_SECRET_2=kc.service.secret.kc.service.secret.kc.service.secret
+      - UPDATE_INSTITUTION=false
+      - MONGO_URI=mongodb://mongo-cor-main:27017/core-development
+      - START_CMD=node --inspect=0.0.0.0:9229 /var/core/index.js
+      - CORE_HOST=${VIRTUAL_HOST}
+      - SMTP_HOST=smtp.bu.edu
+      - JOBS_SCHEDULER=false
+      - SMTP_PORT=25
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    volumes:
+      - ./cor-main/local.js:/var/core-config/local.js
+    expose:
+      - "3000"
+    ports:
+      - 3000:3000
+    command:
+      - /bin/bash
+      - -c
+      - |
+        set -eo pipefail
+        counter=1
+        while true ; do
+          if mongo --quiet "mongo-cor-main:27017/test" --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'; then
+            echo "Mongo container ready, starting up..."
+            break;
+          elif [ $$counter -gt 30 ] ; then
+            echo "It has been a minute and the mongo container is not ready. Cancelling startup."
+            exit 1
+          else
+            echo "Mongo check $$counter, not ready. waiting 2 seconds..."
+            ((counter++))
+            sleep 2
+          fi
+        done
+        sh /var/bash-scripts/startup.sh
+
+  research-portal:
+    image: wrh1/portal:2001.0040
+    container_name: research-portal
+    depends_on: 
+      -  mongo-research-portal
+    environment:
+      - CACHE_RES_REQUESTS=false
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - CORE_AUTH_BASE_URL=http://cor-main:3000
+      - RESEARCH_URL=https://${VIRTUAL_HOST}/kc
+      - PORTAL_HOST=localhost
+      - OMNISEARCH_ENABLED=true
+      - USE_LEGACY_APIS=false
+      - LOG_LEVEL=debug
+      - MONGODB_URI=mongodb://mongo-research-portal:27017/research-portal
+      - MONGO_DB_NAME=res-dashboard
+      - NODE_ENV=production
+      - PORT=3005
+      - REQUEST_LOG_LEVEL=debug
+      - RESEARCH_SECRET=kc.service.secret.kc.service.secret.kc.service.secret
+      - START_CMD=node --inspect=0.0.0.0:9228 /var/portal/server/index.js 
+    expose:
+      - "3005"
+    command:
+      - /bin/bash
+      - -c
+      - |
+        set -eo pipefail
+        counter=1
+        while true ; do
+          if mongo --quiet "mongo-cor-main:27017/test" --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'; then
+            echo "Mongo container ready, starting up..."
+            break;
+          elif [ $$counter -gt 30 ] ; then
+            echo "It has been a minute and the mongo container is not ready. Cancelling startup."
+            exit 1
+          else
+            echo "Mongo check $$counter, not ready. waiting 2 seconds..."
+            ((counter++))
+            sleep 2
+          fi
+        done
+        sh /var/bash-scripts/startup.sh
+
+  research-pdf:
+    image: wrh1/pdf:2004.0004
+    container_name: research-pdf
+    depends_on: 
+      -  mongo-research-pdf
+    environment:
+      - AUTH_ENABLED=true
+      - AUTH_BASEURL=http://cor-main:3000
+      - AUTH_SERVICE2SERVICE_SECRETS=kc.service.secret.kc.service.secret.kc.service.secret
+      - MONGO_ENABLED=true
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo-research-pdf:27017/test?retryWrites=true&w=majority
+      - AWS_S3_ENABLED=false
+      # - AWS_S3_BUCKET=kuali-research-pdf-stg
+      # - AWS_REGION=us-east-1
+      - ALLOW_SELF_SIGNED_SSL=true
+    expose:
+    - "3006"
+
+  kuali-research:
+    image: wrh1/kc:2001.0040
+    container_name: kuali-research
+    build:
+      context: ./kc
+    volumes:
+      - ./kc/kc-config.xml:/opt/kuali/kc-config.xml
+      - ./kc/rice.cer:/opt/kuali/rice.cer
+      - ./kc/rice.keystore:/opt/kuali/rice.keystore
+      - ./kc/kc_tomcat_logs/:/opt/tomcat/logs
+      - ./kc/pre-startup.sh:/opt/kuali/pre-startup.sh
+      - ./kc/users:/opt/kuali/users
+      - ./kc/kc_api_keys:/opt/kuali/api_keys
+      - ./kc/kc_log4j:/opt/tomcat/log4j2/lib
+      - ./nginx/certs/:/opt/kuali/certs:ro
+      - ${KC_ROOT}/coeus-webapp/target/coeus-webapp-2001.0040/:/opt/kuali/webapp
+      - ${KC_ROOT}/pom.xml:/opt/kuali/pom.xml
+    environment:
+      - VIRTUAL_HOST=${VIRTUAL_HOST}
+      - KC_PRIVATE_HOST=kuali-research:8080
+      - PDF_PRIVATE_URL=http://research-pdf:3006
+      - CORE_PRIVATE_URL=http://cor-main:3000
+      - CORE_AUTH_ENABLED=true
+      - SERVICE_SECRET_1=kc.service.secret.kc.service.secret.kc.service.secret
+      - DB_HOST=${DB_HOST}
+      - KCOEUS_PASSWORD=${KCOEUS_PASSWORD}
+      - REMOTE_DEBUG=true
+      - LOGJ2_LOCALHOST_LEVEL=info
+      - LOGJ2_CATALINA_LEVEL=info
+    expose:
+      - "8080"
+    ports:
+      - 8787:8787
+    command:
+      - /bin/bash
+      - -c
+      - |
+        source /opt/kuali/pre-startup.sh
+        if initializeCore ; then
+          if configureLog4j ; then
+            outputHeading 'Starting tomcat...'
+            sh /opt/tomcat/bin/catalina.sh run
+          fi
+        else
+          # Use a dummy foreground process to keep the container running - can shell in and poke around.
+          tail -f /dev/null
+        fi
+
+  mongo-cor-main:
+    image: mongo
+    container_name: mongo-cor-main
+    volumes:
+      - ./mongo/cor-main-data:/data/db
+    command: --bind_ip_all --noauth
+    expose:
+      - "27017"
+    ports:
+      - 27018:27017
+
+  mongo-research-portal:
+    image: mongo
+    container_name: mongo-research-portal
+    volumes:
+      - ./mongo/research-portal-data:/data/db
+    command: --bind_ip_all --noauth
+    expose:
+      - "27017"
+    ports:
+      - 27019:27017
+
+  mongo-research-pdf:
+    image: mongo
+    container_name: mongo-research-pdf
+    volumes:
+      - ./mongo/research-pdf-data:/data/db
+    command: --bind_ip_all --noauth
+    expose:
+      - "27017"
+    ports:
+      - 27020:27017
+
+
+

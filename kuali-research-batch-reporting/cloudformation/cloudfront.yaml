@@ -1,0 +1,116 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  Create content distribution for research admin reports with cloudfront
+  
+Parameters:
+
+  GlobalTag:
+    Type: String
+    Description: >
+      A common value that all resources in this template will have prefixed to
+      their name and attached as a tag to establish a bundling through naming convention.
+    Default: research-admin-reports
+ 
+  Service:
+    Description: Service catalog name
+    Type: String
+    Default: research-administration
+
+  Function:
+    Description: The Function within the Service
+    Type: String
+    Default: kuali
+
+  Landscape:
+    Description: The landscape of the database.
+    Type: String
+
+  PublicKey:
+    Type: String
+    Description: >
+      A public key value in PEM format used in the cloudfront keygroup.
+      The counterpart to the private key stored in ssm parameter store.
+    # NoEcho: true
+
+      
+Resources:
+
+  CloudfrontPublicKey:
+    Type: AWS::CloudFront::PublicKey
+    Properties: 
+      PublicKeyConfig: 
+        CallerReference: 1619185986187
+        Comment: Public Key used in Research Admin Batch Reporting to access S3 content via CloudFront.
+        EncodedKey: !Sub "${PublicKey}"
+        Name: !Sub ${GlobalTag}-${Landscape}-public-key
+
+  CloudfrontKeyGroup:
+    Type: AWS::CloudFront::KeyGroup
+    Properties: 
+      KeyGroupConfig: 
+        Name: !Sub ${GlobalTag}-${Landscape}-key-group
+        Comment: Research Admin batch reporting key group used in CloudFront to access S3 content
+        Items: 
+          - !Ref CloudfrontPublicKey
+
+  CloudfrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties: 
+      CloudFrontOriginAccessIdentityConfig: 
+        Comment: !Sub ${GlobalTag}-${Landscape}-origin-access-identity
+
+  CloudfrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties: 
+      DistributionConfig:               
+        Comment: Research Admin Reports CouldWatch Distribution to serve reports from S3
+        DefaultCacheBehavior: 
+          AllowedMethods: 
+            - HEAD
+            - GET
+          CachedMethods: 
+            - HEAD
+            - GET
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+          Compress: false
+          OriginRequestPolicyId: acba4595-bd28-49b8-b9fe-13317c0390fa
+          SmoothStreaming: false
+          TargetOriginId: !Sub S3-bu-${GlobalTag}-${Landscape}-archive
+          TrustedKeyGroups: 
+            - !Ref CloudfrontKeyGroup
+          ViewerProtocolPolicy: https-only
+        Enabled: true
+        HttpVersion: http2
+        IPV6Enabled: false
+        Origins: 
+          - ConnectionAttempts: 3
+            ConnectionTimeout: 10
+            DomainName: !Sub bu-${GlobalTag}-${Landscape}-archive.s3.amazonaws.com
+            Id: !Sub S3-bu-${GlobalTag}-${Landscape}-archive
+            S3OriginConfig: 
+              OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${CloudfrontOriginAccessIdentity}
+        PriceClass: PriceClass_100
+        ViewerCertificate: 
+          CloudFrontDefaultCertificate: true
+          MinimumProtocolVersion: TLSv1
+          # SslSupportMethod: vip
+          # CertificateSource: cloudfront
+      Tags: 
+        - Key: Name
+          Value: !Sub bu-${GlobalTag}-${Landscape}-archive
+        - Key: Service
+          Value: !Ref Service
+        - Key: Function
+          Value: !Ref Function
+
+Outputs:
+
+  OriginAccessIdentity:
+    Value: !Ref CloudfrontOriginAccessIdentity
+
+  PublicKeyId:
+    Value: !Ref CloudfrontPublicKey
+
+  DomainName:
+    Value: !GetAtt CloudfrontDistribution.DomainName

@@ -1,0 +1,12 @@
+workspace
+config
+scripts
+*_rsa
+**/*_rsa
+last-docker*.sh
+private
+LAST_IMAGE_BUILD_DATE
+samlMeta.xml
+local.js
+local.js.*
+bash.lib.sh

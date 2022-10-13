@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  Create the required roles used by research admin reporting resources
+  
+Parameters:
+
+  GlobalTag:
+    Type: String
+    Description: >
+      A common value that all resources in this template will have prefixed to
+      their name and attached as a tag to establish a bundling through naming convention.
+    Default: research-admin-reports
+ 
+  Service:
+    Description: Service catalog name
+    Type: String
+    Default: research-administration
+
+  Function:
+    Description: The Function within the Service
+    Type: String
+    Default: kuali
+
+  Landscape:
+    Description: The landscape of the database.
+    Type: String
+
+  SnsSubscriptionEmail:
+    Type: String
+    Description: The email of the person/group that is sent failed job report messages
+    # Default: dhaywood@bu.edu
+
+
+Resources:
+
+  SnsTopic:
+    Type: AWS::SNS::Topic
+    Properties: 
+      DisplayName: Research admin reports failed job alert
+      Subscription: 
+        - Endpoint: !Ref SnsSubscriptionEmail
+          Protocol: email
+      Tags: 
+        - Key: Name
+          Value: !Sub ${GlobalTag}-${Landscape}-failed-job-alert
+        - Key: Service
+          Value: !Ref Service
+        - Key: Function
+          Value: !Ref Function
+      TopicName: !Sub ${GlobalTag}-${Landscape}-failed-job-alert
+
+  SnsTopicPolicy:
+    Type: 'AWS::SNS::TopicPolicy'
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Sid: 1
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Action:
+            - SNS:GetTopicAttributes
+            - SNS:SetTopicAttributes
+            - SNS:AddPermission
+            - SNS:RemovePermission
+            - SNS:DeleteTopic
+            - SNS:Subscribe
+            - SNS:ListSubscriptionsByTopic
+            - SNS:Publish
+            Resource: arn:aws:sns:us-east-1:770203350335:research-admin-reports-stg-failed-job-alert
+            Condition:
+              StringEquals:
+                AWS:SourceOwner: !Ref AWS::AccountId
+          - Sid: 2
+            Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sns:Publish
+            Resource: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${GlobalTag}-${Landscape}-failed-job-alert
+      Topics:
+        - !Ref SnsTopic
+
+
+Outputs:
+
+  TopicArn:
+    Value: !Ref SnsTopic

@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>This job will transfer a war file to the target directory of the kc-research server.&#xd;
+Used to test the post-build step of the full kc job.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>SSH_KEY</name>
+          <description>File path of the ssh key to use for scp</description>
+          <defaultValue>/var/jenkins_ssh/ec2_rsa</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SCP_URL</name>
+          <description>The url for the target kuali-research aws ec2 instance</description>
+          <defaultValue>ec2-52-37-253-82.us-west-2.compute.amazonaws.com</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>EC2_USER</name>
+          <description>Name of the user that is accessing the kuali-research aws ec2 instance via scp</description>
+          <defaultValue>jenkins</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SRC_DIR</name>
+          <description>File path of the war to transfer</description>
+          <defaultValue>/var/jenkins_home/workspace/kc/coeus-webapp/target</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SRC_WAR</name>
+          <description>The name of the war file to scp.</description>
+          <defaultValue>coeus-webapp-1603.49.war</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TARGET_WAR</name>
+          <description>Target directory for the war on the target server.</description>
+          <defaultValue>/var/jenkins/kc/war/kc.war</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>scp \
+   -C \
+   -i $SSH_KEY \
+   $SRC_DIR/$SRC_WAR \
+   $EC2_USER@$SCP_URL:$TARGET_WAR</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

@@ -1,0 +1,7 @@
+# Ignore macOS specific files
+.DS_Store
+Desktop.ini
+Thumbs.db
+# Ignore Python cache and compiled Python modules
+**/__pycache__
+*.pyc

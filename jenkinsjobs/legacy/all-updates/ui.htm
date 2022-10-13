@@ -1,0 +1,331 @@
+<div>
+<style>
+	div.landscape { 
+		width: 120px; 
+		float: left; 
+		border-right-style: solid; 
+		background-color: #4b758b;
+		border-right-width: 3px;
+		border-right-color: white; 
+		margin-top: 5px; 
+		padding-left: 5px;
+		padding-bottom: 3px;
+		font-weight: bold;
+		color: white;	
+	}
+
+	div.detail {
+		width: 720px; 
+		margin-left: 20px;
+		/*background-color: #e6e6e6;*/
+		padding: 5px;
+		font-family: verdana;
+		color: #4b758b;
+		border:solid 1px #4b758b;
+	}
+
+	.hide { display: none; }
+
+	td { font-family:monospace; font-size:12px; }
+
+	input[type="text"] { font-family:monospace; font-size:12px; }
+</style>
+<script>
+
+	/*
+	function validate_checkboxes(chk) {
+		var ours = document.getElementById('ours').innerText;
+		var theirs = document.getElementById('theirs').innerText;
+		if(/^\w+$/.test(ours) && /^\w+$/.test(theirs)) {
+			if(ours != theirs) {
+				toggle_checkboxes(chk);
+				return;
+			}
+		}
+		if(confirm('Our centos image id appears to be up-to-date with dockerhub.\n\nContinue anyway?')) {
+			toggle_checkboxes(chk);
+		}
+		else {
+			document.getElementById('build-action').value = '0';
+		}		
+	}
+	*/
+
+	function toggle_checkboxes(chk) {
+
+		switch(chk.id) {
+			case 'landscape-all':
+				toggle(['centos', 'apache', 'kuali', 
+					'landscape-sb', 'landscape-ci', 'landscape-qa', 'landscape-stg', 'landscape-prod',
+					'apache-sb', 'apache-ci', 'apache-qa', 'apache-stg', 'apache-prod',
+					'kuali-sb', 'kuali-ci', 'kuali-qa', 'kuali-stg', 'kuali-prod'], chk.checked);
+				break;
+			case 'landscape-sb': case 'landscape-ci': case 'landscape-qa': case 'landscape-stg': case 'landscape-prod':
+				var landscape = chk.id.split('\-')[1];
+				if(chk.checked) {
+					toggle(['centos', 'apache', 'kuali', 
+						'apache-'+landscape, 'kuali-'+landscape], chk.checked);
+				}
+				else {
+					toggle(['landscape-all', 'apache-'+landscape, 'kuali-'+landscape], chk.checked);
+					if(noLandscapes()) {
+						toggle(['apache', 'kuali'], chk.checked);
+					}
+				}
+				break;
+			case 'centos': case 'apache': case 'kuali':
+				if(chk.id == 'centos') {
+					if(!chk.checked) {
+						toggle(['landscape-all', 'landscape-sb', 'landscape-ci', 'landscape-qa', 'landscape-stg', 'landscape-prod'], false);
+					}
+					break;
+				}
+				if(chk.checked) {
+					toggleRow(chk.id, ['sb', 'ci', 'qa', 'stg', 'prod'], true);
+				}
+				else {
+					toggle(['landscape-all', 'landscape-sb', 'landscape-ci', 'landscape-qa', 'landscape-stg', 'landscape-prod',
+						chk.id+'-sb', chk.id+'-ci', chk.id+'-qa', chk.id+'-stg', chk.id+'-prod'], chk.checked);
+				}
+				break;
+			default:
+				if(!chk.checked) {
+					var image = chk.id.split('\-')[0];
+					var landscape = chk.id.split('\-')[1];
+					toggle(['landscape-all', 'landscape-'+landscape], chk.checked);
+					if(noImages(image)) {
+						toggle([image, image+'-sb', image+'-ci', image+'-qa', image+'-stg', image+'-prod'], chk.checked);
+					}
+				}
+		}
+
+		var counter=0;
+		if(allChecked('sb')) { 
+			toggle(['landscape-sb'], true); 
+			counter++;
+		}
+		if(allChecked('ci')) {
+			toggle(['landscape-ci'], true);
+			counter++;
+		}
+		if(allChecked('qa')) {
+			toggle(['landscape-qa'], true);
+			counter++;
+		}
+		if(allChecked('stg')) {
+			toggle(['landscape-stg'], true);
+			counter++;
+		}
+		if(allChecked('prod')) {
+			toggle(['landscape-prod'], true);
+			counter++;
+		}
+		if(counter == 5) {
+			toggle(['apache', 'kuali', 'landscape-all'], true);
+		}
+
+		if(sameCheckedStatus(['kuali-sb', 'kuali-ci', 'kuali-qa', 'kuali-stg', 'kuali-prod'], false)) {
+			document.getElementById('centos').checked = false;
+		}
+		else {
+			document.getElementById('centos').checked = true;
+		}
+
+		serializeChoices();
+	}
+
+	function toggle(chkIds, show) {
+		for(var i=0; i<chkIds.length; i++) {
+			var chk = document.getElementById(chkIds[i]);
+			if(chk != null) {
+				chk.checked = show;
+				if(/\-/.test(chk.id) && /landscape/.test(chk.id) == false) {
+					chk.parentElement.parentElement.parentElement.className = show ? '' : 'hide';
+				}
+			}
+		}
+	}
+
+	function toggleRow(image, landscapes, show) {
+		for(var i=0; i<landscapes.length; i++) {
+			var chk = document.getElementById(image+'-'+landscapes[i]);
+			if(chk != null) {
+				chk.parentElement.parentElement.parentElement.className = show ? '' : 'hide';
+			}
+		}
+
+	}
+
+	function sameCheckedStatus(chkIds, show) {
+		for(var i=0; i<chkIds.length; i++) {
+			var chk = document.getElementById(chkIds[i]);
+			if(chk != null && chk.checked != show) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	function noLandscapes() {
+		return sameCheckedStatus(['landscape-sb', 'landscape-ci', 'landscape-qa', 'landscape-stg', 'landscape-prod'], false);
+	}
+
+	function noImages(image) {
+		return sameCheckedStatus([image+'-sb', image+'-ci', image+'-qa', image+'-stg', image+'-prod'], false);
+	}
+
+	function allChecked(landscape) {
+		if(landscape == null || landscape == undefined) {
+			return sameCheckedStatus(['centos', 'apache-sb', 'apache-ci', 'apache-qa', 'apache-stg', 'apache-prod',
+						'kuali-sb', 'kuali-ci', 'kuali-qa', 'kuali-stg', 'kuali-prod'], true);
+		}
+		return sameCheckedStatus(['centos', 'apache-'+landscape, 'kuali-'+landscape], true);
+	}
+
+	function serializeChoices() {
+		var choices = ['centos',
+				'apache-sb', 'apache-ci', 'apache-qa', 'apache-stg', 'apache-prod',
+				'kuali-sb', 'kuali-ci', 'kuali-qa', 'kuali-stg', 'kuali-prod'];
+		var s = '';
+		for(var i=0; i<choices.length; i++) {
+			if(document.getElementById(choices[i]).checked) {
+				s += ((s?', ':'') + choices[i]);
+			}
+		}
+		document.getElementById('build-action').value = s; 
+	}
+</script>
+
+<table border=0 style='font-family:arial; font-size:10px'>
+<tr class=hide>
+	<td>
+		<div align=right>
+			local centos:7 image id:
+			<div id='ours' style='padding-left:8px; display:inline;'>97ca462ad9eeae25941546209454496e1d66749d53dfa2ee32bf1faabd239d38</div>
+		</div>
+	</td>
+</tr>
+<tr class=hide>
+	<td>
+		<div align=right>
+			dockerhub centos:7 image id:
+			<div id='theirs' style='padding-left:8px; display:inline;'>5a2725191d75eb64e9b7c969cd23d8c67c6e8af9979e521a417bbfa34434fb83</div>
+		</div>
+	</td>	
+</tr>
+<tr class=hide>
+	<td><hr width='100%'></td>
+</tr>
+<tr>
+	<td><b>By Landscape:</b><br>
+		<div class='landscape' style='margin-bottom:10px; display:none;'>All:<input type='checkbox' id='landscape-all' onclick="toggle_checkboxes(this)"></div>
+		<div class='landscape'>sandbox:<input type='checkbox' id='landscape-sb' onclick="toggle_checkboxes(this)"></div>
+		<div class='landscape'>ci:<input type='checkbox' id='landscape-ci' onclick="toggle_checkboxes(this)"></div>
+		<div class='landscape'>qa:<input type='checkbox' id='landscape-qa' onclick="toggle_checkboxes(this)"></div>
+		<div class='landscape'>staging:<input type='checkbox' id='landscape-stg' onclick="toggle_checkboxes(this)"></div>
+		<div class='landscape'>production:<input type='checkbox' id='landscape-prod' onclick="toggle_checkboxes(this)"></div>
+	</td>
+</tr>
+
+
+<tr class=hide>
+	<td style='padding-left:8px;'>
+		<input id='centos' type=checkbox onclick="toggle_checkboxes(this)"><b>Rebuild centos/java/tomcat docker image</b>
+		<div class=detail>
+			Rebuild the docker image image locally and push it up to our AWS 'centos7-java-tomcat' registry repository. 
+			If an image with the same tag already exists in the registry it loses its tag to the incoming image 
+			and becomes anonymous and becomes a candidate for manual garbage collection of images.
+		</div>
+	</td>
+</tr>
+<tr><td>&nbsp; </td></tr>
+
+
+<tr>
+	<td style='padding-left:8px;'>
+		<input id='apache' type=checkbox onclick="toggle_checkboxes(this)"><b>Rebuild apache/shibboleth image</b>
+		<div class=detail>
+			Rebuild the docker image locally and push it to the 'apache-shibboleth' repository in our AWS registry.
+			If an image with the same tag already exists in the registry it loses its tag to the incoming image 
+			and becomes anonymous and becomes a candidate for manual garbage collection of images. For each selected
+			landscape, the associated EC2 instances are each commanded to pull the new images to their local docker
+			repositories and recreate the associated containers. 
+		</div>
+	</td>
+</tr>
+<tr class=hide>
+	<td style='padding-left:50px;'>
+		<div><input id='apache-sb' type=checkbox onclick="toggle_checkboxes(this)">sandbox</div>
+	</td>
+</tr>
+<tr class=hide>
+	<td style='padding-left:50px;'>
+		<div><input id='apache-ci' type=checkbox onclick="toggle_checkboxes(this)">ci</div>
+	</td>
+</tr>
+<tr class=hide>
+	<td style='padding-left:50px;'>
+		<div><input id='apache-qa' type=checkbox onclick="toggle_checkboxes(this)">qa</div>
+	</td>
+</tr>
+<tr class=hide>
+	<td style='padding-left:50px;'>
+		<div><input id='apache-stg' type=checkbox onclick="toggle_checkboxes(this)">staging</div>
+	</td>
+</tr>
+<tr class=hide>
+	<td style='padding-left:50px;'>
+		<div><input id='apache-prod' type=checkbox onclick="toggle_checkboxes(this)">production</div>
+	</td>
+</tr>
+<tr><td>&nbsp; </td></tr>
+
+
+<tr>
+	<td style='padding-left:8px;'>
+		<input id='kuali' type=checkbox onclick="toggle_checkboxes(this)"><b>Rebuild kuali-research image</b>
+		<div class=detail>
+			Rebuild the docker image locally and push it to the 'coeus' repository in our AWS registry.
+			If an image with the same tag already exists in the registry it loses its tag to the incoming image 
+			and becomes anonymous and becomes a candidate for manual garbage collection of images. For each selected
+			landscape, the associated EC2 instances will each be commanded to pull the new images to their local docker
+			repositories and recreate the associated containers. NOTE: creating the new docker images
+			does not include rebuilding the war file with maven - it is assumed that the war file most recently built 
+			is still valid and can be wrapped by the docker image.
+		</div>
+	</td>
+</tr>
+<tr class=hide>
+	<td style='padding-left:50px;'>
+		<div><input id='kuali-sb' type=checkbox onclick="toggle_checkboxes(this)">sandbox</div>
+	</td>
+</tr>
+<tr class=hide>
+	<td style='padding-left:50px;'>
+		<div><input id='kuali-ci' type=checkbox onclick="toggle_checkboxes(this)">ci</div>
+	</td>
+</tr>
+<tr class=hide>
+	<td style='padding-left:50px;'>
+		<div><input id='kuali-qa' type=checkbox onclick="toggle_checkboxes(this)">qa</div>
+	</td>
+</tr>
+<tr class=hide>
+	<td style='padding-left:50px;'>
+		<div><input id='kuali-stg' type=checkbox onclick="toggle_checkboxes(this)">staging</div>
+	</td>
+</tr>
+<tr class=hide>
+	<td style='padding-left:50px;'>
+		<div><input id='kuali-prod' type=checkbox onclick="toggle_checkboxes(this)">production</div>
+	</td>
+</tr>
+<tr><td>&nbsp; </td></tr>
+<tr><td style='border-bottom-style:solid; border-bottom-width:1px;'><b>Selected Options:</b></td></tr>
+<tr>
+	<td style='padding-left:15px;'><input type=text id='build-action' name='value' style='width:700px; border-style:none;' readonly> </td>
+</tr>
+
+
+</table>
+</div>

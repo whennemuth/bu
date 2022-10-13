@@ -1,0 +1,163 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Kuali-research-docker is a git repository that contains bash scripts for building docker images from kuali module source code and deploying them as containers in specified environments.&#xd;
+This job pulls the kuali-research-docker repo into a specified directory.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.BooleanParameterDefinition>
+          <name>VERBOSE</name>
+          <description>Log output will be verbose</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>GIT_REPO_URL</name>
+          <description>The git repository from which this job will pull the docker build context directories and scripts to run the docker commands.</description>
+          <randomName>choice-parameter-7414145968157592</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>def url = &quot;git@github.com:bu-ist/kuali-research-docker.git&quot;
+return &quot;&lt;input type=&apos;text&apos; readonly=true name=&apos;value&apos; style=&apos;width:400px;font-family:monospace;&apos; value=&apos;&quot; +  url + &quot;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>pull-docker-build-context</projectName>
+          <projectFullName>pull-docker-build-context</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>GIT_BRANCH</name>
+          <description>The git branch from which this job will pull the docker build context directories and scripts to run the docker commands.</description>
+          <randomName>choice-parameter-7330918921590289</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>// Instantiate a string builder to build a dropdown box populated with all the branches in the target git repo
+def sb = new StringBuilder(&quot;&lt;select name=&apos;value&apos; style=&apos;width:400px; font-family:monospace;&apos;&gt;&quot;)
+def defaultBranch = &apos;coi-ui-1802.0001&apos;
+// Create a command to that passed to ssh-agent to run with sh that will acquire the list of branches in the target git repo
+def cmd = 
+   &quot;ssh-add /var/lib/jenkins/.ssh/bu_github_id_docker_rsa &gt; /dev/null 2&gt;&amp;1; &quot; + 
+   &quot;git -c core.askpass=true ls-remote -h ${GIT_REPO_URL} | &quot; + 
+   &quot;grep -i -P -o &apos;^[^\\s]+\\s+refs/heads/\\K(.*)\$&apos;&quot;
+
+// Create an array for the ProcessBuilder and run the process.
+// Cannot use execute command because of use of subprocess with sh.
+def cmdarr = [ &quot;ssh-agent&quot;, &quot;sh&quot;, &quot;-c&quot;, cmd ]
+def process = new ProcessBuilder(cmdarr).start()
+
+// Iterate over the input stream produced by having run the process (should be git ls-remote standard output)
+process.inputStream.eachLine {
+   if( &quot;${it}&quot; == defaultBranch) {
+      sb.append(&quot;&lt;option selected=true value=&apos;&quot;).append(&quot;${it}&quot;).append(&quot;&apos;&gt;&quot;).append(&quot;${it}&quot;).append(&quot;&lt;/option&gt;&quot;)
+   }
+   else {
+      sb.append(&quot;&lt;option value=&apos;&quot;).append(&quot;${it}&quot;).append(&quot;&apos;&gt;&quot;).append(&quot;${it}&quot;).append(&quot;&lt;/option&gt;&quot;)
+   }
+}
+process.waitFor();
+sb.append(&quot;&lt;/select&gt;&quot;)
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>pull-docker-build-context</projectName>
+          <projectFullName>pull-docker-build-context</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>GIT_REPO_URL</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>TARGET_DIRECTORY</name>
+          <description>Pull the git repository containing the scripts to this directory.</description>
+          <randomName>choice-parameter-8357271221960033</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;/var/lib/jenkins/workspace&apos; style=&apos;width:400px;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>pull-docker-build-context</projectName>
+          <projectFullName>pull-docker-build-context</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>[ &quot;$VERBOSE&quot; == false ] &amp;&amp; set +x
+
+branchExists() {
+  local branchName=&quot;$1&quot;
+  local retval=&quot;$(git rev-parse --verify $branchName 2&gt;/dev/null)&quot;
+  [ -n &quot;$retval&quot; ] &amp;&amp; true || false
+}
+
+[ ! -d $TARGET_DIRECTORY ] &amp;&amp; mkdir -p $TARGET_DIRECTORY
+cd $TARGET_DIRECTORY
+
+if [ ! -d $TARGET_DIRECTORY/.git ] ; then
+  git init
+  git config user.email &quot;jenkins@bu.edu&quot;
+  git config user.name jenkins
+  git remote add github $GIT_REPO_URL
+fi
+
+eval &quot;ssh-agent -k&quot; || true
+eval `ssh-agent -s`
+ssh-add /var/lib/jenkins/.ssh/bu_github_id_docker_rsa
+git fetch github $GIT_BRANCH
+
+if branchExists &quot;$GIT_BRANCH&quot; ; then
+  git reset --hard FETCH_HEAD
+else 
+  git checkout -b $GIT_BRANCH remotes/github/$GIT_BRANCH
+fi
+
+eval &quot;ssh-agent -k&quot; || true
+</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

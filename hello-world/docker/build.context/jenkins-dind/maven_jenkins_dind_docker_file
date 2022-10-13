@@ -1,0 +1,189 @@
+FROM ubuntu:14.04
+
+MAINTAINER Warren H
+
+# Let's start with some basic stuff.
+RUN apt-get update -qq && apt-get install -qqy \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    lxc \
+    iptables
+
+# Install Docker from Docker Inc. repositories.
+RUN curl -sSL https://get.docker.com/ | sh
+
+# Install the wrapper script from https://raw.githubusercontent.com/docker/docker/master/hack/dind.
+ADD ./dind /usr/local/bin/dind
+RUN chmod +x /usr/local/bin/dind
+
+ADD ./wrapdocker /usr/local/bin/wrapdocker
+RUN chmod +x /usr/local/bin/wrapdocker
+
+# Define additional metadata for our image.
+VOLUME /var/lib/docker
+
+RUN wget -q -O - https://jenkins-ci.org/debian/jenkins-ci.org.key | apt-key add -
+RUN sh -c 'echo deb http://pkg.jenkins-ci.org/debian binary/ > /etc/apt/sources.list.d/jenkins.list'
+RUN apt-get update && apt-get install -y zip supervisor jenkins && rm -rf /var/lib/apt/lists/*
+RUN usermod -a -G docker jenkins
+
+ENV DOCKER_COMPOSE_VERSION 1.3.3
+ENV JAVA_HOME="/usr/lib/jvm/jdk1.8.0_92"
+ENV JAVA_OPTS="-Xmx8192m"
+ENV MAVEN_HOME /usr/share/maven
+ENV MAVEN_VERSION 3.3.9
+ENV JENKINS_HOME /var/jenkins_home
+ENV JENKINS_USER_HOME /var/lib/jenkins
+ENV JENKINS_REF /usr/share/jenkins/ref
+ENV JENKINS_OPTS="--prefix=/jenkinsdind --logfile=/var/log/jenkins/jenkins.log"
+# Overrides the JENKINS_UC variable set in the parent docker file.
+# Changes the target url for jenkins plugins because of timeout issues probably due to mirroring.
+ENV JENKINS_UC_DOWNLOAD https://updates.jenkins.io/download
+ENV COPY_REFERENCE_FILE_LOG $JENKINS_HOME/copy_reference_file.log
+
+VOLUME ${JENKINS_HOME}
+
+# Install Docker Compose
+RUN curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+RUN chmod +x /usr/local/bin/docker-compose
+
+# ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+EXPOSE 8080
+
+
+
+# Start kuali-jenkins-dind additions...
+
+# Install the java 8 jdk
+RUN \
+   wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u92-b14/jdk-8u92-linux-x64.tar.gz && \
+   tar -zxf jdk-8u92-linux-x64.tar.gz -C /usr/lib/jvm && \
+   rm jdk-8u92-linux-x64.tar.gz
+
+# Build maven into the image.
+RUN mkdir -p /usr/share/maven \
+  && curl -fsSL http://apache.osuosl.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz \
+    | tar -xzC /usr/share/maven --strip-components=1 \
+  && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
+
+# Install nodejs and npm
+RUN \
+   apt-get update && \
+   apt-get install -y nodejs && \
+   apt-get install -y npm
+
+ARG user=jenkins
+ARG group=jenkins
+ARG uid=1000
+ARG gid=1000
+
+# Copy script that starts jenkins and change jenkins user and group to match those for jenkins on the docker host.
+COPY jenkins.sh /usr/local/bin/
+RUN \
+   chmod ugo+x /usr/local/bin/jenkins.sh && \
+   chmod -R ugo+wr /var/log/jenkins && \
+   usermod -u ${uid} ${user} && \
+   groupmod -g ${gid} ${group}
+
+# `/usr/share/jenkins/ref/` contains all reference configuration we want 
+# to set on a fresh new installation. Use it to bundle additional plugins 
+# or config file with your custom jenkins Docker image.
+RUN mkdir -p ${JENKINS_REF}
+
+# Jenkins is run with user `jenkins`, uid = 1000
+# If you bind mount a volume from the host or a data container, 
+# ensure you use the same uid
+# RUN useradd -d "$JENKINS_HOME" -u jenkins -g jenkins -m -s /bin/bash jenkins
+
+RUN chown -R ${user} "$JENKINS_HOME" "$JENKINS_REF"
+
+EXPOSE 80
+
+USER root
+
+# Copy selected system settings files to JENKINS_HOME so they do not have to be set through jenkins admin console.
+# Jenkins will transfer these files to JENKINS_HOME, but we cannot transfer them there directly with COPY because
+# once a volume has been declared with the VOLUME instruction, you cannot copy anything there.
+COPY config.xml ${JENKINS_REF}/
+COPY hudson.maven.MavenModuleSet.xml ${JENKINS_REF}/
+COPY credentials.xml ${JENKINS_REF}/
+COPY hudson.tasks.Maven.xml ${JENKINS_REF}/
+COPY org.jenkinsci.plugins.docker.commons.tools.DockerTool.xml ${JENKINS_REF}/
+RUN mkdir -p ${JENKINS_REF}/jobs/pull-all-jobs
+COPY config-pull-all-jobs.xml ${JENKINS_REF}/jobs/pull-all-jobs/config.xml
+
+# Create a directory to mount to later where the .ssh keys will be placed
+# and create a directory for the mounted directory contents to be copied to (cannot change permissions of file in mounted directory).
+RUN \
+   mkdir /var/jenkins_ssh_mount && \
+   mkdir /var/jenkins_ssh
+COPY ssh_hosts /var/jenkins_ssh
+RUN \
+   chown -R jenkins:users /var/jenkins_ssh && \
+   chmod 766 /var/jenkins_ssh
+
+# Copy in a script that processes the ssh keys and change its properties to be executable.
+# NOTE: You cannot put this kind of stuff in /etc/init.d because a docker container is not really a virtual machine and does not have a functioning init system.
+# COPY jenkins.sh /usr/local/bin/
+# RUN chmod ugo+x /usr/local/bin/jenkins.sh
+
+# Create an alternate maven repository location for jenkins
+RUN \
+   mkdir -p /var/jenkins_m2repo && \
+   mkdir -p ${JENKINS_USER_HOME}/.m2
+
+# Copy the settings.xml to the unmounted new repo dir, later to be copied to the standard .m2 location to instruct maven to use this new repo location
+COPY settings.xml ${JENKINS_REF}/
+RUN \
+   cp ${JENKINS_REF}/settings.xml ${JENKINS_USER_HOME}/.m2/settings.xml && \
+   chown -R jenkins:jenkins /var/jenkins_m2repo && \
+   chown -R jenkins:jenkins ${JENKINS_USER_HOME}/.m2 && \
+   chmod -R 766 /var/jenkins_m2repo && \
+   chmod -R 766 ${JENKINS_USER_HOME}/.m2
+
+# Turn off hostname hashing so that the host names are human-readable in the known_hosts files
+RUN sed -i -- 's/HashKnownHosts yes/HashKnownHosts no/g' /etc/ssh/ssh_config
+
+# Add github.com and any other names to the known_hosts for root so that attempts to make an ssh connection do not result in:
+# "host key verification failed" 
+# (NOTE: Alternatively you can be less secure and turn of host key checking:
+#           rm ~/.ssh/config
+#           echo >> ~/.ssh/config "Host *\n\tUser jenkins\n\tStrictHostKeyChecking no\n"
+RUN mkdir /root/.ssh
+# RUN ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts
+COPY ssh_hosts /root/.ssh/
+RUN \
+   ssh-keyscan -t rsa -f /root/.ssh/ssh_hosts >> /root/.ssh/known_hosts && \
+   cp /root/.ssh/ssh_hosts /var/jenkins_ssh && \
+   mkdir -p ${JENKINS_USER_HOME}/.ssh && \
+   chown -R jenkins:jenkins ${JENKINS_USER_HOME}/.ssh
+
+# Have the plugins.sh script (part of the jenkins image build context) load in jpi files to /usr/share/jenkins/ref/plugins for plugins from a text file listing. 
+# Jenkins will install plugins not already there when the container starts.
+COPY plugins.sh /usr/local/bin/plugins.sh
+COPY plugins.txt ${JENKINS_REF}/
+RUN \
+   chmod -R 755 /usr/local/bin && \
+   chmod -R 755 ${JENKINS_REF} && \
+   /usr/local/bin/plugins.sh ${JENKINS_REF}/plugins.txt
+
+# Have the jenkins logs written out to a mounted volume
+# Include the mount target directory when starting the container with a "-v" arg.
+RUN \
+   mkdir -p /var/log/jenkins && \
+   chown -R  jenkins:jenkins /var/log/jenkins && \
+   chmod -R a+rw /var/log
+VOLUME /var/log/jenkins
+# If not mounting a volume, you can still check the log from outside the container as follows:
+# exec jenkins-master tail -f /var/log/jenkins/jenkins.log
+
+# Create a directory to be mounted to the container host directory where the certs are kept for TLS
+RUN mkdir -p /etc/docker/certs.d
+
+ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+CMD ["/usr/bin/supervisord"]
+
+USER jenkins

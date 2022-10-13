@@ -1,0 +1,16 @@
+﻿<?xml version="1.0"?>
+<project name="ABBWebServices" default="sync" basedir=".">
+	<target name="sync" >
+		<delete dir="${tomcat.work.dir}/WEB-INF/classes"/>
+		<sync todir="./target/${target.project.dir.name}" overwrite="true" includeEmptyDirs="true">
+			<fileset dir="./src/main/webapp"/>
+			<preserveintarget>
+				<!-- NOTE preserveintarget will not work unless "includeEmptyDirs" is set to true in parent sync task -->
+				<include name="**/lib/**"/>
+			</preserveintarget>
+		</sync>
+		<sync todir="./target/${target.project.dir.name}/WEB-INF/classes">
+			<fileset dir="./target/classes"/>
+		</sync>
+	</target>
+</project>

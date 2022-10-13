@@ -1,0 +1,250 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  Create the resources that comprise the job - definition, compute environment, security group, log group, etc. 
+  
+Parameters:
+
+  GlobalTag:
+    Type: String
+    Description: >
+      A common value that all resources in this template will have prefixed to
+      their name and attached as a tag to establish a bundling through naming convention.
+    Default: research-admin-reports
+ 
+  Service:
+    Description: Service catalog name
+    Type: String
+    Default: research-administration
+
+  Function:
+    Description: The Function within the Service
+    Type: String
+    Default: kuali
+
+  Landscape:
+    Description: The landscape of the database.
+    Type: String
+      
+  ReportBucketName:
+    Description: Overrides the default naming of the s3 bucket.
+    Type: String
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: The id of the vpc to deploy to.
+
+  CampusSubnet1:
+    Type: AWS::EC2::Subnet::Id
+    Description: The first private subnet where fargate compute resources are launched.
+
+  CampusSubnet2:
+    Type: AWS::EC2::Subnet::Id
+    Description: The second private subnet where fargate compute resources are launched.
+
+  # arn:aws:iam::770203350335:role/aws-service-role/batch.amazonaws.com/AWSServiceRoleForBatch
+  BatchServiceRoleArn:
+    Type: String
+    Description: The ARN of the service linked role used by the compute environment
+
+  TaskExecutionRoleArn:
+    Type: String
+    Description: The Amazon Resource Name of the execution role that AWS Batch can assume.
+
+  JobRoleArn:
+    Type: String
+    Description: The Amazon Resource Name of the IAM role that the container can assume for AWS permissions
+
+  JobQueueState:
+    Type: String
+    Description: >
+      The state of the job queue. If the job queue state is ENABLED, it is able to accept jobs. 
+      If the job queue state is DISABLED, new jobs cannot be added to the queue, but jobs already in the queue can finish.
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Default: ENABLED
+
+  LogGroupRetentionDays:
+    Type: String
+    Description: How long before logs are aged out and removed in days.
+    Default: 90
+
+  DockerImage:
+    Description: The name of the docker image upon which the job task containers are based
+    Type: String
+    Default: 770203350335.dkr.ecr.us-east-1.amazonaws.com/research-admin-reports:latest
+
+  CloudfrontPublicKeyId: 
+    Description: The ID of the public key associated with cloudfront access
+    Type: String
+
+  CloudfrontUrl:
+    Description: The https path for the cloudfront domain name
+    Type: String
+
+  # Related rds instance pre-exists (is NOT part of this stack).
+  RdsVpcSecurityGroupId:
+    Type: String
+    Description: The id of the vpc security group associated with the existing rds instance
+
+
+Resources:
+
+  BatchLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName:
+         !Sub /aws/batch/job/kuali
+      RetentionInDays: !Ref LogGroupRetentionDays
+
+  ComputeEnvSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId:
+        !Ref VpcId
+      GroupName:
+        !Sub ${GlobalTag}-${Landscape}-compute-resources-sg
+      GroupDescription: The security group applied to fargate compute resources for kuali batch reporting 
+      Tags:
+        - Key: Name
+          Value: !Sub ${GlobalTag}-${Landscape}-compute-resources-sg
+        - Key: Service
+          Value: !Ref Service
+        - Key: Function
+          Value: !Ref Function
+
+  ApplicationIngressToExistingRdsInstance:
+   Type: AWS::EC2::SecurityGroupIngress
+   Properties:
+      GroupId: !Ref RdsVpcSecurityGroupId
+      SourceSecurityGroupId: !GetAtt ComputeEnvSecurityGroup.GroupId
+      Description: Allows ingress to an rds instance created in another stack by any resource in the compute environment security group created in this stack.
+      FromPort: 1521
+      IpProtocol: tcp
+      ToPort: 1521
+
+  ComputeEnvironment:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties: 
+      ComputeEnvironmentName: !Sub ${GlobalTag}-${Landscape}-compute-env
+      ComputeResources: 
+        MaxvCpus: 16
+        SecurityGroupIds: 
+          - !Ref ComputeEnvSecurityGroup
+        Subnets: 
+          - !Ref CampusSubnet1
+          - !Ref CampusSubnet2
+        Type: FARGATE
+      ServiceRole: !Ref BatchServiceRoleArn
+      State: ENABLED
+      Tags: 
+        Name: !Sub ${GlobalTag}-${Landscape}-compute-env
+        Service: !Ref Service
+        Function: !Ref Function
+      Type: MANAGED
+
+  JobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties: 
+      ComputeEnvironmentOrder: 
+        - Order: 0
+          ComputeEnvironment: !GetAtt ComputeEnvironment.ComputeEnvironmentArn
+      JobQueueName: !Sub ${GlobalTag}-${Landscape}-job-queue
+      Priority: 1
+      State: !Ref JobQueueState
+      Tags: 
+        Name: !Sub ${GlobalTag}-${Landscape}-job-queue
+        Service: !Ref Service
+        Function: !Ref Function
+        
+  JobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties: 
+      ContainerProperties: 
+        Command: 
+          - sh
+          - _loader.sh
+          # https://docs.aws.amazon.com/batch/latest/userguide/job_definition_parameters.html#parameters
+          - Ref::reportcd
+        Environment:
+          - Name: PARMSTORE_DB_USER
+            Value: !Sub /${GlobalTag}/${Landscape}/oracle/user
+          - Name: PARMSTORE_DB_PSWD
+            Value: !Sub /${GlobalTag}/${Landscape}/oracle/pswd
+          - Name: PARMSTORE_DB_HOST
+            Value: !Sub /${GlobalTag}/${Landscape}/oracle/host
+          - Name: PARMSTORE_EMAIL_FROM
+            Value: !Sub /${GlobalTag}/${Landscape}/email/from
+          - Name: PARMSTORE_EMAIL_REPLYTO
+            Value: !Sub /${GlobalTag}/${Landscape}/email/reply-to
+          - Name: PARMSTORE_EMAIL_GREETING
+            Value: !Sub /${GlobalTag}/${Landscape}/email/greeting
+          - Name: PARMSTORE_EMAIL_SIGNATURE
+            Value: !Sub /${GlobalTag}/${Landscape}/email/signature
+          - Name: PARMSTORE_CLOUDFRONT_PK
+            Value: !Sub /${GlobalTag}/${Landscape}/cloudfront/rsa-private-key
+          - Name: PARMSTORE_CLOUDFRONT_TTL_DAYS
+            Value: !Sub /${GlobalTag}/${Landscape}/cloudfront/ttl-days
+          - Name: PARMSTORE_DYNAMODB_TABLE
+            Value: !Sub ${GlobalTag}-${Landscape}-distribution
+          - Name: REPORT_BUCKET_NAME
+            Value: !Ref ReportBucketName
+          - Name: CLOUDFRONT_PUBLIC_KEY_ID
+            Value: !Ref CloudfrontPublicKeyId
+          - Name: CLOUDFRONT_URL
+            Value: !Ref CloudfrontUrl
+          - Name: AWS_DEFAULT_REGION
+            Value: !Ref AWS::Region
+          - Name: AWS_DEFAULT_OUTPUT
+            Value: text
+          - Name: LANG
+            Value: en_US.UTF-8
+        ExecutionRoleArn: !Ref TaskExecutionRoleArn
+        FargatePlatformConfiguration: 
+          PlatformVersion: 1.4.0
+        Image: !Ref DockerImage
+        JobRoleArn: !Ref JobRoleArn
+        LogConfiguration: 
+          LogDriver: awslogs
+          Options:
+            awslogs-group: 
+              !Ref BatchLogGroup
+            awslogs-region:
+              !Ref AWS::Region
+            awslogs-stream-prefix:
+              !Ref AWS::StackName
+            awslogs-datetime-format:
+              '%Y-%m-%dT%H:%M:%S.%f'
+        NetworkConfiguration: 
+          AssignPublicIp: DISABLED
+        ResourceRequirements: 
+          - Type: VCPU
+            Value: 4
+          - Type: MEMORY
+            Value: 16384
+      JobDefinitionName: !Sub ${GlobalTag}-${Landscape}-job-definition
+      Parameters:
+        reportcd: report_name_sample_val
+      PlatformCapabilities: 
+        - FARGATE
+      PropagateTags: true
+      RetryStrategy: 
+        Attempts: 3
+      Tags:
+        Name: !Sub ${GlobalTag}-${Landscape}-job-definition
+        Service: !Ref Service
+        Function: !Ref Function
+      Timeout: 
+        AttemptDurationSeconds: 3600
+      Type: container
+
+
+Outputs:
+
+  JobQueueArn:
+    Value: !GetAtt JobQueue.JobQueueArn
+
+  JobDefinitionArn:
+    Value: !Ref JobDefinition

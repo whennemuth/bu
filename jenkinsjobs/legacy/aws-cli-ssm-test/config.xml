@@ -1,0 +1,77 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>
+ECR_REGISTRY_URL=730096353738.dkr.ecr.us-east-1.amazonaws.com
+EC2_INSTANCE_ID=i-0cb479180574b4ba2
+POM_ARTIFACT_ID=hello-world
+POM_VERSION=0.0.1-SNAPSHOT
+DOCKER_TAG=&quot;${ECR_REGISTRY_URL}/${POM_ARTIFACTID}:${POM_VERSION}&quot;
+BASE64=$(\
+  echo &quot;docker images 2&gt;&amp;1 | \
+  tee /tmp/warren-test&quot; | base64 -w 0 \
+)
+COMMAND_ID=$(aws ssm send-command \
+   --instance-ids ${EC2_INSTANCE_ID} \
+   --document-name &quot;AWS-RunShellScript&quot; \
+   --comment &quot;Running shell script to pull and run container against a new docker image for hello-world&quot; \
+   --parameters commands=&quot;echo ${BASE64} | base64 --decode | sh&quot; \
+   --output text \
+   --query &quot;Command.CommandId&quot; \
+   --output-s3-bucket-name &quot;warren-testing&quot; \
+   --output-s3-key-prefix &quot;send-command-test&quot;)
+s3Url=&quot;s3://warren-testing/send-command-test/${COMMAND_ID}/${EC2_INSTANCE_ID}/awsrunShellScript/0.awsrunShellScript/stdout&quot;
+echo &quot;s3Url = $s3Url&quot;
+TenDays=&quot;$((60*60*24*10))&quot;
+httpUrl=&quot;$(aws --profile=$PROFILE s3 presign &quot;${s3Url}&quot; --expires-in=${TenDays})&quot;
+echo &quot;httpUrl = $httpUrl&quot;
+exit 0;
+
+BASE64=$(\
+   echo &quot;EXISTING_IMAGE_ID=\$(docker images \
+            | grep -P \&quot;${ECR_REGISTRY_URL}/${POM_ARTIFACTID}\s+${POM_VERSION}\&quot; \
+            | sed -r -n &apos;s/[[:blank:]]+/ /gp&apos; \
+            | cut -d &apos; &apos; -f 3) &amp;&amp; \
+      echo \&quot;1. \${EXISTING_IMAGE_ID}\&quot; &gt;&gt; /tmp/testing &amp;&amp; \
+      if [ -n \&quot;\${EXISTING_IMAGE_ID}\&quot; ]; then \
+         echo \&quot;2. \${EXISTING_IMAGE_ID}\&quot; &gt;&gt; /tmp/testing; \
+      fi&quot; | base64 -w 0 \
+) 
+
+# BASE64=$(echo &quot;HELLO=\&quot;hello and\&quot; &amp;&amp; echo \$HELLO &gt;&gt; /tmp/testing &amp;&amp; echo goodbye &gt;&gt; /tmp/testing&quot; | base64 -w 0)
+
+run_command_id=$(/usr/local/aws/bin/aws ssm send-command \
+   --instance-ids &quot;${EC2_INSTANCE_ID}&quot; \
+   --document-name &quot;AWS-RunShellScript&quot; \
+   --comment &quot;Running shell script to pull and run container against a new docker image for hello-world&quot; \
+   --parameters commands=&quot;echo ${BASE64} | base64 --decode | sh&quot; \
+   --profile &quot;${PROFILE}&quot; \
+   --output text \
+   --query &quot;Command.CommandId&quot;) </command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

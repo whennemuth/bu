@@ -1,0 +1,253 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  Creates all event rules. These are based on cron expressions which trigger to place jobs in the job queue. 
+  
+Parameters:
+
+  GlobalTag:
+    Type: String
+    Description: >
+      A common value that all resources in this template will have prefixed to
+      their name and attached as a tag to establish a bundling through naming convention.
+    Default: research-admin-reports
+ 
+  Service:
+    Description: Service catalog name
+    Type: String
+    Default: research-administration
+
+  Function:
+    Description: The Function within the Service
+    Type: String
+    Default: kuali
+
+  Landscape:
+    Description: The landscape of the database.
+    Type: String
+
+  JobQueueArn:
+    Type: String
+    Description: The amazon resource name of the job queue that event rules are triggered to place work on.
+
+  JobDefinitionArn:
+    Type: String
+    Description: The amazon resource name of the job definition for any job that is put in the job queue.
+
+  CloudwatchEventRoleArn:
+    Type: String
+    Description: The amazon resource name of the role event rule targets are given in order to submit jobs to the job queue.
+
+  FailedJobSnsTopicArn:
+    Type: String
+    Description: The amazon resource name of the sns topic published to by the failed job event
+
+  EventRuleState:
+    Type: String
+    Description: >
+      The initial state of each event rule that triggers a batch job. If equal to DISABLED, no events will be triggered
+      and no jobs will run. If ENABLED, the JobQueue must also be ENABLED for jobs to run.
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Default: ENABLED
+
+
+Resources:
+
+  EventRuleTest:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub ${GlobalTag}-${Landscape}-cron-test
+      Description: >
+        Test Research Admin scheduled batch report. 
+        This Rule normally remains DISABLED except when testing a new batch report. 
+        Don't leave ENABLED or a new job will be triggered every 2 minutes.
+      State: DISABLED
+      ScheduleExpression: rate(2 minutes)
+      Targets:
+        - Arn: !Ref JobQueueArn
+          BatchParameters: 
+            JobDefinition: !Ref JobDefinitionArn
+            JobName: cron-test-job
+          Id: !Sub ${GlobalTag}-${Landscape}-cron-test
+          Input: "{\"Parameters\": {\"reportcd\": \"pre_award_not_billable\"}}"
+          RoleArn: !Ref CloudwatchEventRoleArn
+
+  EventRule14thAnd28th:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub ${GlobalTag}-${Landscape}-cron-14th-and-28th
+      Description: Research Admin Reports Cron event for 14th and 28th of the Month.
+      State: !Ref EventRuleState
+      ScheduleExpression: "cron(0 12 14,28 * ? *)"
+      Targets:
+        - Arn: !Ref JobQueueArn
+          BatchParameters: 
+            JobDefinition: !Ref JobDefinitionArn
+            JobName: new-ips
+          Id: !Sub ${GlobalTag}-${Landscape}-cron-14th-and-28th
+          Input: "{\"Parameters\": {\"reportcd\": \"new_ips\"}}"
+          RoleArn: !Ref CloudwatchEventRoleArn
+
+  EventRule15th:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub ${GlobalTag}-${Landscape}-cron-15th
+      Description: Research Admin Reports Cron event for 15th of the Month.
+      State: !Ref EventRuleState
+      ScheduleExpression: cron(0 12 15 * ? *)
+      Targets:
+        - Arn: !Ref JobQueueArn
+          BatchParameters: 
+            JobDefinition: !Ref JobDefinitionArn
+            JobName: ip-pending-update
+          Id: !Sub ${GlobalTag}-${Landscape}-cron-15th
+          Input: "{\"Parameters\": {\"reportcd\": \"ip_pending_update\"}}"
+          RoleArn: !Ref CloudwatchEventRoleArn
+
+  EventRule1st:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub ${GlobalTag}-${Landscape}-cron-1st
+      Description: Research Admin Reports Cron event for 1st of the Month.
+      State: !Ref EventRuleState
+      ScheduleExpression: cron(0 12 1 * ? *)
+      Targets:
+        - Arn: !Ref JobQueueArn
+          BatchParameters: 
+            JobDefinition: !Ref JobDefinitionArn
+            JobName: award-billing-info
+          Id: !Sub ${GlobalTag}-${Landscape}-cron-1st-billing-info
+          Input: "{\"Parameters\": {\"reportcd\": \"award_billing_info\"}}"
+          RoleArn: !Ref CloudwatchEventRoleArn
+        - Arn: !Ref JobQueueArn
+          BatchParameters: 
+            JobDefinition: !Ref JobDefinitionArn
+            JobName: invoice-instructions
+          Id: !Sub ${GlobalTag}-${Landscape}-cron-1st-invoice-instructions
+          Input: "{\"Parameters\": {\"reportcd\": \"invoice_instructions\"}}"
+          RoleArn: !Ref CloudwatchEventRoleArn
+        - Arn: !Ref JobQueueArn
+          BatchParameters: 
+            JobDefinition: !Ref JobDefinitionArn
+            JobName: award-oav
+          Id: !Sub ${GlobalTag}-${Landscape}-cron-1st-award-oav
+          Input: "{\"Parameters\": {\"reportcd\": \"award_oav\"}}"
+          RoleArn: !Ref CloudwatchEventRoleArn
+        - Arn: !Ref JobQueueArn
+          BatchParameters: 
+            JobDefinition: !Ref JobDefinitionArn
+            JobName: qa
+          Id: !Sub ${GlobalTag}-${Landscape}-cron-1st-qa
+          Input: "{\"Parameters\": {\"reportcd\": \"qa\"}}"
+          RoleArn: !Ref CloudwatchEventRoleArn
+        - Arn: !Ref JobQueueArn
+          BatchParameters: 
+            JobDefinition: !Ref JobDefinitionArn
+            JobName: pre-award-not-billable
+          Id: !Sub ${GlobalTag}-${Landscape}-cron-1st-pre-award-not-billable
+          Input: "{\"Parameters\": {\"reportcd\": \"pre_award_not_billable\"}}"
+          RoleArn: !Ref CloudwatchEventRoleArn
+
+  EventRuleFriday:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub ${GlobalTag}-${Landscape}-cron-friday
+      Description: Research Admin Reports Cron event for every Friday.
+      State: !Ref EventRuleState
+      ScheduleExpression: cron(0 12 ? * FRI *)
+      Targets:
+        - Arn: !Ref JobQueueArn
+          BatchParameters: 
+            JobDefinition: !Ref JobDefinitionArn
+            JobName: subaward-award-trans
+          Id: !Sub ${GlobalTag}-${Landscape}-cron-friday-subaward-award-trans
+          Input: "{\"Parameters\": {\"reportcd\": \"subaward_award_trans\"}}"
+          RoleArn: !Ref CloudwatchEventRoleArn
+        - Arn: !Ref JobQueueArn
+          BatchParameters: 
+            JobDefinition: !Ref JobDefinitionArn
+            JobName: irb
+          Id: !Sub ${GlobalTag}-${Landscape}-cron-friday-irb
+          Input: "{\"Parameters\": {\"reportcd\": \"irb\"}}"
+          RoleArn: !Ref CloudwatchEventRoleArn
+
+  EventRuleMonFri:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub ${GlobalTag}-${Landscape}-cron-mon-fri
+      Description: Research Admin Reports Cron event for every Monday thru Friday.
+      State: !Ref EventRuleState
+      ScheduleExpression: cron(0 12 ? * MON-FRI *)
+      Targets:
+        - Arn: !Ref JobQueueArn
+          BatchParameters: 
+            JobDefinition: !Ref JobDefinitionArn
+            JobName: award-active-update
+          Id: !Sub ${GlobalTag}-${Landscape}-cron-mon-fri-award-active-update
+          Input: "{\"Parameters\": {\"reportcd\": \"award_active_update\"}}"
+          RoleArn: !Ref CloudwatchEventRoleArn
+        - Arn: !Ref JobQueueArn
+          BatchParameters: 
+            JobDefinition: !Ref JobDefinitionArn
+            JobName: subaward-aging
+          Id: !Sub ${GlobalTag}-${Landscape}-cron-mon-fri-subaward-aging
+          Input: "{\"Parameters\": {\"reportcd\": \"subaward_aging\"}}"
+          RoleArn: !Ref CloudwatchEventRoleArn
+        - Arn: !Ref JobQueueArn
+          BatchParameters: 
+            JobDefinition: !Ref JobDefinitionArn
+            JobName: negotiation
+          Id: !Sub ${GlobalTag}-${Landscape}-cron-mon-fri-negotiation
+          Input: "{\"Parameters\": {\"reportcd\": \"negotiation\"}}"
+          RoleArn: !Ref CloudwatchEventRoleArn
+
+  EventRuleMonday:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub ${GlobalTag}-${Landscape}-cron-monday
+      Description: Research Admin Reports Cron event for every Monday.
+      State: !Ref EventRuleState
+      ScheduleExpression: cron(0 12 ? * MON *)
+      Targets:
+        - Arn: !Ref JobQueueArn
+          BatchParameters: 
+            JobDefinition: !Ref JobDefinitionArn
+            JobName: new-sponsor-activity
+          Id: !Sub ${GlobalTag}-${Landscape}-cron-monday-new-sponsor-activity
+          Input: "{\"Parameters\": {\"reportcd\": \"new_sponsor_activity\"}}"
+          RoleArn: !Ref CloudwatchEventRoleArn
+
+  EventRuleFailedJob:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub ${GlobalTag}-${Landscape}-failed-job-event
+      Description: Send alert via SNS Topic if a Research Admin Reports batch job fails to complete.
+      State: ENABLED
+      EventPattern: !Sub
+        "{
+          \"detail-type\":[
+            \"Batch Job State Change\"
+          ],
+          \"source\":[
+            \"aws.batch\"
+          ],
+          \"detail\":{
+            \"jobQueue\":[
+              \"arn:aws:batch:${AWS::Region}:${AWS::AccountId}:job-queue/${GlobalTag}-${Landscape}-job-queue\"
+            ],
+            \"status\":[
+              \"FAILED\"
+            ]
+          }
+        }"
+      Targets:
+        - Arn: !Ref FailedJobSnsTopicArn
+          Id: !Sub ${GlobalTag}-${Landscape}-failed-job-event
+          InputTransformer:
+            InputPathsMap: 
+              "jobname": "$.detail.jobName"
+              "jobqueue": "$.detail.jobQueue"
+              "status": "$.detail.status"
+            InputTemplate: "\"A Research Admin Reports batch job failed to complete. Login to the AWS Batch Job Queue for more details.\"\n\n\"Job Name: <jobname>\"\n\"Job Queue: <jobqueue>\"\n\"Status: <status>\"" 

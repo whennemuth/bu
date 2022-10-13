@@ -1,0 +1,137 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Kuali-research-docker is a git repository that contains bash scripts for building docker images from kuali module source code and deploying them as containers in specified environments.&#xd;
+This job pulls the kuali-research-docker repo into the /tmp directory.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.BooleanParameterDefinition>
+          <name>VERBOSE</name>
+          <description>Log output will be verbose</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>GIT_REPO_URL</name>
+          <description>The git repository from which this job will pull the docker build context directories and scripts to run the docker commands.</description>
+          <randomName>choice-parameter-7414145968157592</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>def url = &quot;git@github.com:bu-ist/kuali-research-docker.git&quot;
+return &quot;&lt;input type=&apos;text&apos; readonly=true name=&apos;value&apos; style=&apos;width:400px;font-family:monospace;&apos; value=&apos;&quot; +  url + &quot;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-coi-1-pull-build-scripts</projectName>
+          <projectFullName>kuali-coi-1-pull-build-scripts</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>GIT_BRANCH</name>
+          <description>The git branch from which this job will pull the docker build context directories and scripts to run the docker commands.</description>
+          <randomName>choice-parameter-7330918921590289</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>return new URL(
+   &quot;http&quot;, 
+    &quot;127.0.0.1&quot;, 
+   8002, 
+   &quot;/active-choices?&quot; + 
+      &quot;parameter-name=git_refs&amp;&quot; + 
+      &quot;git-ref-type=branch&amp;&quot; +
+      &quot;git-ssh-key=bu_github_id_docker_rsa&amp;&quot; +
+      &quot;git-remote-url=&quot; + GIT_REPO_URL).text;
+</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-coi-1-pull-build-scripts</projectName>
+          <projectFullName>kuali-coi-1-pull-build-scripts</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>GIT_REPO_URL</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>ROOT_DIR</name>
+          <description>Pull the docker scripts to this directory.
+Defaults to the workspace directory of this job</description>
+          <randomName>choice-parameter-8364657314338619</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;&apos; style=&apos;width:400px;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-coi-1-pull-build-scripts</projectName>
+          <projectFullName>kuali-coi-1-pull-build-scripts</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>[ &quot;$VERBOSE&quot; == false ] &amp;&amp; set +x
+
+# Fix affects of active choices reactive parameter bug. The variables trail with added comma.
+GIT_BRANCH=$(echo &quot;$GIT_BRANCH&quot; | sed &apos;s/,//g&apos;)
+GIT_REPO_URL=$(echo &quot;$GIT_REPO_URL&quot; | sed &apos;s/,//g&apos;)
+ROOT_DIR=$(echo &quot;$ROOT_DIR&quot; | sed &apos;s/,//g&apos;)
+
+[ -z &quot;$ROOT_DIR&quot; ] &amp;&amp; ROOT_DIR=&quot;$WORKSPACE&quot;
+
+source /var/lib/jenkins/cli-credentials.sh
+java -jar \
+  /var/lib/jenkins/jenkins-cli.jar \
+  -s http://localhost:8080/ \
+  build &apos;pull-docker-build-context&apos; \
+  -v -f \
+  -p VERBOSE=${VERBOSE} \
+  -p GIT_REPO_URL=${GIT_REPO_URL} \
+  -p GIT_BRANCH=${GIT_BRANCH} \
+  -p TARGET_DIRECTORY=$ROOT_DIR
+</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

@@ -1,0 +1,363 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<maven2-moduleset plugin="maven-plugin@3.2">
+  <actions/>
+  <description>This build:&#xd;
+   1) Creates the application war file from the specified git commit (HEAD of &quot;bu-master&quot; branch by default).&#xd;
+       (NOTE: this will be the only thing done if DEPLOY is not checked)&#xd;
+   2) Wraps the war file into the image during its creation&#xd;
+   3) Uploads the new image to a docker registry&#xd;
+   4) Issues a command over SSH to docker on the application host to remove any existing container that is running and run a new one based on the new image.&#xd;
+&#xd;
+ISSUE:&#xd;
+If you see any node errors that mention &quot;ECONNRESET or EPIPE&quot;, this is probably due to the following known bug:&#xd;
+https://github.com/npm/npm/issues/7945&#xd;
+This issue is intermittent and not actually related to proxy configuration.&#xd;
+Running the build again usually goes successfully.&#xd;
+&#xd;
+TODO:&#xd;
+Is there an alternative to the pre-build step for building the other dependencies if they are not in the local .m2 repo?&#xd;
+Tried to detect if rice or s2sgen versions indicated in the pom file are not present by the following command (but did not work):&#xd;
+mvn dependency:get -Dartifact=g:a:v -o -DrepoUrl=file://path/to/your/repo&#xd;
+See also:&#xd;
+https://wiki.jenkins-ci.org/display/JENKINS/Jenkins+CLI&#xd;
+https://wiki.jenkins-ci.org/display/JENKINS/Conditional+BuildStep+Plugin&#xd;
+https://wiki.jenkins-ci.org/display/JENKINS/Run+Condition+Plugin&#xd;
+https://www.cloudbees.com/blog/how-use-jenkins-job-chaining-and-visualizations</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>GITFLOW_BRANCH</name>
+          <description>The standard gitflow branch in the github repository to be pulled for the maven build.
+(Unless overridden by the BRANCH parameter).</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>bu-master</string>
+              <string>master</string>
+              <string>develop</string>
+              <string>hotfix</string>
+              <string>support</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description>The branch in the github repository to be pulled for the maven build.
+(Change the default value to build against a custom branch). </description>
+          <defaultValue>${GITFLOW_BRANCH}</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>CHECK_DEPENDENCIES</name>
+          <description>Build any kuali modules that are out of date (rice, s2sgen, api, schemaspy).
+This is determined by analyzing the pom file for this build and the local .m2 repository.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DEPLOY</name>
+          <description>When the build has finished, trigger the next 3 jobs which 
+   1) Build the docker image around the war file created here
+   2) Push the docker image to the docker registry
+   3) Execute commands on the application server to pull the docker image from the registry and run a container from it. 
+Uncheck this box if you simply want to build a war file and do nothing else (location of war: ${JENKINS_HOME}/workspace/kuali-research-1-build-war/coeus-webapp/target). </description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ECR_REGISTRY_URL</name>
+          <description>The url of the elastic container registry (ECR) where the docker image that wraps the war file built in this job is to reside.
+(Only used if DEPLOY is checked).</description>
+          <defaultValue>730096353738.dkr.ecr.us-east-1.amazonaws.com</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>EC2_INSTANCE_ID</name>
+          <description>The id of the EC2 instance that will be running the container based on the docker image wrapping the newly built war file.
+Example: i-099de1c5407493f9b
+(Only used if DEPLOY is checked).</description>
+          <defaultValue>i-0258a5f2a87ba7972</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_REPO_URL</name>
+          <description>The git repository from which the build will pull source code.</description>
+          <defaultValue>https://github.com/bu-ist/kuali-research</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_REFSPEC</name>
+          <description>Controls the remote refs to be retrieved (git fetch) and how they map to local refs.
+The default ref narrows refs to retrieve to a specific branch.
+To narrow down to a specific tag or tags (will use the latest matching pattern used) use:
+
+NOTE: This is NOT what determines what gets checked out for building (see GIT_BRANCHES_TO_BUILD)
+
++refs/tags/[tag pattern]:refs/remotes/origin/tags/[tag pattern]</description>
+          <defaultValue>+refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_BRANCHES_TO_BUILD</name>
+          <description>Specify the branches if you&apos;d like to track a specific branch in a repository. If left blank, all branches will be examined for changes and built.
+
+NOTE: This is NOT what determines what gets fetched from the remote repository (see GIT_REFSPEC).
+Therefore, it is possible to specify a certain tagname of commitId here and have the build fail because the GIT_REFSPEC value has only caused fetches that to date have not yet included that tagname or commitId.
+
+Possible options:
+
+    &lt;branchName&gt;
+        Tracks/checks out the specified branch. If ambiguous the first result is taken, which is not necessarily the expected one. Better use refs/heads/&lt;branchName&gt;.
+        E.g. master, feature1,...
+    
+    refs/heads/&lt;branchName&gt;
+        Tracks/checks out the specified branch.
+        E.g. refs/heads/master, refs/heads/feature1/master,...
+    
+    &lt;remoteRepoName&gt;/&lt;branchName&gt;
+        Tracks/checks out the specified branch. If ambiguous the first result is taken, which is not necessarily the expected one.
+        Better use refs/heads/&lt;branchName&gt;.
+        E.g. origin/master
+    
+    remotes/&lt;remoteRepoName&gt;/&lt;branchName&gt;
+        Tracks/checks out the specified branch.
+        E.g. remotes/origin/master
+    
+    refs/remotes/&lt;remoteRepoName&gt;/&lt;branchName&gt;
+        Tracks/checks out the specified branch.
+        E.g. refs/remotes/origin/master
+    
+    &lt;tagName&gt;
+        This does not work since the tag will not be recognized as tag.
+        Use refs/tags/&lt;tagName&gt; instead.
+        E.g. git-2.3.0
+    
+    refs/tags/&lt;tagName&gt;
+        Tracks/checks out the specified tag.
+        E.g. refs/tags/git-2.3.0
+    
+    &lt;commitId&gt;
+        Checks out the specified commit.
+        E.g. 5062ac843f2b947733e6a3b105977056821bd352, 5062ac84, ...
+        NOTE: technically, the entry must be */branchname commitid, not simply commitid
+    
+    ${ENV_VARIABLE}
+        It is also possible to use environment variables. In this case the variables are evaluated and the result is used as described above.
+        E.g. ${TREEISH}, refs/tags/${TAGNAME},...
+    
+    &lt;Wildcards&gt;
+        The syntax is of the form: REPOSITORYNAME/BRANCH. In addition, BRANCH is recognized as a shorthand of */BRANCH, &apos;*&apos; is recognized as a wildcard, and &apos;**&apos; is recognized as wildcard that includes the separator &apos;/&apos;. Therefore, origin/branches* would match origin/branches-foo but not origin/branches/foo, while origin/branches** would match both origin/branches-foo and origin/branches/foo.
+    
+    :&lt;regular expression&gt;
+        The syntax is of the form: :regexp. Regular expression syntax in branches to build will only build those branches whose names match the regular expression.
+        Examples:
+    
+            :^(?!(origin/prefix)).*
+                matches: origin or origin/master or origin/feature
+                does not match: origin/prefix or origin/prefix_123 or origin/prefix-abc
+            :origin/release-\d{8}
+                matches: origin/release-20150101
+                does not match: origin/release-2015010 or origin/release-201501011 or origin/release-20150101-something
+            :^(?!origin/master$|origin/develop$).*
+                matches: origin/branch1 or origin/branch-2 or origin/master123 or origin/develop-123
+                does not match: origin/master or origin/develop</description>
+          <defaultValue>refs/heads/${BRANCH}</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.3">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <refspec>${GIT_REFSPEC}</refspec>
+        <url>${GIT_REPO_URL}</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>${GIT_BRANCHES_TO_BUILD}</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>jdk-11</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <rootModule>
+    <groupId>org.kuali.coeus</groupId>
+    <artifactId>coeus</artifactId>
+  </rootModule>
+  <goals>clean compile install -Dgrm.off=true -Dmaven.test.skip=true -Dbuild.version=&apos;${UPCOMING_POM_VERSION}&apos; -Dbuild.bu.git.ref=&apos;git:branch=${GIT_BRANCH},ref=${GIT_COMMIT}&apos;</goals>
+  <aggregatorStyleBuild>true</aggregatorStyleBuild>
+  <incrementalBuild>false</incrementalBuild>
+  <ignoreUpstremChanges>true</ignoreUpstremChanges>
+  <ignoreUnsuccessfulUpstreams>false</ignoreUnsuccessfulUpstreams>
+  <archivingDisabled>false</archivingDisabled>
+  <siteArchivingDisabled>false</siteArchivingDisabled>
+  <fingerprintingDisabled>false</fingerprintingDisabled>
+  <resolveDependencies>false</resolveDependencies>
+  <processPlugins>false</processPlugins>
+  <mavenValidationLevel>-1</mavenValidationLevel>
+  <runHeadless>false</runHeadless>
+  <disableTriggerDownstreamProjects>false</disableTriggerDownstreamProjects>
+  <blockTriggerWhenBuilding>true</blockTriggerWhenBuilding>
+  <settings class="jenkins.mvn.DefaultSettingsProvider"/>
+  <globalSettings class="jenkins.mvn.DefaultGlobalSettingsProvider"/>
+  <reporters/>
+  <publishers/>
+  <buildWrappers>
+    <com.lookout.jenkins.EnvironmentScript plugin="environment-script@1.2.5">
+      <script># The environment variable POM_VERSION is set AFTER the mvn command is executed.
+# Therefore you cannot pass it to mvn as a parameter as this will indicate the pom version of the LAST maven build.
+# So, we must get the pom version by grepping for it in physical pom file itself and setting it as an environment variable:
+
+echo UPCOMING_POM_VERSION=$(grep -Po &apos;(?!&lt;version&gt;)[^&lt;&gt;]+&lt;/version&gt;&apos; ${WORKSPACE}/pom.xml | head -n 1 | sed &apos;s/&lt;\/version&gt;//&apos;)</script>
+      <scriptType>unixScript</scriptType>
+      <runOnlyOnParent>false</runOnlyOnParent>
+      <hideEnvironmentVariablesValues>false</hideEnvironmentVariablesValues>
+    </com.lookout.jenkins.EnvironmentScript>
+  </buildWrappers>
+  <prebuilders>
+    <hudson.tasks.Shell>
+      <command>
+if [ &quot;$CHECK_DEPENDENCIES&quot; == true ] ; then 
+  source /var/lib/jenkins/cli-credentials.sh
+  CLI=/var/lib/jenkins/jenkins-cli.jar
+  HOST=http://localhost:8080/
+  POM=${WORKSPACE}/pom.xml
+  
+  java -jar ${CLI} -s ${HOST} build &apos;kc-dependency-check&apos; -v -f -p POM=${POM};
+  
+fi
+</command>
+    </hudson.tasks.Shell>
+  </prebuilders>
+  <postbuilders>
+    <hudson.tasks.Shell>
+      <command>set +x
+
+# For a multibranch project, this will be set to the name of the branch being built, for example in case you wish to deploy to production from master but not from feature branches.
+echo &quot;BRANCH_NAME = ${BRANCH_NAME}&quot;
+# The current build number, such as &quot;153&quot;
+echo &quot;BUILD_NUMBER = ${BUILD_NUMBER}&quot;
+# The current build ID, identical to BUILD_NUMBER for builds created in 1.597+, but a YYYY-MM-DD_hh-mm-ss timestamp for older builds
+echo &quot;BUILD_ID = ${BUILD_ID}&quot;
+# The display name of the current build, which is something like &quot;#153&quot; by default.
+echo &quot;BUILD_DISPLAY_NAME = ${BUILD_DISPLAY_NAME}&quot;
+# Name of the project of this build, such as &quot;foo&quot; or &quot;foo/bar&quot;.
+echo &quot;JOB_NAME = ${JOB_NAME}&quot;
+# Short Name of the project of this build stripping off folder paths, such as &quot;foo&quot; for &quot;bar/foo&quot;.
+echo &quot;JOB_BASE_NAME = ${JOB_BASE_NAME}&quot;
+# String of &quot;jenkins-${JOB_NAME}-${BUILD_NUMBER}&quot;. Convenient to put into a resource file, a jar file, etc for easier identification. starts from 0, not 1.
+echo &quot;BUILD_TAG = ${BUILD_TAG}&quot;
+# The absolute path of the directory assigned to the build as a workspace.
+echo &quot;WORKSPACE = ${WORKSPACE}&quot;
+# The absolute path of the directory assigned on the master node for Jenkins to store data.
+echo &quot;JENKINS_HOME = ${JENKINS_HOME}&quot;
+# Full URL of Jenkins, like http://server:port/jenkins/ (note: only available if Jenkins URL set in system configuration)
+echo &quot;JENKINS_URL = ${JENKINS_URL}&quot;
+# Full URL of this build, like http://server:port/jenkins/job/foo/15/ (Jenkins URL must be set)
+echo &quot;BUILD_URL = ${BUILD_URL}&quot;
+# Full URL of this job, like http://server:port/jenkins/job/foo/ (Jenkins URL must be set)
+echo &quot;JOB_URL = ${JOB_URL}&quot;
+
+# These should all come from the maven project plugin
+echo &quot;POM_DISPLAYNAME = ${POM_DISPLAYNAME}&quot;
+echo &quot;POM_VERSION = ${POM_VERSION}&quot;
+echo &quot;POM_GROUPID = ${POM_GROUPID}&quot;
+echo &quot;POM_ARTIFACTID = ${POM_ARTIFACTID}&quot;
+echo &quot;POM_PACKAGING = ${POM_PACKAGING}&quot;
+
+if [ &quot;$DEPLOY&quot; == true ] ; then
+
+   source /var/lib/jenkins/cli-credentials.sh
+   CLI=/var/lib/jenkins/jenkins-cli.jar
+   HOST=http://localhost:8080/
+   WARFILE_DIR=${WORKSPACE}/coeus-webapp/target
+   WAR_FILE=$(ls -1 $WARFILE_DIR | grep -P &quot;^.*war$&quot;)
+   WAR_URL=http://localhost:8080/job/${JOB_BASE_NAME}/ws/coeus-webapp/target/${WAR_FILE}
+   BACKUP_DIR=/var/lib/jenkins/backup/kuali-research/war
+   
+   # Confirm the war file has been found
+   if [ -z &quot;${WARFILE}&quot; ]; then
+      echo &quot;Found war file: ${WAR_FILE}&quot;;
+      # Insert a copy of the log4j-appserver jar file into the WEB-INF/lib directory of the war file.
+      java -jar ${CLI} -s ${HOST} build &apos;kc-pack-log4j-appserver-jar&apos; -v -f \
+         -p POM=${WORKSPACE}/pom.xml \
+         -p WARFILE_DIR=${WARFILE_DIR}
+   else
+      echo &quot;CANNOT FIND WAR FILE!!!&quot;;
+      echo &quot;EXITING BUILD.&quot;;
+      exit 1;
+   fi      
+   
+   # Set the name of the target repository in docker registry
+   if [ &quot;${BRANCH}&quot; == &quot;feature&quot; ] ; then
+      REGISTRY_REPO_NAME=&quot;${POM_ARTIFACTID}-feature&quot;
+   elif [ &quot;${BRANCH}&quot; == &quot;master&quot; ] ; then
+      REGISTRY_REPO_NAME=&quot;${POM_ARTIFACTID}-sandbox&quot;
+   else
+      REGISTRY_REPO_NAME=&quot;${POM_ARTIFACTID}&quot;
+   fi
+   
+   # Backup the war file. This keeps war files with the same name but from different git branches
+   # from overwriting each other in the jenkins workspace on subsequent builds.
+   if [ ! -d ${BACKUP_DIR}/${BRANCH} ] ; then 
+      mkdir -p ${BACKUP_DIR}/${BRANCH} 
+   fi
+   # Clear out the backup dir (ensures only one war file and no space-consuming buildup)
+   rm -f -r ${BACKUP_DIR}/${BRANCH}/*
+   # Copy the war file from the maven target directory to the backup directory
+   cp -f ${WORKSPACE}/coeus-webapp/target/${WAR_FILE} ${BACKUP_DIR}/${BRANCH}/
+
+   # 2nd step) Build the docker image locally 
+   java -jar ${CLI} -s ${HOST} build &apos;kuali-research-2-docker-build-image&apos; -v -f \
+      -p POM_VERSION=${POM_VERSION} \
+      -p REGISTRY_REPO_NAME=${REGISTRY_REPO_NAME} \
+      -p JENKINS_WAR_FILE=${BACKUP_DIR}/${BRANCH}/${WAR_FILE} \
+      -p ECR_REGISTRY_URL=${ECR_REGISTRY_URL};
+         
+   # 3rd step) Push the docker image to the registry
+   java -jar ${CLI} -s ${HOST} build &apos;kuali-research-3-docker-push-image&apos; -v -f \
+      -p ECR_REGISTRY_URL=${ECR_REGISTRY_URL} \
+      -p POM_VERSION=${POM_VERSION} \
+      -p REGISTRY_REPO_NAME=${REGISTRY_REPO_NAME};
+
+   # 4th step) Pull the docker image from the registry to the application instance and start a container there from it.
+   java -jar ${CLI} -s ${HOST} build &apos;kuali-research-4-docker-run-container&apos; -v -f \
+      -p ECR_REGISTRY_URL=${ECR_REGISTRY_URL} \
+      -p EC2_INSTANCE_ID=${EC2_INSTANCE_ID} \
+      -p POM_VERSION=${POM_VERSION} \
+      -p REGISTRY_REPO_NAME=${REGISTRY_REPO_NAME};
+         
+   echo &quot;FINISHED BUILD AND DEPLOYMENT!&quot;;
+else
+   echo &quot;FINISHED BUILD! (NO DEPLOYMENT)&quot;;
+fi
+
+set -x
+</command>
+    </hudson.tasks.Shell>
+  </postbuilders>
+  <runPostStepsIfResult>
+    <name>SUCCESS</name>
+    <ordinal>0</ordinal>
+    <color>BLUE</color>
+    <completeBuild>true</completeBuild>
+  </runPostStepsIfResult>
+</maven2-moduleset>

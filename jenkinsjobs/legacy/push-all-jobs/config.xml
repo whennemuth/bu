@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Backs up all jobs to a github repository&#xd;
+&#xd;
+NOTE: If you receive the following error:&#xd;
+   &quot;error: insufficient permission for adding an object to repository database .git/objects&quot;&#xd;
+Somehow a one or more files have shown up in the git object directory with different permissions.&#xd;
+To remedy:&#xd;
+   cd /var/lib/jenkins/jobs&#xd;
+   sudo chmod -R g+ws *&#xd;
+   sudo chgrp -R jenkins *</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>GITUSER</name>
+          <description>What user are you identifying yourself to git as?</description>
+          <defaultValue>jenkins</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REPO</name>
+          <description>What is the url of the git repo where the jenkins jobs are stored?</description>
+          <defaultValue>git@github.com:bu-ist/kuali-research-jenkins.git</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description>The branch being pushed to.</description>
+          <defaultValue>master</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>COMMENT</name>
+          <description>What comment do you want for the commit that will be pushed to git?</description>
+          <defaultValue>Jenkins jobs backup</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>cd ${JENKINS_HOME}/jobs
+eval `ssh-agent -s`
+ssh-add ${JENKINS_HOME}/.ssh/bu_github_id_jenkins_rsa
+# ssh -T git@github.com
+if [ ! -d .git ] ; then
+	git init	
+	git config user.email &quot;jenkins@bu.edu&quot;
+	git config user.name $GITUSER
+	git remote add github $REPO
+fi
+if [ ! -f .gitignore ] ; then
+    echo &gt; .gitignore &quot;# Ignore everything in subdirectories&quot;
+    echo &gt;&gt; .gitignore &quot;/*/*&quot;
+    echo &gt;&gt; .gitignore &quot;# ...except the config.xml file in those subdirectories&quot;
+    echo &gt;&gt; .gitignore &quot;!/**/config.xml&quot;
+    echo &gt;&gt; .gitignore &quot;#...and this file&quot;
+    echo &gt;&gt; .gitignore &quot;!.gitignore&quot;
+    echo &gt;&gt; .gitignore &quot;#...and javajobs&quot;
+    echo &gt;&gt; .gitignore &quot;!/javajobs/ContinuousIntegration/&quot;
+fi
+
+if [ -n &quot;$(git status -s -z)&quot; ] ; then
+   echo &quot;Found changes to push.&quot;
+   git add --all
+   git commit -m &quot;$COMMENT&quot;
+   git push github $BRANCH
+else
+   echo &quot;No changes! Nothing to commit! Push cancelled!&quot;
+fi
+eval `ssh-agent -k`</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

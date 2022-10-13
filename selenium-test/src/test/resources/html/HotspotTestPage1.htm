@@ -1,0 +1,111 @@
+<html>
+<head>
+<style>
+	body { font: normal bold 12px verdana; }
+	body > div { 
+		border: solid 1px blue;
+		margin: 5px;
+		padding: 5px;
+		float:left;
+		clear:both;
+		background-color:#CCCCCC;
+		height:65px;
+		width:700px;
+	}
+	td, th {
+		padding:5px;
+		background-color:#CCCCCC;
+		font: normal bold 12px verdana;
+		border-bottom: solid 1px blue;
+		border-right: solid 1px blue;
+	}
+	table {
+		border-top: solid 1px blue;
+		border-left: solid 1px blue;
+		margin: 5px;
+	}
+	li { margin: 5px; }
+</style>
+<script>
+
+</script>
+</head>
+<body leftmargin=30 topmargin=30>
+
+3 types of hotspots:<br>
+<hr><ol>
+<li><img src="SubawardEntry_files/searchicon.gif"> Buttonimage (input of type "image")</li>
+<li><img src="SubawardEntry_files/my_cp_inf.gif"> Imagelink (image wrapped in anchor tags)</li>
+<li><a href="#">Hyperlink</a></li></ol>
+<hr><br>
+
+<div>
+	1) Button image wins (Button image and image link both have the same matching attribute) <br><br>
+	<span>label1</span>
+	<div style="display:inline">
+		<a href="#" name="test1">
+			<img src="SubawardEntry_files/my_cp_inf.gif">
+		</a>
+	</div>
+	<div style="display:inline">
+		<input type="image" title="test1" src="SubawardEntry_files/searchicon.gif">
+	</div>	
+	<a href="#" myprop="hello">test1</a>
+</div>
+
+<div>
+	2) Image link wins (image link has a better matching attribute) <br><br>
+	<span>label2</span>
+	<div style="display:inline">
+		<input type="image" title="test234" src="SubawardEntry_files/searchicon.gif">
+	</div>	
+	<div style="display:inline">
+		<a href="#" name="test2">
+			<img src="SubawardEntry_files/my_cp_inf.gif">
+		</a>
+	</div>
+	<a href="#" myprop="hello">test234</a>
+</div>
+
+<div>
+	3) Image link wins (image link has a better matching attribute) <br><br>
+	<span>label3</span>
+	<div style="display:inline">
+		<input type="image" title="test345" src="SubawardEntry_files/searchicon.gif">
+	</div>	
+	<div style="display:inline">
+		<a href="#" name="test3">
+			<img src="SubawardEntry_files/my_cp_inf.gif">
+		</a>
+	</div>
+	<a href="#" myprop="hello">test3</a>
+</div>
+
+<div>
+	4) Hyperlink wins (Only the hyperlink matches the label (in its innerText)) <br><br>
+	<span>bogus</span>
+	<div style="display:inline">
+		<input type="image" title="test4" src="SubawardEntry_files/searchicon.gif">
+	</div>	
+	<div style="display:inline">
+		<a href="#" name="test4">
+			<img src="SubawardEntry_files/my_cp_inf.gif">
+		</a>
+	</div>
+	<a href="#" myprop="test4">label4</a>
+</div>
+
+<div>
+	5) Between 2 otherwise equal results found in the same row of a table, where the label is in a separate cell, the result closest to the right of that cell is the winner.
+	<table cellpadding=0 cellspacing=0 border=0>
+	<tr>
+		<td>label5a</td>
+		<td><input type="image" title="test5" myprop="worsematch" src="SubawardEntry_files/searchicon.gif"></td>
+		<td>label5b</td>
+		<td><input type="image" title="test5" myprop="bettermatch"  src="SubawardEntry_files/searchicon.gif"></td>
+	</tr>
+	</table>
+</div>
+
+</body>
+</html>

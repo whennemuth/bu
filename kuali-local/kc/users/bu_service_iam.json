@@ -1,0 +1,23 @@
+{
+    "password":"password",
+    "passwordConfirm":"password",
+      "lowerUsername" : "bu_service_iam",
+    "name" : "bu_service_iam",
+    "firstName" : "IAM",
+    "lastName" : "ADD",
+    "username" : "bu_service_iam",
+    "updatedBy" : {
+        "id" : "5c3f7b5fc4254f0377772b3d"
+    },
+    "active" : true,
+    "approved" : true,
+    "role" : "admin",
+    "email" : null,
+    "groupId" : null,
+    "phone" : null,
+    "schoolId" : null,
+    "scopesCm" : null,
+    "ssoProps" : null,
+    "products" : [],
+    "systemNotifications" : "all"
+}

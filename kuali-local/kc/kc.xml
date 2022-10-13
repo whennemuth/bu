@@ -1,0 +1,36 @@
+<Context
+        reloadable="false"
+        cachingAllowed="false"
+        antiResourceLocking="false"
+        docBase="/opt/kuali/webapp"
+        workDir="/opt/kuali/workdir" 
+        swallowOutput="true" >
+	
+        <!--
+        <Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader" cachingAllowed="false"
+        />
+	-->
+
+	<!-- Somewhere around release 1709 of kc, you can no longer override the following:
+	     /opt/kuali/kc/coeus-webapp/target/coeus-webapp-1709.0037/WEB-INF/lib/coeus-impl-1709.0037.jar
+             with...    
+	     /opt/kuali/kc/coeus-impl/target/classes
+	     for some reason eclipselink runtime bytecode manipulation (weaving) cannot find the entities and classes
+	     it wants to weave and throws the same error all over the place when the spring context is getting loaded:
+	     Excerpt: "The class was not weaved properly - for EE deployments"
+	     
+	     This means for now that the coeus-impl jar needs to be recompiled and copied over to /opt/kuali/kc/coeus-webapp/target/coeus-webapp-1709.0037/WEB-INF/lib
+             every time code is changed, instead of simply recompiling the coeus-impl module.
+	     WHAT A DRAG!!!
+        <Resources className="org.apache.catalina.webresources.StandardRoot" cachingAllowed="false">
+                <PreResources className="org.apache.catalina.webresources.DirResourceSet"
+                        base="IMPL_CLASSES"
+                        internalPath="/"
+                        webAppMount="/WEB-INF/classes" />
+        </Resources>
+        -->
+        <Resources>
+                <!-- Trick to force this JAR to be searched for classes before all others. (NOTE: For some reason all attributes must be on the same line. Don't know why) -->
+                <PreResources className="org.apache.catalina.webresources.FileResourceSet" base="${DOCLIB}/coeus-impl-2001.0040.jar" webAppMount="/WEB-INF/lib/coeus-impl-2001.0040.jar" />
+        </Resources>
+</Context>

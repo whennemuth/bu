@@ -1,0 +1,227 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>This job creates a kuali-research docker image, wrapping a specified war file into it.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>JENKINS_WAR_FILE</name>
+          <description>The location of the war file within the jenkins home directory.
+Example: /var/lib/jenkins/workspace/kuali-research-1-build-war/coeus-webapp/target/coeus-webapp-1603.50-SNAPSHOT.war	
+
+NOTE: If you are executing this job directly, keep in mind that the war file you want will not necessarily be the last war file that was built by maven in the kuali-research-1-build-war job (this is the default value). Instead, you may want one of the war files that has been backed up in /var/lib/jenkins/backup/kuali-research/war</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POM_VERSION</name>
+          <description>The maven version number for the war file the docker image being built is based on.
+Example: 1603.50-SNAPSHOT</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REGISTRY_REPO_NAME</name>
+          <description>This value comes from maven artifact id (except for sandbox builds).
+This is used to identify the name of the docker registry repository that this image is going to be pushed to.
+The value is &quot;coeus&quot; by default, but remember that any sandbox images should go to a registry repository called &quot;coeus-sandbox&quot;</description>
+          <defaultValue>coeus</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ECR_REGISTRY_URL</name>
+          <description>The url of the elastic container registry (ECR) where the newly created image is to be pushed to from this server and pulled from by the target docker host for the image wrapping the newly built war file.</description>
+          <defaultValue>730096353738.dkr.ecr.us-east-1.amazonaws.com</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DOCKER_BUILD_CONTEXT_GIT_BRANCH</name>
+          <description>You can modify this value to pull a build context stored in a branch other than master.</description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>JAVA_VERSION</name>
+          <description>The version of java that runs that application.
+The image to be built is based on a centos7-java-tomcat image that is tagged with a value that contains this number.</description>
+          <randomName>choice-parameter-37673092737987989</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def sb = new StringBuilder(&quot;&lt;select name=&apos;value&apos; style=&apos;width:400px;font-family:monospace;&apos;&gt;&quot;)
+sb.append(&quot;&lt;option selected=true value=&apos;11&apos;&gt;11&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;8&apos;&gt;8&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;7&apos;&gt;7&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;/select&gt;&quot;)
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research-2-docker-build-image</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <hudson.model.StringParameterDefinition>
+          <name>TOMCAT_VERSION</name>
+          <description>The version of tomcat under which the app runs.
+The image to be built is based on a centos7-java-tomcat image that is tagged with a value that contains this version.</description>
+          <defaultValue>8.5.34</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command># 1a) Remove any dangling items
+#if [ -n &quot;$(docker images --filter dangling=true -q)&quot; ] ; then 
+#   docker rmi -f $(docker images --filter dangling=true -q); 
+#   echo &quot;Removed dangling image(s)&quot;;
+#else
+#   echo &quot;No dangling images to remove&quot;;
+#fi
+#if [ -n &quot;$(docker volume ls -qf dangling=true)&quot; ] ; then 
+#   docker volume rm $(docker volume ls -qf dangling=true); 
+#   echo &quot;Removed dangling volume(s)&quot;;
+#else 
+#   echo &quot;No dangling volumes to remove&quot;;
+#fi
+
+# 1b) Being more agressive with the cleanup.
+# WARNING! This will remove:
+#        - all stopped containers
+#        - all networks not used by at least one container
+#        - all images without at least one container associated to them
+#        - all build cache
+# echo &quot;Pruning the entire docker system...&quot;
+# docker system prune -a -f
+echo &quot;Removing coeus images tagged for the registry over 6 months ago...&quot;
+docker rmi $(
+  docker images | \
+    grep 730096353738 | \
+    awk &apos;(($4 &gt;= 6 &amp;&amp; $5 == &quot;months&quot;) || ($5 == &quot;years&quot;)) &amp;&amp; ($1 ~ /^.*\/coeus(\-feature)?$/) {
+      print $3
+    }&apos;\
+) 2&gt; /dev/null &amp;&amp; \
+docker rmi $(docker images -a --filter dangling=true -q) 2&gt; /dev/null || true
+
+# 2) If the base tomcat image is not in the local repo, get it from the registry
+JAVA_VERSION=&quot;$(echo $JAVA_VERSION | sed &apos;s/,//g&apos;)&quot;
+# Bug correction: An active choices plugin element will not set its corresponding environment variable if the 
+# default value is being invoked through calling this job using the jenkins-cli build function with the corresponding parameter omitted.
+# NOTE: If you run this job manually, the default value will be reflected in the environment variable.
+[ -z $JAVA_VERSION ] &amp;&amp; JAVA_VERSION=11
+BASE_IMAGE_TAG=&quot;java${JAVA_VERSION}-tomcat${TOMCAT_VERSION}&quot;
+TOMCAT_REGISTRY_IMAGE=&quot;${ECR_REGISTRY_URL}/centos7-java-tomcat:${BASE_IMAGE_TAG}&quot;
+TOMCAT_LOCAL_IMAGE=&quot;bu-ist/centos7-java-tomcat:${BASE_IMAGE_TAG}&quot;
+if [ -z &quot;$(docker images -q ${TOMCAT_LOCAL_IMAGE})&quot; ]; then
+   echo &quot;CANNOT FIND DOCKER IMAGE: ${TOMCAT_LOCAL_IMAGE}&quot;;
+   if [ -z &quot;$(docker images -q ${TOMCAT_REGISTRY_IMAGE})&quot; ]; then 
+      echo &quot;CANNOT FIND DOCKER IMAGE: ${TOMCAT_REGISTRY_IMAGE}&quot;; 
+      echo &quot;Pulling ${TOMCAT_REGISTRY_IMAGE} from registry...&quot;
+      evalstr=&quot;$(aws ecr get-login)&quot;
+      evalstr=&quot;$(echo $evalstr | sed &apos;s/ -e none//&apos;)&quot;
+      eval $evalstr
+      docker pull ${TOMCAT_REGISTRY_IMAGE}
+   fi
+   echo &quot;Tagging ${TOMCAT_REGISTRY_IMAGE}&quot;
+   docker tag ${TOMCAT_REGISTRY_IMAGE} ${TOMCAT_LOCAL_IMAGE}
+fi
+
+# 3) Define variables.
+# NOTE: JENKINS_URL is the full URL of Jenkins, like http://server:port/jenkins/ 
+#       Only available if Jenkins URL is set in system configuration
+ECR_REPO_URL=&quot;${ECR_REGISTRY_URL}/${REGISTRY_REPO_NAME}&quot;
+DOCKER_TAG=&quot;${ECR_REPO_URL}:${POM_VERSION}&quot;
+DOCKER_BUILD_CONTEXT=&quot;git@github.com:bu-ist/kuali-research-docker.git#${DOCKER_BUILD_CONTEXT_GIT_BRANCH}:kuali-research/build.context&quot;
+
+# 4) Build the app image (the image will curl the jenkins war artifact into itself while it is building).
+eval `ssh-agent -s`
+# We cannot execute the ADD instruction in the Dockerfile against $SOURCE_WAR because we are implementing
+# Jenkins security and docker gets challenged for authentication while trying to the war file from this
+# link. The ADD instruction does not support authentication and I have not been able to make wget or curl 
+# with authentication work from a RUN instruction within the Dockerfile for this same link.
+# Therefore we must get our war file into the build context manually where we can use ADD (or COPY) with 
+# a relative file location.
+# Therefore, the standard docker build command with a context referring to a git repo also cannot be used
+# because it clones the build context to some unknown directory in /tmp.
+# Therefore, we will checkout the build context to a known location within the jenkins build context, copy
+# our war file to it, and then execute the docker build command.
+#
+# so...
+# commenting out the original build command
+# docker build -t ${DOCKER_TAG} --build-arg SOURCE_WAR=${JENKINS_WAR_URL} ${DOCKER_BUILD_CONTEXT}
+#
+# and...
+# adding the manual approach
+ssh-add ~/.ssh/bu_github_id_docker_rsa
+if [ -d kuali-research-docker ] ; then
+   rm -f -r kuali-research-docker
+fi
+mkdir kuali-research-docker
+cd kuali-research-docker
+git init	
+git config user.email &quot;jenkins@bu.edu&quot;
+git config user.name jenkins
+git config core.sparseCheckout true
+git remote add github git@github.com:bu-ist/kuali-research-docker.git
+echo kuali-research &gt;&gt; .git/info/sparse-checkout
+git fetch github master
+git checkout master 
+eval `ssh-agent -k`
+# Copy the war file into the docker build context directory
+if [ -n &quot;${JENKINS_WAR_FILE}&quot; ] ; then
+   cp ${JENKINS_WAR_FILE} kuali-research/build.context
+else
+   MAVEN_TARGET_DIR=${JENKINS_HOME}/workspace/kuali-research-1-build-war/coeus-webapp/target
+   cp ${MAVEN_TARGET_DIR}/*.war kuali-research/build.context
+fi
+cd kuali-research/build.context
+WAR_FILE=$(ls *.war)
+
+if [ &quot;$(docker images -q bu-ist/centos7-java-tomcat:8.5 | wc -l)&quot; == &quot;0&quot; ] ; then
+   tomcat8=&quot;$ECR_REGISTRY_URL/centos7-java-tomcat:tomcat8.5&quot;
+   if [ &quot;$(docker images -q $tomcat8 | wc -l)&quot; == &quot;0&quot; ] ; then
+      evalstr=&quot;$(aws ecr get-login)&quot;
+      evalstr=&quot;$(echo $evalstr | sed &apos;s/ -e none//&apos;)&quot;
+      eval $evalstr
+      docker pull $tomcat8
+   fi
+   docker tag $tomcat8 bu-ist/centos7-java-tomcat:tomcat8.5
+fi
+docker build -t ${DOCKER_TAG} \
+  --build-arg SOURCE_WAR=${WAR_FILE} \
+  --build-arg JAVA_VERSION=${JAVA_VERSION} \
+  --build-arg TOMCAT_VERSION=${TOMCAT_VERSION} .
+
+echo &quot;Removing dangling images...&quot;
+docker rmi $(docker images -a --filter dangling=true -q) 2&gt; /dev/null || true</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

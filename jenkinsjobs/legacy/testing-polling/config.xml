@@ -1,0 +1,104 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Testing polling of git for build triggering</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>GITFLOW_BRANCH</name>
+          <description>The standard gitflow branch in the github repository to be pulled for the maven build.
+(Unless overridden by the BRANCH parameter).</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>bu-master</string>
+              <string>mastercopy</string>
+              <string>master</string>
+              <string>develop</string>
+              <string>hotfix</string>
+              <string>support</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description>The branch in the github repository to be pulled for the maven build.
+(Change the default value to build against a custom branch). </description>
+          <defaultValue>${GITFLOW_BRANCH}</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_REPO_URL</name>
+          <description>The git repository from which the build will pull source code.</description>
+          <defaultValue>https://github.com/bu-ist/kuali-research</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_REFSPEC</name>
+          <description>Controls the remote refs to be retrieved and how they map to local refs.
+The default ref narrows refs to retrieve to a specific branch.
+To narrow down to a specific tag or tags (will use the latest matching pattern used) use:
+
++refs/tags/[tag pattern]:refs/remotes/origin/tags/[tag pattern]</description>
+          <defaultValue>+refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_BRANCHES_TO_BUILD</name>
+          <description>Specify the branches if you&apos;d like to track a specific branch in a repository. If left blank, all branches will be examined for changes and built.</description>
+          <defaultValue>refs/heads/${BRANCH}</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.3">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <refspec>${GIT_REFSPEC}</refspec>
+        <url>${GIT_REPO_URL}</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>${GIT_BRANCHES_TO_BUILD}</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+
+CLI=/var/lib/jenkins/jenkins-cli.jar
+HOST=http://localhost:8080/
+
+source /var/lib/jenkins/cli-credentials.sh
+java -jar ${CLI} -s ${HOST} build &apos;kuali-research&apos; -v -f \
+      -p LANDSCAPE=ci
+
+set -x</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

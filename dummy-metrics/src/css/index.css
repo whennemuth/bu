@@ -1,0 +1,102 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.pageLeft {
+  float: left;
+  height: 100%;
+  border-right: 1px solid black;
+}
+
+.pageRight {
+  float: left
+}
+
+div.cluster {
+  margin: 15px;
+  padding: 10px;
+  display: block;
+  float : left;
+  position : relative;
+}
+
+div.clusterHeading {
+  width:100%;
+  border-bottom: 1px solid black;
+  padding: 15px;
+  font: bold 14px arial
+}
+
+div.clusterinfo {
+  margin: 3px;
+  margin-top: 15px;
+  padding: 7px;
+  display: block;
+  float:left;
+  font: normal 10px monospace;
+  color: darkblue;
+  margin-bottom:10px;
+}
+
+div.service {
+  display: block; 
+  float: left; 
+  clear: both;
+  margin-left:15px;
+  position: relative;
+}
+
+div.serviceinfo {
+  padding: 10px;
+  display: block;
+  float:left;
+  clear:both;
+  font: normal 10px monospace;
+  border-left: 1px solid black;
+  margin-bottom:10px;
+}
+
+div.instance {
+  display: block; 
+  float: left; 
+  clear: both;
+  position: relative;
+  top:-42px;
+  left:-1px;
+}
+
+div.instanceinfo {
+  padding: 10px;
+  display: block;
+  float: left;
+  clear: both;
+  font: normal 10px monospace;
+  border-left: 1px solid black;
+  margin-bottom:10px;
+}
+
+div.clusterDummyConfig {
+  padding: 10px;
+  display: block;
+  float:left;
+  font: normal 10px monospace;
+  /* border-left: 1px solid black; */
+  margin-bottom:10px;
+}
+
+div.separator {
+  width:100%;
+  border-bottom: 1px solid black;
+  padding: 15px;
+  font: bold 12px arial
+}

@@ -1,0 +1,18 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+	hideDotFiles = dotGitOnly
+[remote "github-ssh"]
+	url = git@github.com:bu-ist/kuali-ui.git
+	fetch = +refs/heads/*:refs/remotes/github-ssh/*
+[remote "github-http"]
+	url = https://github.com/bu-ist/kuali-ui.git
+	fetch = +refs/heads/*:refs/remotes/github-http/*
+[user]
+  name = admin
+  email = admin@bu.edu
+

@@ -1,0 +1,102 @@
+/*
+ * Kuali Coeus, a comprehensive research administration system for higher education.
+ * 
+ * Copyright 2005-2016 Kuali, Inc.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+ul.warnings, li.warnings
+{
+	list-style-type: none;
+	text-align: left;
+	width: 98%;
+	padding-right: 0px;
+	padding-left: 0px;
+}
+
+select.fixed-size-select {
+width:160px;
+}
+
+select.fixed-size-200-select {
+width:200px;
+}
+
+select.fixed-size-850-select {
+	width: 850px;
+}
+
+div.same-line{
+	float: left; 
+	text-align: left;
+}
+
+div.innerTab-h3head
+{
+	background-color:#6B6B6B;
+	border-bottom:1px solid #666666;
+	border-top:1px solid #666666;
+	color:#FFFFFF;
+	font-size:100%;
+	font-weight:bold;
+	height:18px;
+	margin:0px;
+	padding:2px 0px 0px 6px;
+	text-align:left;
+}
+
+input.align-right {
+	text-align: right;
+	
+}
+
+.headerarea-kra
+{
+	background-color: #e4e4e4;
+	padding-bottom: 0px;
+	padding-left: 10px;
+	height: 55px;
+	padding-right: 0px;
+	background-image: url("../kr/images/masthead1.gif");
+	margin: 0px;
+}
+
+.errorField 
+{
+      border-color: #FF0000;
+}
+
+.left-errmsg-tab
+{
+	text-align: left;
+	padding-left: 20px;
+	width: auto;
+}
+
+#workarea .changedRow td {
+	background-color: #fcf0e1;
+	background-image: none;
+}
+
+.changedAsterisk {
+	margin: 0 5px 0 5px;
+}
+
+.changedResetBtn {
+	margin: 0 5px 0 5px;
+}
+.changedResetBtn:hover {
+	cursor: pointer;
+}

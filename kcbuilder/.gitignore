@@ -1,0 +1,15 @@
+/.classpath
+/.project
+/.settings
+/target
+/ssh.sh
+/tomcat.8080
+/tomcat.8080/*
+/.externalToolBuilders
+/.externalToolBuilders/*
+/db2.tmp
+/db2.*
+/_maven.repositories
+/target/
+/eclipse_build.xml
+/README.txt

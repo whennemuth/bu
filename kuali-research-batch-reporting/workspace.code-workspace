@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"name": "root",
+			"path": "."
+		},
+		{
+			"name": "debug-job",
+			"path": "cloudformation\\debug\\job"
+		},
+		{
+			"name": "debug-dynamodb",
+			"path": "cloudformation\\debug\\dynamodb"
+		},
+		{
+			"name": "debug-zip",
+			"path": "cloudformation\\debug\\zip"
+		}
+	],
+	"settings": {}
+}

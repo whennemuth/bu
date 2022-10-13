@@ -1,0 +1,63 @@
+{
+    "Namespace" : "EC2TestDummyMetrics",
+    "Instances" : [
+        {
+            "InstanceId" : "i-0b10d4809ae3d9718",
+            "Metrics" : [
+                {
+                    "MetricName" : "mem-avail",
+                    "BaselineValue" : "797",
+                    "DeviationValue" : "161",
+                    "DeviateUntil" : "1550177877"
+                },
+                {
+                    "MetricName" : "mem-util",
+                    "BaselineValue" : "1196",
+                    "DeviationValue" : "1832",
+                    "DeviateUntil" : "1550177877"
+                },
+                {
+                    "MetricName" : "mem-util-percent",
+                    "BaselineValue" : "60.00",
+                    "DeviationValue" : "91.92",
+                    "DeviateUntil" : "1550177877"
+                },
+                {
+                    "MetricName" : "disk-space-util",
+                    "BaselineValue" : "60",
+                    "DeviationValue" : "80",
+                    "DeviateUntil" : "1550177877"
+                }
+            ]
+        },
+        {
+            "InstanceId" : "i-0258a5f2a87ba7972",
+            "Metrics" : [
+                {
+                    "MetricName" : "mem-avail",
+                    "BaselineValue" : "800",
+                    "DeviationValue" : "170",
+                    "DeviateUntil" : "1552598473"
+                },
+                {
+                    "MetricName" : "mem-util",
+                    "BaselineValue" : "1100",
+                    "DeviationValue" : "1800",
+                    "DeviateUntil" : "1552598473"
+                },
+                {
+                    "MetricName" : "mem-util-percent",
+                    "BaselineValue" : "66.00",
+                    "DeviationValue" : "89.92",
+                    "DeviateUntil" : "1552598473"
+                },
+                {
+                    "MetricName" : "disk-space-util",
+                    "BaselineValue" : "50",
+                    "DeviationValue" : "90",
+                    "DeviateUntil" : "1552598473"
+                }
+            ]
+        }
+    ]   
+}

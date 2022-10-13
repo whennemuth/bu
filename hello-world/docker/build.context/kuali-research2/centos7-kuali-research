@@ -1,0 +1,76 @@
+#################################################################################################
+#
+# Docker build for the Boston University kc-research web application.
+#
+#  Tomcat directories/symlinks are as follows:
+#  bin
+#  conf -> /etc/tomcat
+#  lib -> /usr/share/java/tomcat
+#  logs -> /var/log/tomcat
+#  temp -> /var/cache/tomcat/temp
+#  webapps -> /var/lib/tomcat/webapps
+#  work -> /var/cache/tomcat/work
+# 
+# To prepare the docker host, create the following directories:
+#    sudo mkdir -p /var/log/kuali/tomcat
+#    sudo mkdir -p /var/log/kuali/printing
+#    sudo mkdir -p /opt/kuali/main/config
+#    sudo cp kc-config.xml /opt/kuali/main/config/
+#
+#################################################################################################
+
+FROM bu-ist/centos7-java-tomcat
+MAINTAINER Warren H (wrh@bu.edu)
+
+USER root
+
+# Do the following:
+# 1) Beef up the memory to get the most it can for a t2.medium (4GB)
+#    NOTE: This can be alternatively set by including a setenv.sh file in the build context with these settings (uncomment the corresponding COPY statement below)
+#       Also, you can override this setting by including it in an -e switch of the docker container run command.
+# 2) Make tomcat start up with a system variable set (java: System.getProperty()) to specify the location of kc-config.xml
+# 
+# NOTE: JAVA_OPTS can also be set in /etc/tomcat/tomcat.conf
+
+ENV JAVA_OPTS="-Xmx3072m -Xms512m -XX:MaxPermSize=256m -Dalt.config.location=/opt/kuali/main/config/kc-config.xml"
+
+ARG SOURCE_WAR
+
+RUN \
+   mkdir -p /opt/kuali/main/config && \
+   mkdir -p /opt/kuali/logs/printing && \
+   chown -R tomcat:tomcat /opt/kuali
+
+# Copy the setenv.sh file into the the catalina bin directory to increase the java heap size.
+# COPY setenv.sh /usr/share/tomcat/bin
+
+# Copy the spring intrumentation jar file to the tomcat lib directory
+COPY spring-instrument-tomcat-3.2.13.RELEASE.jar /usr/share/java/tomcat
+
+# Copy the oracle jdbc dirver to the tomcat lib directory
+COPY ojdbc7.jar /usr/share/java/tomcat
+
+# Copy the mysql driver to the tomcat lib directory
+COPY mysql-connector-java-5.1.38-bin.jar /usr/share/java/tomcat
+
+# Overwrite the context.xml in the catalina conf directory with one that includes a reference to the spring intrumentation jar
+COPY context.xml /etc/tomcat/context.xml
+
+# 8080 is already exposed in parent image. Expose port 80 as well.
+EXPOSE 80
+
+# METHOD 1: Copy in the kc war file into the image from its jenkins build location
+# (NOTE: 169.254.169.254 is a standard AWS ip for EC2 instance metadata
+#        however, it does not seem to be working.)
+# RUN \
+   # JENKINS_HOST=curl 169.254.169.254/latest/meta-data/public-hostname && \
+   # SOURCE_WAR="${JENKINS_HOST}:${JENKINS_PORT}/${JENKINS_ROOT}/job/kc-dind/ws/coeus-webapp/target/[a-z].war" && \
+
+# METHOD 2: Copy in the kc war file into the image from its jenkins build location.
+# RUN curl -sSL $SOURCE_WAR > $TARGET_WAR
+
+# METHOD 3: The kc.war is in the docker build context directory - no need to get curl it in from jenkins
+COPY kc.war /var/lib/tomcat/webapps/kc.war
+
+# Start tomcat by running the file that systemd would if it were enabled.
+CMD ["sh", "/usr/libexec/tomcat/server", "start"]

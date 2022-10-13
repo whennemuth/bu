@@ -1,0 +1,9 @@
+ssh.sh
+**/mysqldata
+*.war
+*.log
+*.swp
+**/workspace
+LAST_IMAGE_BUILD_DATE
+**/environment.variables.*
+

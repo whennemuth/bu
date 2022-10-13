@@ -1,0 +1,474 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>THIS IS THE STARTING POINT FOR A MANUAL BUILD OF THE COI APPLICATION&#xd;
+</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>DEBUG</name>
+          <description></description>
+          <randomName>choice-parameter-8441679458654903</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def opendiv = &quot;&lt;div style=&apos;font-size:14px;font-family:verdana; width:600px; align:left;&apos;&gt;&quot;
+def checkbox = &quot;&lt;input type=&apos;checkbox&apos; name=&apos;value&apos; value=&apos;true&apos; checked style=&apos;display:inline;&apos;&gt;&quot;
+def desc = &quot;Prints out would be calls to other jobs, but do not go through with them.&quot;
+def closediv = &quot;&lt;/div&gt;&quot;
+return opendiv + checkbox + desc + closediv</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;Error creating debug selection&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-coi</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>VERBOSE</name>
+          <description></description>
+          <randomName>choice-parameter-8441679459948153</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def opendiv = &quot;&lt;div style=&apos;font-size:14px;font-family:verdana; width:600px; align:left;&apos;&gt;&quot;
+def checkbox = &quot;&lt;input type=&apos;checkbox&apos; name=&apos;value&apos; value=&apos;false&apos; style=&apos;display:inline;&apos;&gt;&quot;
+def desc = &quot;If checked log output will be verbose.&quot;
+def closediv = &quot;&lt;/div&gt;&quot;
+return opendiv + checkbox + desc + closediv</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;Error creating verbose selection&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-coi</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>NO_BUILD</name>
+          <description></description>
+          <randomName>choice-parameter-8466761842197271</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def opendiv = &quot;&lt;div style=&apos;font-size:14px;font-family:verdana; width:600px; align:left;&apos;&gt;&quot;
+def checkbox = &quot;&lt;input type=&apos;checkbox&apos; name=&apos;value&apos; value=&apos;true&apos; checked style=&apos;display:inline;&apos;&gt;&quot;
+def desc = &quot;Up-to-date docker image already in registry. Skip ahead to the last step (pull)&quot;
+def closediv = &quot;&lt;/div&gt;&lt;br&gt;&quot;
+return opendiv + checkbox + desc + closediv</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;Error creating no_build selection&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-coi</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>GIT_REPO_URL</name>
+          <description>&lt;div style=&quot;font-size:14px;font-family:verdana; width:600px; padding:5px; padding-bottom:20px;&quot;&gt;
+The git repository from which the build will pull source code.
+&lt;/div&gt;</description>
+          <randomName>choice-parameter-8281387729590036</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def url = &quot;git@github.com:bu-ist/kuali-research-coi.git&quot;
+return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; style=&apos;width:400px; font-family:monospace;&apos; value=&apos;&quot; +  url + &quot;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-coi</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>NO_BUILD</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.1">
+          <name>GIT_REF_TYPE</name>
+          <description>&lt;div style=&quot;font-size:14px;font-family:verdana; width:600px; padding:5px; padding-bottom:20px;&quot;&gt;
+Select how you would like to determine your git commit ID
+&lt;/div&gt;</description>
+          <randomName>choice-parameter-8281387730844273</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def list = [&apos;Branch:selected&apos;, &apos;Tag&apos;, &apos;Commit ID&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>def list = [error]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-coi</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>GIT_REPO_URL</referencedParameters>
+          <choiceType>PT_RADIO</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>GIT_REF</name>
+          <description></description>
+          <randomName>choice-parameter-8281387732130785</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>// Instantiate a string builder to build a dropdown box populated with all the branches in the target git repo
+def sb = new StringBuilder(&quot;&lt;select name=&apos;value&apos; style=&apos;width:400px; font-family:monospace;&apos;&gt;&quot;)
+def defaultValue = null
+def process = null
+def cmd = &quot;ssh-add /var/lib/jenkins/.ssh/bu_github_id_coi_rsa &gt; /dev/null 2&gt;&amp;1; &quot;
+
+// Create a command to that passed to ssh-agent to run with sh that will acquire the list of branches in the target git repo
+if (&quot;branch&quot;.equalsIgnoreCase(GIT_REF_TYPE)) {
+   defaultValue = &apos;coi-ui-1802.0001&apos;
+   cmd = cmd +
+      &quot;git -c core.askpass=true ls-remote -h ${GIT_REPO_URL} | &quot; + 
+      &quot;grep -i -P -o &apos;^[^\\s]+\\s+refs/heads/\\K(.*)\$&apos;&quot;
+} 
+else if (&quot;tag&quot;.equalsIgnoreCase(GIT_REF_TYPE)) {
+   cmd = cmd +
+      &quot;git -c core.askpass=true ls-remote -t ${GIT_REPO_URL} | &quot; + 
+      &quot;grep -i -P -o &apos;^[^\\s]+\\s+refs/tags/\\K(.*)\$&apos;&quot;
+}
+else {
+    return &quot;&lt;input type=&apos;text&apos; readonly=true name=&apos;value&apos; style=&apos;width:400px; font-family:monospace;&apos; disabled=true&gt;&quot;
+}
+
+def cmdarr = [ &quot;ssh-agent&quot;, &quot;sh&quot;, &quot;-c&quot;, cmd ]
+process = new ProcessBuilder(cmdarr).start()
+
+// Iterate over the input stream produced by having run the process (should be git ls-remote standard output)
+process.inputStream.eachLine {
+   if( &quot;${it}&quot;.equals(defaultValue)) {
+      sb.append(&quot;&lt;option selected=true value=&apos;&quot;).append(&quot;${it}&quot;).append(&quot;&apos;&gt;&quot;).append(&quot;${it}&quot;).append(&quot;&lt;/option&gt;&quot;)
+   }
+   else {
+      sb.append(&quot;&lt;option value=&apos;&quot;).append(&quot;${it}&quot;).append(&quot;&apos;&gt;&quot;).append(&quot;${it}&quot;).append(&quot;&lt;/option&gt;&quot;)
+   }
+}
+process.waitForOrKill(20000);
+sb.append(&quot;&lt;/select&gt;&quot;)
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; readonly=true name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px; font-family:monospace;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-coi</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>GIT_REPO_URL,GIT_REF_TYPE</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>GIT_COMMIT_ID</name>
+          <description>&lt;div style=&quot;font-size:14px;font-family:verdana; width:600px; padding:5px; padding-bottom:20px;&quot;&gt;
+This is the git commit ID that the build will be based on.
+&lt;/div&gt;</description>
+          <randomName>choice-parameter-8281387733387643</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def commitId = null
+def process = null
+def cmd = &quot;ssh-add /var/lib/jenkins/.ssh/bu_github_id_coi_rsa &gt; /dev/null 2&gt;&amp;1; &quot;
+
+if(&quot;commit id&quot;.equalsIgnoreCase(GIT_REF_TYPE)) {
+    return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; style=&apos;font-family:monospace; width:400px;&apos;&gt;&quot;
+}
+
+if (&quot;branch&quot;.equalsIgnoreCase(GIT_REF_TYPE)) {
+   cmd = cmd +
+      &quot;git -c core.askpass=true ls-remote -h ${GIT_REPO_URL} refs/heads/ ${GIT_REF} | &quot; + 
+      &quot;grep -i -P -o &apos;^[^\\s]+&apos;&quot;
+}
+else if (&quot;tag&quot;.equalsIgnoreCase(GIT_REF_TYPE)) {
+   cmd = cmd +
+      &quot;git -c core.askpass=true ls-remote -t ${GIT_REPO_URL} refs/tags/ ${GIT_REF} | &quot; + 
+      &quot;grep -i -P -o &apos;^[^\\s]+&apos;&quot;
+}
+
+def cmdarr = [ &quot;ssh-agent&quot;, &quot;sh&quot;, &quot;-c&quot;, cmd ]
+process = new ProcessBuilder(cmdarr).start()
+
+// Iterate over the input stream produced by having run the process (should have only one line).
+process.inputStream.eachLine {
+   if(commitId == null) {
+      commitId = &quot;${it}&quot;
+   }
+}
+process.waitForOrKill(20000);
+
+
+if(commitId == null) {
+   return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; disabled=true style=&apos;font-family:monospace; width:400px;&apos;&gt;&quot;
+}
+else {
+   return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; disabled=true value=&apos;&quot; + commitId + &quot;&apos; style=&apos;font-family:monospace; width:400px;&apos;&gt;&quot;
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; disabled=true style=&apos;font-family:monospace; width:400px;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-coi</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>GIT_REPO_URL,GIT_REF_TYPE,GIT_REF</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>VERSION</name>
+          <description>&lt;div style=&quot;font-size:14px;font-family:verdana; width:800px; padding:5px; padding-bottom:20px;&quot;&gt;This value reflects the git tag applied to the codebase the docker image will be based on.
+The git commit may not be the exact commit that was tagged, but would be the most recent commit since that tag before the next tag is encountered.
+VERSION follows the convention of YYMM.xxxx
+&lt;div style=&quot;padding:5px;padding-left:10px;&quot;&gt;
+&lt;b&gt;Example:&lt;/b&gt; &quot;1802.0001&quot;&lt;br&gt;
+This version would specify the January release for 2018 (The month indicates February, but &quot;0001&quot; indicates the very first commit, which the same as the last commit the previous day.
+&lt;/div&gt;
+&lt;/div&gt;</description>
+          <randomName>choice-parameter-8281387734677597</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>if(&quot;${GIT_REF}&quot;.matches(&quot;^\\d{4}\\.\\d{4}\$&quot;)) {
+   return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;${GIT_REF}&apos; style=&apos;font-family:monospace; width:400px;&apos;&gt;&quot;
+}
+else {
+   def matches = &quot;${GIT_REF}&quot;.findAll(/\d{4}\.\d{4}/)
+   if(matches.isEmpty()) {
+      return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; style=&apos;font-family:monospace; width:400px;&apos;&gt;&quot;
+   }
+   else {
+      return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;&quot; + matches.get(0) + &quot;&apos; style=&apos;font-family:monospace; width:400px;&apos;&gt;&quot;
+   }
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;font-family:monospace; width:400px;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-coi</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>GIT_REF</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>LANDSCAPE</name>
+          <description>&lt;div style=&quot;font-size:14px;font-family:verdana; width:600px; padding:5px; padding-bottom:20px;&quot;&gt;
+What landscape is the target EC2 instance in?
+&lt;/div&gt;</description>
+          <randomName>choice-parameter-8282566762271781</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def sb = new StringBuilder(&quot;&lt;select name=&apos;value&apos; style=&apos;width:400px;font-family:monospace;&apos;&gt;&quot;)
+sb.append(&quot;&lt;option selected=true value=&apos;sb&apos;&gt;sb&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;ci&apos;&gt;ci&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;qa&apos;&gt;qa&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;stg&apos;&gt;stg&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;prod&apos;&gt;prod&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;/select&gt;&quot;)
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-coi</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>TARGET</name>
+          <description>&lt;div style=&quot;font-size:14px;font-family:verdana; width:600px; padding:5px; padding-bottom:20px;&quot;&gt;
+Is build for a feature branch (not the main line of git development)?
+&lt;/div&gt;</description>
+          <randomName>choice-parameter-8298680389599121</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def sb = new StringBuilder(&quot;&lt;select name=&apos;value&apos; style=&apos;width:400px;font-family:monospace;&apos;&gt;&quot;)
+sb.append(&quot;&lt;option selected=true value=&apos;coi&apos;&gt;No (publish to the main repo in the docker registry)&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;coi-feature&apos;&gt;Yes (publish to the feature repo in the docker registry&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;/select&gt;&quot;)
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-coi</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>[ &quot;$(echo $VERBOSE | sed &apos;s/,//g&apos;)&quot; == false ] &amp;&amp; set +x
+
+# Static and private variables
+ECR_REGISTRY_URL=730096353738.dkr.ecr.us-east-1.amazonaws.com
+GIT_SCRIPT_URL=git@github.com:bu-ist/kuali-research-docker.git
+GIT_SCRIPT_BRANCH=master
+CLI=/var/lib/jenkins/jenkins-cli.jar
+HOST=http://localhost:8080/
+EC2_IDS=()
+CMDS=()
+
+# Fix the trailing comma issue with active choices parameters reactive
+DEBUG=&quot;$(echo $DEBUG | sed &apos;s/,//g&apos;)&quot;
+NO_BUILD=&quot;$(echo $NO_BUILD | sed &apos;s/,//g&apos;)&quot;
+GIT_REPO_URL=&quot;$(echo $GIT_REPO_URL | sed &apos;s/,//g&apos;)&quot;
+GIT_REF=&quot;$(echo $GIT_REF | sed &apos;s/,//g&apos;)&quot;
+GIT_COMMIT_ID=&quot;$(echo $GIT_COMMIT_ID | sed &apos;s/,//g&apos;)&quot;
+ECR_REGISTRY_URL=&quot;$(echo $ECR_REGISTRY_URL | sed &apos;s/,//g&apos;)&quot;
+VERSION=&quot;$(echo $VERSION | sed &apos;s/,//g&apos;)&quot;
+LANDSCAPE=&quot;$(echo $LANDSCAPE | sed &apos;s/,//g&apos;)&quot;
+TARGET=&quot;$(echo $TARGET | sed &apos;s/,//g&apos;)&quot;
+NOTIFY_EMAIL=&quot;$(echo $NOTIFY_EMAIL | sed &apos;s/,//g&apos;)&quot;
+
+# Validate the job parameters
+[ -z &quot;$GIT_REPO_URL&quot; ] &amp;&amp; echo &quot;ERROR! GIT_REPO_URL cannot be empty!&quot; &amp;&amp; exit 1
+[ -z &quot;$GIT_COMMIT_ID&quot; ] &amp;&amp; echo &quot;ERROR! GIT_COMMIT_ID cannot be empty!&quot; &amp;&amp; exit 1
+
+
+EC2_INSTANCE_ID=&quot;$(echo $EC2_INSTANCE_ID | sed &apos;s/,//g&apos;)&quot;
+
+case &quot;$LANDSCAPE&quot; in
+   &quot;sb&quot;)
+      EC2_IDS=(&quot;i-099de1c5407493f9b&quot; &quot;i-0c2d2ef87e98f2088&quot;);;
+   &quot;ci&quot;)
+      BRANCH=&quot;bu-master&quot;
+      EC2_IDS=(&quot;i-0258a5f2a87ba7972&quot; &quot;i-0511b83a249cd9fb1&quot;);;      
+   &quot;qa&quot;)
+      EC2_IDS=(&quot;i-011ccd29dec6c6d10&quot;);;
+   &quot;stg&quot;)
+      EC2_IDS=(&quot;i-090d188ea237c8bcf&quot; &quot;i-0cb479180574b4ba2&quot;);;
+   &quot;prod&quot;)
+      EC2_IDS=(&quot;i-0534c4e38e6a24009&quot; &quot;i-07d7b5f3e629e89ae&quot;);;
+esac
+
+source /var/lib/jenkins/cli-credentials.sh
+for i in $(seq ${#EC2_IDS[@]}); do 
+   if [ $i -eq 1 ] &amp;&amp; [ &quot;$NO_BUILD&quot; != true ] ; then
+     # First iteration, therefore do all build steps     
+     CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;kuali-coi-1-pull-build-scripts&apos; -v -f \
+       -p GIT_REPO_URL=${GIT_SCRIPT_URL} \
+       -p GIT_BRANCH=${GIT_SCRIPT_BRANCH} \
+       -p ROOT_DIR=${WORKSPACE}&quot;
+       CMDS[${#CMDS[@]}]=$CMD       
+     
+     CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;kuali-coi-2-build-docker-image&apos; -v -f \
+       -p VERBOSE=${VERBOSE} \
+       -p DRYRUN=false \
+       -p GIT_PULL=true \
+       -p GIT_REPO_URL=${GIT_REPO_URL} \
+       -p GIT_REF=${GIT_REF} \
+       -p GIT_COMMIT_ID=${GIT_COMMIT_ID} \
+       -p VERSION=${VERSION} \
+       -p ECR_REGISTRY_URL=${ECR_REGISTRY_URL} \
+       -p REGISTRY_REPO_NAME=${TARGET} \
+       -p ROOT_DIR=${WORKSPACE}&quot;
+       CMDS[${#CMDS[@]}]=$CMD 
+       
+     CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;kuali-coi-3-push-docker-image&apos; -v -f \
+       -p VERBOSE=${VERBOSE} \
+       -p ECR_REGISTRY_URL=${ECR_REGISTRY_URL} \
+       -p VERSION=${VERSION} \
+       -p REGISTRY_REPO_NAME=${TARGET}&quot;
+       CMDS[${#CMDS[@]}]=$CMD       
+   fi
+   
+   CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;kuali-coi-4-run-docker-container&apos; -v -f \
+     -p VERBOSE=${VERBOSE} \
+     -p GIT_REPO_URL=${GIT_SCRIPT_URL} \
+     -p GIT_BRANCH=${GIT_SCRIPT_BRANCH} \
+     -p ECR_REGISTRY_URL=${ECR_REGISTRY_URL} \
+     -p REGISTRY_REPO_NAME=${TARGET} \
+     -p VERSION=${VERSION} \
+     -p LANDSCAPE=${LANDSCAPE} \
+     -p BLAST_IMAGE=true \
+     -p EC2_INSTANCE_ID=${EC2_IDS[i-1]}\
+     -p ROOT_DIR=${WORKSPACE}&quot;
+     
+     CMDS[${#CMDS[@]}]=$CMD       
+done;
+
+for ((i = 0; i &lt; ${#CMDS[@]}; i++)) ; do
+  CMD_PRINTABLE=&quot;$(echo &quot;${CMDS[i]}&quot; | sed &apos;s/[[:space:]][[:space:]]*\-p/\n\0/g&apos;)&quot;
+  printf &quot;\n$CMD_PRINTABLE\n&quot;
+  [ &quot;$DEBUG&quot; == false ] &amp;&amp; eval &quot;${CMDS[i]}&quot;
+done
+
+printf &quot;\n\nBuild Completed!&quot;</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.37">
+      <deleteDirs>false</deleteDirs>
+      <cleanupParameter></cleanupParameter>
+      <externalDelete></externalDelete>
+      <disableDeferredWipeout>false</disableDeferredWipeout>
+    </hudson.plugins.ws__cleanup.PreBuildCleanup>
+  </buildWrappers>
+</project>

@@ -1,0 +1,73 @@
+<html>
+<head>
+	<style>
+		div { 
+			border: solid 1px blue;
+			margin: 5px;
+			padding: 5px;
+			float:left;
+			clear:both;
+		}
+		table { 
+			float:left;
+			clear:both;
+			margin: 5px;
+			border-left:solid 1px blue;
+			border-top:solid 1px blue;
+		}
+		th, td { 
+			border-bottom: solid 1px blue;
+			border-right: solid 1px blue;
+			margin: 5px;
+			padding: 5px;
+			font-weight: normal; 
+		}
+	</style>
+</head>
+<body>
+
+<div id="div1">
+	<div>The innerText of the parent of two adjacent divs seems to always have the text of 
+	those divs on separate lines despite the display style and float settings</div>
+	
+	<br>
+	<div style="display:inline; float:none; margin:5px;">pears: </div>
+	<div style="display:inline; float:none; margin:5px"> bannanas </div>
+	<br><br>
+	
+	<div>apples</div>
+	<div style="clear:none;">oranges</div>
+	
+	<div>mangos</div>
+	<div>&nbsp;</div>
+	<div style="clear:none;">pineapples</div>
+	
+</div>
+
+<div id="div1">
+	mylabel1<div>myvalue1</div>
+</div>
+
+<div id="div2">
+	<div><div>mylabel2a</div></div>
+	<div>
+		mylabel2b
+		<div>myvalue2</div>
+		<div>myvalue2a</div>
+	</div>
+	<div>myvalue2</div>
+</div>
+
+<table id="table1" cellpadding=0 cellspacing=0>
+<tr><td colspan=4>The inner text of a row has spaces between the content of each cell</td></tr>
+<tr>
+<td>mylabel3a</td>
+<td>myvalue3a</td>
+<td>mylabel3b</td>
+<td>myvalue3b</td>
+</tr>
+</table>
+
+
+</body>
+</html>

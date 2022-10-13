@@ -1,0 +1,1 @@
+docker build -t bu-ist/apache-shibboleth .

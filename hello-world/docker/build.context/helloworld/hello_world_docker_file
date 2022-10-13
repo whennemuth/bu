@@ -1,0 +1,16 @@
+FROM tomcat:8-jre8
+MAINTAINER Warren
+
+# Beef up the memory
+ENV JAVA_OPTS="-Xmx8192m"
+
+USER root
+
+RUN mkdir -p /usr/local/tomcat/webapp_mount
+
+# Copy in a script that will run catalina.sh, but only after it does some custom tasks first.
+# Namely, copying war file from mounted directory to webapps dir so containter can start with last built war running.
+COPY tomcatInit.sh /usr/local/tomcat/bin
+RUN chmod ugo+x /usr/local/tomcat/bin/tomcatInit.sh
+
+CMD ["tomcatInit.sh"]

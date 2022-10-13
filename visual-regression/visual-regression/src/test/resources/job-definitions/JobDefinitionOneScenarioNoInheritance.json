@@ -1,0 +1,22 @@
+{
+  "id" : "MyJob",
+  "engine" : "selenium",
+  "viewports" : [{
+     "width" : 60,
+     "height": 100,
+     "label" : "smartphone" 
+  }],
+  "scenarios" : [
+    {
+      "label" : "label1",
+      "url" : "https://ref-domain.bu.edu/main-test.htm",
+      "referenceUrl" : "https://ref-domain.bu.edu/main.htm",
+      "loginUrl" : "https://ref-domain.bu.edu/login.htm",
+      "viewports" : [{
+      	"height" : 1000,
+      	"width" : 1500,
+      	"label" : "computer"
+      }]
+    }
+  ]
+}

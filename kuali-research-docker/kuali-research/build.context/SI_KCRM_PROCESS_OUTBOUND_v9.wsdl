@@ -1,0 +1,2246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="SI_KCRM_PROCESS_OUTBOUND"
+	targetNamespace="http://bu.edu/sap/kcrm" xmlns:rfc="urn:sap-com:document:sap:rfc:functions"
+	xmlns:p1="http://bu.edu/sap/kcrm" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+	xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+	<wsdl:documentation />
+	<wsp:UsingPolicy wsdl:required="true" />
+	<wsp:Policy wsu:Id="OP_SI_KCRM_PROCESS_OUTBOUND" />
+	<wsdl:types>
+		<xsd:schema targetNamespace="urn:sap-com:document:sap:rfc:functions"
+			xmlns="urn:sap-com:document:sap:rfc:functions" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+			<xsd:element name="Z_GM_KCRM_INTERFACE.Response">
+				<xsd:complexType>
+					<xsd:all>
+						<xsd:element name="GRANT_MESSAGES" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>Return Messages Table Type for KCRM Interface
+									- Grant</xsd:documentation>
+							</xsd:annotation>
+							<xsd:complexType>
+								<xsd:sequence>
+									<xsd:element name="item" type="ZGRANTMESSAGES"
+										minOccurs="0" maxOccurs="unbounded" />
+								</xsd:sequence>
+							</xsd:complexType>
+						</xsd:element>
+						<xsd:element name="SPONSORED_PROGRAMS_MESSAGES"
+							minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>Return Messages Table Type for KCRM Interface
+									- SP Program</xsd:documentation>
+							</xsd:annotation>
+							<xsd:complexType>
+								<xsd:sequence>
+									<xsd:element name="item" type="ZSPPROGRAMMESSAGES"
+										minOccurs="0" maxOccurs="unbounded" />
+								</xsd:sequence>
+							</xsd:complexType>
+						</xsd:element>
+						<xsd:element name="SPONSOR_MESSAGES" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>Return Messages Table Type for KCRM Interface
+									- Sponsor</xsd:documentation>
+							</xsd:annotation>
+							<xsd:complexType>
+								<xsd:sequence>
+									<xsd:element name="item" type="ZSPONSORMESSAGES"
+										minOccurs="0" maxOccurs="unbounded" />
+								</xsd:sequence>
+							</xsd:complexType>
+						</xsd:element>
+						<xsd:element name="RETURN" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>Return Parameter</xsd:documentation>
+							</xsd:annotation>
+							<xsd:complexType>
+								<xsd:sequence>
+									<xsd:element name="item" type="BAPIRET2" minOccurs="0"
+										maxOccurs="unbounded" />
+								</xsd:sequence>
+							</xsd:complexType>
+						</xsd:element>
+					</xsd:all>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="Z_GM_KCRM_INTERFACE">
+				<xsd:complexType>
+					<xsd:all>
+						<xsd:element name="BILLING_PLAN">
+							<xsd:annotation>
+								<xsd:documentation>Billing Plan Structure for interface
+								</xsd:documentation>
+							</xsd:annotation>
+							<xsd:complexType>
+								<xsd:sequence>
+									<xsd:element name="item" type="ZGMBILLINGPLANSTRUCTURE"
+										minOccurs="0" maxOccurs="unbounded" />
+								</xsd:sequence>
+							</xsd:complexType>
+						</xsd:element>
+						<xsd:element name="GRANT" type="ZGMGRANTSTRUCTURE">
+							<xsd:annotation>
+								<xsd:documentation>Grants Master data Structure
+								</xsd:documentation>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element name="SPONSOR">
+							<xsd:annotation>
+								<xsd:documentation>Sponsor structure for KCRM Interface
+								</xsd:documentation>
+							</xsd:annotation>
+							<xsd:complexType>
+								<xsd:sequence>
+									<xsd:element name="item" type="ZGMSPONSORSTRUCTURE"
+										minOccurs="0" maxOccurs="unbounded" />
+								</xsd:sequence>
+							</xsd:complexType>
+						</xsd:element>
+						<xsd:element name="SPONSORED_PROGRAMS">
+							<xsd:annotation>
+								<xsd:documentation>Sponsored Program table type for interface
+								</xsd:documentation>
+							</xsd:annotation>
+							<xsd:complexType>
+								<xsd:sequence>
+									<xsd:element name="item" type="ZGMSPPROGRAMSTRUCTURE"
+										minOccurs="0" maxOccurs="unbounded" />
+								</xsd:sequence>
+							</xsd:complexType>
+						</xsd:element>
+						<xsd:element name="SPONSORED_PROGRAMS_GRP">
+							<xsd:annotation>
+								<xsd:documentation>Sponsored Program Group table type for
+									Interface</xsd:documentation>
+							</xsd:annotation>
+							<xsd:complexType>
+								<xsd:sequence>
+									<xsd:element name="item" type="ZGMSPPROGRAMGRPSTRUCTURE"
+										minOccurs="0" maxOccurs="unbounded" />
+								</xsd:sequence>
+							</xsd:complexType>
+						</xsd:element>
+						<xsd:element name="RETURN" minOccurs="0">
+							<xsd:annotation>
+								<xsd:documentation>Return Parameter</xsd:documentation>
+							</xsd:annotation>
+							<xsd:complexType>
+								<xsd:sequence>
+									<xsd:element name="item" type="BAPIRET2" minOccurs="0"
+										maxOccurs="unbounded" />
+								</xsd:sequence>
+							</xsd:complexType>
+						</xsd:element>
+					</xsd:all>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:simpleType name="genericDate">
+				<xsd:restriction base="xsd:string">
+					<xsd:pattern value="....-..-.." />
+				</xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="date">
+				<xsd:union memberTypes="xsd:date genericDate" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+					xmlns="urn:sap-com:document:sap:rfc:functions" />
+			</xsd:simpleType>
+			<xsd:complexType name="ZBAPI0035BUDGETVALIDITY">
+				<xsd:annotation>
+					<xsd:documentation>Grant master budget validity</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="BDGT_PHASE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Budget Phase</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="RELEASE_STATUS" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Budget Status: Unreleased/Released
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="BDGT_VLDTY_NBR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Budget Validity Number</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="3" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="FROM_DATE" type="date" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Valid-from Date</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="TO_DATE" type="date" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Valid-to Date</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="BLOCK" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Block a Budget Validity Period
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZBAPI0035FUNDS">
+				<xsd:annotation>
+					<xsd:documentation>Funds for the grant master</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="FUND" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Fund</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="IDC_FUND" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Indirect Cost Recover Fund</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="CS_FUND" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Cost sharing fund</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="PI_FUND" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>GM Program Income Fund</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZGMFACREDIT_T">
+				<xsd:annotation>
+					<xsd:documentation>F&amp;A Recovery Affiliation table type
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="item" type="ZGMFACREDIT" minOccurs="0"
+						maxOccurs="unbounded" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZSPPROGRAMMESSAGES">
+				<xsd:annotation>
+					<xsd:documentation>Return Messages for KCRM Interface - Grant
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="SPONSORED_PROG" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Sponsored Program</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="TYPE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Message type: S Success, E Error, W Warning, I
+								Info, A Abort</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="MESSAGE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Message Text</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="220" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZBAPI0035SPONSOREDOBJECTST">
+				<xsd:annotation>
+					<xsd:documentation>Table for grant master sponsored objects
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="item" type="ZBAPI0035SPONSOREDOBJECTS"
+						minOccurs="0" maxOccurs="unbounded" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZGMSPPROGRAMGRPSTRUCTURE">
+				<xsd:annotation>
+					<xsd:documentation>Sponsored Program Group Structure for Interface
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="PARENT_AWARD" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>KCRM Parent Award</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="12" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="CHILD_AWARD" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>KCRM Child Award</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="12" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SPONSORED_PROG" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Sponsored Program</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="TITLE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Award Title</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="255" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZGMSPPROGRAMSTRUCTURE">
+				<xsd:annotation>
+					<xsd:documentation>Sponsored Program Structure for KCRM interface
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="SPPROGRAM_UPDATE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Create/Change Flag</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SPPROGRAM_NUMBER" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Sponsored Program used by KCRM on their side
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SPONSORED_PROG" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Sponsored Program</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="VALIDATE_FMBT" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Indicator: Validate Budget Transfer Object
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="VALIDATE_FMBA" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Indicator: Validate Allowed Budget and Posting
+								objects</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="LD_CODE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Legislative District Code</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="6" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="AUTH_GROUP" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Grants Management: Authorization Groups
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="CREATED_BY" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Record Created by</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="12" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="CREATED_ON" type="date" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Created on</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="MODIFIED_BY" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Last Modified by</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="12" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="MODIFIED_ON" type="date" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Date last modified</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="ZZVALID_FROM" type="date" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Valid-from Date</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="ZZVALID_TO" type="date" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Valid-to Date</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="ZZSUBRECIPIENT" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Subrecipient</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZDOCNO" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Document Number</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="24" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZAWARDNO" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Sponsor Award Number</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="24" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZREFERENCE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Reference</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="24" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZOFFCAMPUS" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Off Campus Indicator</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="DESCRIPTION" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Sponsored Program Description
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="30" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="AUTH_GROUP_DESCRIPTION" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Grants Management: Authority Group Description
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZORD_CAT" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Order Category</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="3" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="OVERHEAD_KEY" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Overhead key</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="6" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="BASE_CODE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>KCRM Base Code</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="6" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="FRINGE_CODE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>KCRM Fringe Code</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="6" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="BUDGET_TDC" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Currency amount in BAPI interfaces
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:decimal">
+								<xsd:totalDigits value="23" />
+								<xsd:fractionDigits value="4" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="BUDGET_FA" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Currency amount in BAPI interfaces
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:decimal">
+								<xsd:totalDigits value="23" />
+								<xsd:fractionDigits value="4" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="BUSINESS_AREA" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Business Area</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="4" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="KCRM_STATUS" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Status of the Child</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="2" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SPONSOR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>KCRM Sponsor</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="PRIME_SPONSOR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>KCRM Prime Sponsor</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="T_RESPONSIBLE" type="ZFI_GMSPRESPONSIBLE_TAB_KCRM"
+						minOccurs="0" />
+					<xsd:element name="T_GMSPPROGRAM_FMBT" type="GMSPPROGRAM_FMBT_TT"
+						minOccurs="0" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="GMSPPROGRAM_FMBT">
+				<xsd:annotation>
+					<xsd:documentation>Sponsored Program Master Data - Budget Transfer
+						Objects</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="CLIENT" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Client</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="3" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SPONSORED_PROG" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Sponsored Program</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="FM_AREA" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Financial Management Area</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="4" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="FUNDS_CENTER" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Funds Center</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="16" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="FUNCTIONAL_AREA" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Functional Area</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="16" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="MEASURE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Funded Program</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="24" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="DEFAULT_BUDGET" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Default Value When Creating GM Budget
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZBAPI0035SPONSOREDPROGT">
+				<xsd:annotation>
+					<xsd:documentation>table of sposored programs in grant master data
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="item" type="ZBAPI0035SPONSOREDPROG"
+						minOccurs="0" maxOccurs="unbounded" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZGMSPRESPONSIBLE_KCRM">
+				<xsd:annotation>
+					<xsd:documentation>GMSPRESPONSIBLe structure used for KCRM
+						interface</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="CLIENT" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Client</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="3" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SPONSORED_PROG" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Sponsored Program</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="RESPONSIBILITY" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Type of Responsibility within the Sponsored
+								Program</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="4" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="OBJECT_TYPE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>HR Planning Object</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="2" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="OBJECT_ID" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>HR Planning Object ID of Resource
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="70" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="OBJECT_NAME" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Responsible user name used by KCRM on their
+								side</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="255" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="FROM_DATE" type="date" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Date that responsiblity starts
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="TO_DATE" type="date" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Date that responsibility</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="DEFAULT_TO_GRANT" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Default Value When Creating a Grant
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZSPONSORMESSAGES">
+				<xsd:annotation>
+					<xsd:documentation>Return Messages for KCRM Interface - Grant
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="SPONSOR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Business Partner Number</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="TYPE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Message type: S Success, E Error, W Warning, I
+								Info, A Abort</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="MESSAGE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Message Text</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="220" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZGMFACREDIT">
+				<xsd:annotation>
+					<xsd:documentation>F&amp;A Recovery Affiliation Structure
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="GRANT_NBR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Grant</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="DEPT" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Funds Center</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="16" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="PERCENTAGE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Indirect Overhead Rate</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:decimal">
+								<xsd:totalDigits value="6" />
+								<xsd:fractionDigits value="3" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZBAPI0035RESPONSIBLET">
+				<xsd:annotation>
+					<xsd:documentation>Table of responsibility</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="item" type="ZBAPI0035RESPONSIBLE"
+						minOccurs="0" maxOccurs="unbounded" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="GMSPPROGRAM_FMBT_TT">
+				<xsd:annotation>
+					<xsd:documentation>Sponsored Program Master Data - Budget Transfer
+						Objects</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="item" type="GMSPPROGRAM_FMBT"
+						minOccurs="0" maxOccurs="unbounded" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZBAPI0035BUDGETVALIDITYT">
+				<xsd:annotation>
+					<xsd:documentation>Table for budget validity in grant master
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="item" type="ZBAPI0035BUDGETVALIDITY"
+						minOccurs="0" maxOccurs="unbounded" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZFI_GMSPRESPONSIBLE_TAB_KCRM">
+				<xsd:annotation>
+					<xsd:documentation>Table type for GMSPRESPONSIBLE used in KCRM
+						interface</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="item" type="ZGMSPRESPONSIBLE_KCRM"
+						minOccurs="0" maxOccurs="unbounded" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZBAPI0035GRANTDESCRIPTION">
+				<xsd:annotation>
+					<xsd:documentation>GM Grant Description Texts</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="LANGUAGE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Language Key</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SHORT_DESC" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Shorter description of the grant
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="DESCRIPTION" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Descriptive Text</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="80" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZGMSPONSORSTRUCTURE">
+				<xsd:annotation>
+					<xsd:documentation>Sponsor structure for KCRM Interface
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="SPONSOR_UPDATE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Create/Change Flag</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SPONSOR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Business Partner Number</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SPONSOR_TYPE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Attribute 6</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="3" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SPONSOR_NAME" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Sponsor Name</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="300" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="CONTACT_PERSON" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>c/o name</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="40" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ADDRESS_LINE1" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Street</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="60" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ADDRESS_LINE2" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Street 2</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="40" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="CITY" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>City</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="40" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="STATE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Region (State, Province, County)
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="3" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="POST_CODE1" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>City postal code</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="COUNTRY" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Country Key</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="3" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="TEL_NUMBER" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>First telephone no.: dialling code+number
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="30" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="FAX_NUMBER" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>First fax no.: dialling code+number
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="30" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="FUND" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Fund</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZBAPI0035SPONSOREDPROG">
+				<xsd:annotation>
+					<xsd:documentation>Sponsored program for grant master
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="SPONSORED_PROG" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Sponsored Program</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZBAPI0035HEADERADD">
+				<xsd:annotation>
+					<xsd:documentation>Additional data for grant master creation
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="BILLING_RULE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Rule Used as a Basis for Billing
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="4" />
+								<xsd:pattern value="\d+" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SALESORG" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Sales Organization</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="4" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="DISTR_CHAN" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Distribution Channel</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="2" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="DIVISION" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Division</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="2" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="WBS_ELEMENT" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Work Breakdown Structure Element (WBS Element)
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="24" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ORDERID" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Order Number</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="12" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="INSTALLMENT_AMT" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Currency amount in BAPI interfaces
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:decimal">
+								<xsd:totalDigits value="23" />
+								<xsd:fractionDigits value="4" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="MILESTONE_TOTAL" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Currency amount in BAPI interfaces
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:decimal">
+								<xsd:totalDigits value="23" />
+								<xsd:fractionDigits value="4" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="AUTH_GROUP" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Grants Management: Authorization Groups
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="AWARD_TYPE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Award Type</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="3" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="GRANT_TOTAL" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Currency amount in BAPI interfaces
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:decimal">
+								<xsd:totalDigits value="23" />
+								<xsd:fractionDigits value="4" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="CFDA_NBR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Number in Catalog of Federal Domestic
+								Assistance</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="EXCHANGE_RATE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Grant exchange rate</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:decimal">
+								<xsd:totalDigits value="9" />
+								<xsd:fractionDigits value="5" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="EXCHANGE_DATE" type="date"
+						minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Exchange Rate Date</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="FROM_FACTOR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Ratio for the &quot;From&quot; Currency Units
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:decimal">
+								<xsd:totalDigits value="9" />
+								<xsd:fractionDigits value="0" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="TO_FACTOR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Ratio for the &quot;To&quot; Currency Units
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:decimal">
+								<xsd:totalDigits value="9" />
+								<xsd:fractionDigits value="0" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="FY_VARIANT" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Fiscal year variant of grant
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="2" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="IDC_RULE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Rule for Determining Indirect Costs
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="4" />
+								<xsd:pattern value="\d+" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SPLITTING_RULE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Rule Used to Split Time Intervals Between
+								Fiscal Years</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="4" />
+								<xsd:pattern value="\d+" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="CS_RULE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Rule for Determining Cost Sharing Requirements
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="4" />
+								<xsd:pattern value="\d+" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="FUNDING_ORIGIN" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Origin of Grant Funding</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="30" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="BLOCKING_IND" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Blocking Indicator</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="PRE_AWARD_COSTS" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Pre-award cost control</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="LETTER_OF_CREDIT" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Letter of Credit</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="PAYMENT_RULE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Payment Rule</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="4" />
+								<xsd:pattern value="\d+" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="CS_RATE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Overall cost sharing rate for grant
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:decimal">
+								<xsd:totalDigits value="7" />
+								<xsd:fractionDigits value="3" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZFIGRANTDATA">
+				<xsd:annotation>
+					<xsd:documentation>Additional fields for Grant Master
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="ZZINVOICE_FREQ" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Invoice frequency</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZINVOICE_FORM" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Name of Form Object</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="30" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZADV_PYMNT_IND" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Advance Payment Indicator</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZLD_CODE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Legislative District Code</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="6" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZMJR_PRJCT" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Major Project</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZPRPRTY_OWNR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Property Owner Title</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="2" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZCOST_SHARE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Cost Share Code</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZAVC_TOLERANCE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Tolerance Profile for Availability Control
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="4" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZNSF_CTGRY" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>NSF Category</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="5" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZA133_CLSTR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>A133 Cluster</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZAWARD_TITLE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Award Title</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="255" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZFUND_CENTER" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Funds Center</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="16" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZINT_EARNED" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Interest Earned</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZPROJ_BEGDA" type="date" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Valid-from Date</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="ZZPROJ_ENDDA" type="date" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Valid-to Date</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="ZZAWARDNO" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Order Number</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="12" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZSPONSOR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Grant Sponsor</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZINVOICE_CODE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Invoice Code</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZMAIN_SPONSOR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Main Sponsor</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ZZBILL_PARTNER" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Billing Partner</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZBAPI0035SPONSOREDOBJECTS">
+				<xsd:annotation>
+					<xsd:documentation>Grant master sponsored objects
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="FUND" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Fund</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SPONSORED_PROG" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Sponsored Program</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SPONSORED_CLASS" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Sponsored Class</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="PLAN_ALLOWED" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Planning allowed indicator</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="BUDGET_ALLOWED" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Budgeting Allowed Indicator
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ACTUALS_ALLOWED" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Actual Postings Allowed Indicator
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZGMBILLINGPLANSTRUCTURE">
+				<xsd:annotation>
+					<xsd:documentation>Billing Plan Structure for KCRM Interface
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="BILLING_UPDATE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Create/Change Flag</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="BILLING_DATE" type="date" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Billing date for billing index and printout
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="BILLING_VALUE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Currency amount in BAPI interfaces
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:decimal">
+								<xsd:totalDigits value="23" />
+								<xsd:fractionDigits value="4" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZGMGRANTSTRUCTURE">
+				<xsd:annotation>
+					<xsd:documentation>Grant Structure for KCRM Interface
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="GRANT_UPDATE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Create/Change Flag</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="HEADER" type="ZBAPI0035HEADER"
+						minOccurs="0" />
+					<xsd:element name="HEADER_ADD" type="ZBAPI0035HEADERADD"
+						minOccurs="0" />
+					<xsd:element name="RESPONSIBILITY" type="ZBAPI0035RESPONSIBLET"
+						minOccurs="0" />
+					<xsd:element name="FUNDS" type="ZBAPI0035FUNDST"
+						minOccurs="0" />
+					<xsd:element name="SPONSORED_PROGRAM" type="ZBAPI0035SPONSOREDPROGT"
+						minOccurs="0" />
+					<xsd:element name="SPONSORED_OBJECTS" type="ZBAPI0035SPONSOREDOBJECTST"
+						minOccurs="0" />
+					<xsd:element name="BUDGET_VALIDITY" type="ZBAPI0035BUDGETVALIDITYT"
+						minOccurs="0" />
+					<xsd:element name="GRANT_DESCRIPTIONS" type="ZBAPI0035GRANTDESCRIPTION"
+						minOccurs="0" />
+					<xsd:element name="EXTENSION_IN" type="ZFIGRANTDATA"
+						minOccurs="0" />
+					<xsd:element name="FACREDIT" type="ZGMFACREDIT_T"
+						minOccurs="0" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZBAPI0035FUNDST">
+				<xsd:annotation>
+					<xsd:documentation>table of funds for grant master
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="item" type="ZBAPI0035FUNDS"
+						minOccurs="0" maxOccurs="unbounded" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZBAPI0035RESPONSIBLE">
+				<xsd:annotation>
+					<xsd:documentation>Responsiblity for the grant</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="RESPONSIBILITY" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Type of Responsibility Within the Grant
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="4" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="USER_TYPE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>HR Planning Object</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="2" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="USER_ID" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>HR Planning Object ID of Resource
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="70" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="USER_NAME" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>User name used by KCRM on their side
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="255" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="RESPONSIBLE_FROM_DATE" type="date"
+						minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Date that responsiblity starts
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="RESPONSIBLE_TO_DATE" type="date"
+						minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Date that responsibility</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZBAPI0035HEADER">
+				<xsd:annotation>
+					<xsd:documentation>Header data for grant master creation
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="GRANT_NBR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Char 20</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="PARENT_TRANSACTION_TYPE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Parent Transaction Type used by KCRM on their
+								side</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="255" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="GRANT_TYPE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Grant Type</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="2" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="EXT_REFERENCE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Alternate Grant Identifier</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="24" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="INT_REFERENCE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Alternate Grant Identifier</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="24" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SPONSOR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Grant Sponsor</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="COMP_CODE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Company Code</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="4" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="GRANT_CURR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Grant currency</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="5" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="GRANT_CURR_ISO" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>ISO currency code</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="3" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="LIFECYCLE_STATUS" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Grant lifecycle</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="2" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="USER_STATUS" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>User-Defined State</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="5" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="VALID_FROM" type="date" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Grant validity from date</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="VALID_TO" type="date" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Grant Validity To Date</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="VALID_FROM_BUDGET" type="date"
+						minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Date</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="VALID_TO_BUDGET" type="date"
+						minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Date</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="BAPIRET2">
+				<xsd:annotation>
+					<xsd:documentation>Return Parameter</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="TYPE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Message type: S Success, E Error, W Warning, I
+								Info, A Abort</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ID" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Message Class</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="NUMBER" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Message Number</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="3" />
+								<xsd:pattern value="\d+" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="MESSAGE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Message Text</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="220" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="LOG_NO" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Application log: log number
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="LOG_MSG_NO" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Application log: Internal message serial
+								number</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="6" />
+								<xsd:pattern value="\d+" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="MESSAGE_V1" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Message Variable</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="50" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="MESSAGE_V2" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Message Variable</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="50" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="MESSAGE_V3" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Message Variable</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="50" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="MESSAGE_V4" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Message Variable</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="50" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="PARAMETER" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Parameter Name</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="32" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="ROW" type="xsd:integer" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Lines in parameter</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="FIELD" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Field in parameter</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="30" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="SYSTEM" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Logical system from which message originates
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="10" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZGRANTMESSAGES">
+				<xsd:annotation>
+					<xsd:documentation>Return Messages for KCRM Interface - Grant
+					</xsd:documentation>
+				</xsd:annotation>
+				<xsd:sequence>
+					<xsd:element name="GRANT_NBR" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Grant</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="20" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="TYPE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Message type: S Success, E Error, W Warning, I
+								Info, A Abort</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="1" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:element name="MESSAGE" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>Message Text</xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="220" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="rfc.Z_GM_KCRM_INTERFACE.Input">
+		<wsdl:documentation />
+		<wsdl:part name="parameters" element="rfc:Z_GM_KCRM_INTERFACE"
+			xmlns:rfc="urn:sap-com:document:sap:rfc:functions" />
+	</wsdl:message>
+	<wsdl:message name="rfc.Z_GM_KCRM_INTERFACE.Output">
+		<wsdl:documentation />
+		<wsdl:part name="parameters" element="rfc:Z_GM_KCRM_INTERFACE.Response"
+			xmlns:rfc="urn:sap-com:document:sap:rfc:functions" />
+	</wsdl:message>
+	<wsdl:portType name="SI_KCRM_PROCESS_OUTBOUND">
+		<wsdl:documentation />
+		<wsdl:operation name="SI_KCRM_PROCESS_OUTBOUND">
+			<wsdl:documentation />
+			<wsp:Policy>
+				<wsp:PolicyReference URI="#OP_SI_KCRM_PROCESS_OUTBOUND" />
+			</wsp:Policy>
+			<wsdl:input message="p1:rfc.Z_GM_KCRM_INTERFACE.Input" />
+			<wsdl:output message="p1:rfc.Z_GM_KCRM_INTERFACE.Output" />
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="SI_KCRM_PROCESS_OUTBOUNDBinding" type="p1:SI_KCRM_PROCESS_OUTBOUND">
+		<soap:binding style="document"
+			transport="http://schemas.xmlsoap.org/soap/http" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" />
+		<wsdl:operation name="SI_KCRM_PROCESS_OUTBOUND">
+			<soap:operation soapAction="http://sap.com/xi/WebService/soap1.1"
+				xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" />
+			<wsdl:input>
+				<soap:body use="literal" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="SI_KCRM_PROCESS_OUTBOUNDService">
+		<wsdl:port name="SI_KCRM_PROCESS_OUTBOUNDPort" binding="p1:SI_KCRM_PROCESS_OUTBOUNDBinding">
+			<soap:address
+				location="https://ppi.buw.bu.edu/sap/xi/engine?type=entry&amp;version=3.0&amp;Sender.Service=BC_KCRM_PROCESS_SENDER&amp;Interface=http://bu.edu/sap/kcrm%5ESI_KCRM_PROCESS_OUTBOUND"
+				xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" />
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

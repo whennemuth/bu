@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>The log4j-appserver jar will not be in the war file because the pom.xml file it was built against listed it with &quot;test&quot; scope.&#xd;
+However, it was still created by maven at some point during the build and can be found in the local .m2 directory.&#xd;
+This job finds that jar and inserts it into the WEB-INF/lib directory inside the war file.&#xd;
+&#xd;
+Why do this?&#xd;
+&#xd;
+This jar file is not needed by the application when it is running, but tomcat will need it when it is booting up.&#xd;
+Therefore all log4j should be placed in $CATALINA_HOME/lib with a CLASSPATH reference to that directory in $CATALINA_HOME/bin/setenv.sh&#xd;
+One way for docker to build an image that places these jars in $CATALINA_HOME/lib is to have them in the build context and put them in with the COPY instruction.&#xd;
+However, later releases are likely to advance the versions and new jars will need to be obtained.&#xd;
+However, an alternate approach is to extract them out of the war file itself, following a wildcard search for them.&#xd;
+Again, the only one that won&apos;t be found in the war file is the log4j-appserver jar.&#xd;
+This is why we are inserting into the war file here.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>POM</name>
+          <description>The pom file where the log4j-appserver version is declared.</description>
+          <defaultValue>/var/lib/jenkins/workspace/kuali-research-1-build-war/pom.xml</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>WARFILE_DIR</name>
+          <description>The directory where the war file was built to.</description>
+          <defaultValue>/var/lib/jenkins/workspace/kuali-research-1-build-war/coeus-webapp/target/</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+
+# Get the content of the pom file with all return/newline characters removed.
+content=$(cat ${POM} | sed &apos;:a;N;$!ba;s/\n//g&apos;)
+
+# repo=&quot;${JENKINS_HOME}/.m2/repository&quot;
+# If the local repo location has been customized in settings.xml, then we need to parse it from maven help plugin output.
+repo=$(echo $(mvn help:effective-settings | grep &apos;localRepository&apos;) | cut -d &apos;&gt;&apos; -f 2 | cut -d &apos;&lt;&apos; -f 1)
+echo &quot;.m2 repository: ${repo}&quot;
+
+# Find a copy of the log4j-appserver jar file for the main kuali-research war file building job and copy it to its workspace.
+echo &quot;Looking for the log4j-appserver jar file (was built for test scope, but need it for runtime scope)&quot;
+vLog4j=$(echo &quot;$content&quot; | grep -Po &apos;(?&lt;=&lt;log4j\.version&gt;)([^&lt;]+)&apos;)
+if [ -n &quot;vLog4j&quot; ] ; then
+  jar=$(find $repo -iname log4j-appserver-${vLog4j}.jar)
+  if [ -f $jar ] ; then
+    # The WEB-INF/lib directory should be wherever you find a copy of the log4j-core jar file (it had runtime scope and maven put it in war file)
+    libdir=$(dirname $(find $WARFILE_DIR -iname log4j-core-*.jar))
+    # Copy the log4j-appserver jar to the lib directory
+    echo &quot;cp $jar $libdir&quot;
+    cp $jar $libdir/
+    # Navigate to the lib directory and then go 2 directories up (parent of WEB-INF, root)
+    echo &quot;cd \$(dirname \$(dirname $libdir))&quot;
+    cd $(dirname $(dirname $libdir))
+    # Get the war file pathname and inject the log4j-appserver jar file into its WEB-INF/lib directory
+    warfile=$(find $WARFILE_DIR -iname coeus-webapp-*.war)
+    jarname=$(ls -la -x $libdir | grep log4j-appserver)
+    echo &quot;jarname \$(ls -la -x $libdir | grep log4j-appserver)&quot;
+    echo &quot;jar -uf $warfile WEB-INF/lib/$jarname&quot;
+    jar -uf $warfile WEB-INF/lib/$jarname
+  else
+    echo &quot;ERROR! Could not find log4j-appserver-${vLog4j}.jar in maven local repository&quot;
+    exit 1
+  fi
+else
+  echo &quot;ERROR! could not find log4j-appserver version in ${POM}&quot;
+  exit 1
+fi
+
+set -x</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  Create the required roles used by research admin reporting resources
+  
+Parameters:
+
+  GlobalTag:
+    Type: String
+    Description: >
+      A common value that all resources in this template will have prefixed to
+      their name and attached as a tag to establish a bundling through naming convention.
+    Default: research-admin-reports
+ 
+  Service:
+    Description: Service catalog name
+    Type: String
+    Default: research-administration
+
+  Function:
+    Description: The Function within the Service
+    Type: String
+    Default: kuali
+
+  Landscape:
+    Description: The landscape of the database.
+    Type: String
+
+
+Resources:
+
+  JobRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+       !Sub ${GlobalTag}-${Landscape}-job-role
+      Description: >
+        Research Admin Reports use this Role to enable ECS batch jobs to call required AWS services.
+        These ECS batch jobs are triggered by CloudWatch cron events.
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ecs-tasks.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonSESFullAccess
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+        - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
+
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+       !Sub ${GlobalTag}-${Landscape}-task-role
+      Description: The execution role that AWS Batch can assume
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ecs-tasks.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  CloudwatchEventRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+       !Sub ${GlobalTag}-${Landscape}-event-role
+      Description: Research Admin Reports uses this Role in CloudWatch cron Events to submit target batch jobs
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - events.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName:
+          !Sub ${GlobalTag}-${Landscape}-submit-policy
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - batch:SubmitJob
+            Resource: 
+            - !Sub arn:aws:batch:*:${AWS::AccountId}:job-definition/*:*
+            - !Sub arn:aws:batch:*:${AWS::AccountId}:job-queue/*
+
+  # Role prefix: AWSServiceRoleForBatch
+  # NOTE: Custom suffix is not allowed for batch.amazonaws.com
+  BatchServiceRole:
+    Type: AWS::IAM::ServiceLinkedRole
+    Properties:
+      AWSServiceName: batch.amazonaws.com
+      # CustomSuffix: !Ref BatchServiceRoleSuffix
+      Description: Initially created for kuali research admin reports batch service
+
+
+Outputs:
+
+  JobRoleArn:
+    Value: !GetAtt JobRole.Arn
+
+  TaskExecutionRoleArn:
+    Value: !GetAtt TaskExecutionRole.Arn
+
+  CloudwatchEventRoleArn:
+    Value: !GetAtt CloudwatchEventRole.Arn
+
+  BatchServiceRoleArn:
+    Value: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/batch.amazonaws.com/AWSServiceRoleForBatch

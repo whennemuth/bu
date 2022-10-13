@@ -1,0 +1,21 @@
+{
+  "password":"password",
+  "passwordConfirm":"password",
+  "lowerUsername" : "rest.svc.user",
+  "name" : "REST_SERVICE_USER",
+  "firstName" : "",
+  "lastName" : "",
+  "phone" : null,
+  "username" : "rest.svc.user",
+  "groupId" : null,
+  "schoolId" : null,
+  "updatedBy" : {
+      "id" : "kuali-system"
+  },
+  "active" : true,
+  "approved" : true,
+  "role" : "service",
+  "email" : null,
+  "scopesCm" : null,
+  "ssoProps" : null
+}

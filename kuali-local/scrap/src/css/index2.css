@@ -1,0 +1,24 @@
+div.left {
+    float : left;
+    clear: both;
+    font: 12px normal Arial, Helvetica, sans-serif;
+    background-color: #e3e3e3;
+    margin:5px;
+}
+div.right {
+    float: left;
+    font: 12px normal Arial, Helvetica, sans-serif;
+    background-color: #e3e3e3;
+    margin:5px;
+}
+div.separator {
+    float: left;
+    width: 600px;
+    padding: 0px;
+    margin-top: 5px;
+    margin-bottom: 2px;
+    padding-bottom: 2px;
+    border-bottom : solid 1px black;
+    font: 12px bold Arial, Helvetica, sans-serif;
+    clear : both;
+}

@@ -1,0 +1,26 @@
+{
+  "id" : "MyJob",
+  "scenarios" : [
+    {
+      "label" : "scenario.label1",
+      "url" : "https://ref-domain.bu.edu/main-test.htm",
+      "referenceUrl" : "https://ref-domain.bu.edu/main.htm",
+      "loginUrl" : "https://ref-domain.bu.edu/login.htm"
+    },
+    {
+      "label" : "scenario.label2",
+      "url" : "https://ref-domain.bu.edu/some/other/page-test.htm",
+      "referenceUrl" : "https://ref-domain.bu.edu/some/other/page.htm"
+    },
+    {
+      "label" : "scenario.label3",
+      "url" : "https://ref-domain.bu.edu/another/web/page-test.htm",
+      "referenceUrl" : "https://ref-domain.bu.edu/another/web/page.htm"
+    }
+  ],
+  "scenarioInheritance" : {
+    "label" : "Default-Label",
+    "cookiePath" : "backstop_data/engine_scripts/cookies.json",
+    "loginUrl" : "https://login/url/inherited/from/JobDefinition/login.htm"
+  }
+}

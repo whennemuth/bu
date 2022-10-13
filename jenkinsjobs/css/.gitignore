@@ -1,0 +1,10 @@
+# Ignore everything in subdirectories
+/*/*
+# ...except the config.xml file in those subdirectories
+!/**/config.xml
+#...and this file
+!.gitignore
+#...and javajobs
+!/javajobs/ContinuousIntegration/
+#...and the config.xml backup file
+!config.xml.bkp

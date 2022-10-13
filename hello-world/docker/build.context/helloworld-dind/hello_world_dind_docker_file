@@ -1,0 +1,24 @@
+FROM tomcat:8-jre8
+MAINTAINER Warren
+
+# ENV JAVA_OPTS="-Xmx8192m"
+ENV JAVA_OPTS="-Xmx1024m"
+ENV TOMCAT_LOCATION="/usr/local/tomcat"
+ENV TARGET_WAR="${TOMCAT_LOCATION}/webapps/helloworlddind.war"
+
+ARG JENKINS_URL
+
+USER root
+
+# Allow write access for jenkins to save war files
+RUN chmod a+w -R $TOMCAT_LOCATION/webapps
+
+# Copy in the hello-world war file into the image from its jenkins build location
+# (NOTE: 169.254.169.254 is a standard AWS ip for EC2 instance metadata)
+RUN \
+   # JENKINS_HOST=curl 169.254.169.254/latest/meta-data/public-hostname && \
+   # JENKINS_URL="${JENKINS_HOST}:${JENKINS_PORT}/${JENKINS_ROOT}" && \
+   SOURCE_WAR="http://${JENKINS_URL}/job/deploy-war-file-dind/ws/target/hello-world-0.0.1-SNAPSHOT.war" && \
+   curl -sSL $SOURCE_WAR > $TARGET_WAR
+
+CMD ["/usr/local/tomcat/bin/catalina.sh", "run"]

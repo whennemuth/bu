@@ -1,0 +1,261 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<maven2-moduleset plugin="maven-plugin@3.15.1">
+  <actions/>
+  <description>This build:&#xd;
+   1) Creates the application war file from the specified git commit (HEAD of &quot;bu-master&quot; branch by default).&#xd;
+       (NOTE: this will be the only thing done if DEPLOY is not checked)&#xd;
+   2) Wraps the war file into the image during its creation&#xd;
+   3) Uploads the new image to a docker registry&#xd;
+   4) Issues a command over SSH to docker on the application host to remove any existing container that is running and run a new one based on the new image.&#xd;
+&#xd;
+ISSUE:&#xd;
+If you see any node errors that mention &quot;ECONNRESET or EPIPE&quot;, this is probably due to the following known bug:&#xd;
+https://github.com/npm/npm/issues/7945&#xd;
+This issue is intermittent and not actually related to proxy configuration.&#xd;
+Running the build again usually goes successfully.&#xd;
+&#xd;
+TODO:&#xd;
+Is there an alternative to the pre-build step for building the other dependencies if they are not in the local .m2 repo?&#xd;
+Tried to detect if rice or s2sgen versions indicated in the pom file are not present by the following command (but did not work):&#xd;
+mvn dependency:get -Dartifact=g:a:v -o -DrepoUrl=file://path/to/your/repo&#xd;
+See also:&#xd;
+https://wiki.jenkins-ci.org/display/JENKINS/Jenkins+CLI&#xd;
+https://wiki.jenkins-ci.org/display/JENKINS/Conditional+BuildStep+Plugin&#xd;
+https://wiki.jenkins-ci.org/display/JENKINS/Run+Condition+Plugin&#xd;
+https://www.cloudbees.com/blog/how-use-jenkins-job-chaining-and-visualizations</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DEBUG</name>
+          <description>Makes all console output verbose (puts in debug mode with set -x)</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_REPO_URL</name>
+          <description>The git repository from which the build will pull source code.</description>
+          <defaultValue>git@github.com:bu-ist/kuali-research.git</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>BRANCH</name>
+          <description>The branch in the github repository to be pulled for the maven build.
+(Change the default value to build against a custom branch). </description>
+          <randomName>choice-parameter-17425928390633473</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>return new URL(
+   &quot;http&quot;, 
+    &quot;127.0.0.1&quot;, 
+   8002, 
+   &quot;/active-choices?&quot; + 
+      &quot;parameter-name=git_refs&amp;&quot; + 
+      &quot;selected-item=bu-master&amp;&quot; +
+      &quot;git-ref-type=branch&amp;&quot; +
+      &quot;git-ssh-key=bu_github_id_kc_rsa&amp;&quot; +
+      &quot;git-remote-url=&quot; + GIT_REPO_URL).text;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research-1-build-war</projectName>
+          <projectFullName>kuali-research-1-build-war</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>GIT_REPO_URL</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <hudson.model.BooleanParameterDefinition>
+          <name>CHECK_DEPENDENCIES</name>
+          <description>Build any kuali modules that are out of date (rice, s2sgen, api, schemaspy).
+This is determined by analyzing the pom file for this build and the local .m2 repository.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_REFSPEC</name>
+          <description>Controls the remote refs to be retrieved (git fetch) and how they map to local refs.
+The default ref narrows refs to retrieve to a specific branch.
+To narrow down to a specific tag or tags (will use the latest matching pattern used) use:
+
+NOTE: This is NOT what determines what gets checked out for building (see GIT_BRANCHES_TO_BUILD)
+
++refs/tags/[tag pattern]:refs/remotes/origin/tags/[tag pattern]</description>
+          <defaultValue>+refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_BRANCHES_TO_BUILD</name>
+          <description>Specify the branches if you&apos;d like to track a specific branch in a repository. If left blank, all branches will be examined for changes and built.
+
+NOTE: This is NOT what determines what gets fetched from the remote repository (see GIT_REFSPEC).
+Therefore, it is possible to specify a certain tagname of commitId here and have the build fail because the GIT_REFSPEC value has only caused fetches that to date have not yet included that tagname or commitId.
+
+Possible options:
+
+    &lt;branchName&gt;
+        Tracks/checks out the specified branch. If ambiguous the first result is taken, which is not necessarily the expected one. Better use refs/heads/&lt;branchName&gt;.
+        E.g. master, feature1,...
+    
+    refs/heads/&lt;branchName&gt;
+        Tracks/checks out the specified branch.
+        E.g. refs/heads/master, refs/heads/feature1/master,...
+    
+    &lt;remoteRepoName&gt;/&lt;branchName&gt;
+        Tracks/checks out the specified branch. If ambiguous the first result is taken, which is not necessarily the expected one.
+        Better use refs/heads/&lt;branchName&gt;.
+        E.g. origin/master
+    
+    remotes/&lt;remoteRepoName&gt;/&lt;branchName&gt;
+        Tracks/checks out the specified branch.
+        E.g. remotes/origin/master
+    
+    refs/remotes/&lt;remoteRepoName&gt;/&lt;branchName&gt;
+        Tracks/checks out the specified branch.
+        E.g. refs/remotes/origin/master
+    
+    &lt;tagName&gt;
+        This does not work since the tag will not be recognized as tag.
+        Use refs/tags/&lt;tagName&gt; instead.
+        E.g. git-2.3.0
+    
+    refs/tags/&lt;tagName&gt;
+        Tracks/checks out the specified tag.
+        E.g. refs/tags/git-2.3.0
+    
+    &lt;commitId&gt;
+        Checks out the specified commit.
+        E.g. 5062ac843f2b947733e6a3b105977056821bd352, 5062ac84, ...
+        NOTE: technically, the entry must be */branchname commitid, not simply commitid
+    
+    ${ENV_VARIABLE}
+        It is also possible to use environment variables. In this case the variables are evaluated and the result is used as described above.
+        E.g. ${TREEISH}, refs/tags/${TAGNAME},...
+    
+    &lt;Wildcards&gt;
+        The syntax is of the form: REPOSITORYNAME/BRANCH. In addition, BRANCH is recognized as a shorthand of */BRANCH, &apos;*&apos; is recognized as a wildcard, and &apos;**&apos; is recognized as wildcard that includes the separator &apos;/&apos;. Therefore, origin/branches* would match origin/branches-foo but not origin/branches/foo, while origin/branches** would match both origin/branches-foo and origin/branches/foo.
+    
+    :&lt;regular expression&gt;
+        The syntax is of the form: :regexp. Regular expression syntax in branches to build will only build those branches whose names match the regular expression.
+        Examples:
+    
+            :^(?!(origin/prefix)).*
+                matches: origin or origin/master or origin/feature
+                does not match: origin/prefix or origin/prefix_123 or origin/prefix-abc
+            :origin/release-\d{8}
+                matches: origin/release-20150101
+                does not match: origin/release-2015010 or origin/release-201501011 or origin/release-20150101-something
+            :^(?!origin/master$|origin/develop$).*
+                matches: origin/branch1 or origin/branch-2 or origin/master123 or origin/develop-123
+                does not match: origin/master or origin/develop</description>
+          <defaultValue>refs/heads/${BRANCH}</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OUTPUT_FILE</name>
+          <description>Write data known only to this job to this file so calling jobs have access to them as return values or shared information.</description>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>BACKUP_WAR</name>
+          <description>Copy the produced war artifact to a backup directory where the subsequent build to create a docker image will look for it.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.10.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <refspec>${GIT_REFSPEC}</refspec>
+        <url>${GIT_REPO_URL}</url>
+        <credentialsId>credentials.github.ssh.bu-ist.kc</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>${GIT_BRANCHES_TO_BUILD}</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="empty-list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <rootModule>
+    <groupId>org.kuali.coeus</groupId>
+    <artifactId>coeus</artifactId>
+  </rootModule>
+  <goals>clean compile install -Dgrm.off=true -Dmaven.test.skip=true -Dbuild.version=&apos;${UPCOMING_POM_VERSION}&apos; -Dbuild.bu.git.ref=&apos;git:branch=${GIT_BRANCH},ref=${GIT_COMMIT}&apos; -Dclean-jsfrontend-node.off</goals>
+  <aggregatorStyleBuild>true</aggregatorStyleBuild>
+  <incrementalBuild>false</incrementalBuild>
+  <ignoreUpstremChanges>true</ignoreUpstremChanges>
+  <ignoreUnsuccessfulUpstreams>false</ignoreUnsuccessfulUpstreams>
+  <archivingDisabled>false</archivingDisabled>
+  <siteArchivingDisabled>false</siteArchivingDisabled>
+  <fingerprintingDisabled>false</fingerprintingDisabled>
+  <resolveDependencies>false</resolveDependencies>
+  <processPlugins>false</processPlugins>
+  <mavenValidationLevel>-1</mavenValidationLevel>
+  <runHeadless>false</runHeadless>
+  <disableTriggerDownstreamProjects>false</disableTriggerDownstreamProjects>
+  <blockTriggerWhenBuilding>true</blockTriggerWhenBuilding>
+  <settings class="jenkins.mvn.DefaultSettingsProvider"/>
+  <globalSettings class="jenkins.mvn.DefaultGlobalSettingsProvider"/>
+  <reporters/>
+  <publishers/>
+  <buildWrappers/>
+  <prebuilders>
+    <hudson.tasks.Shell>
+      <command>
+if [ &quot;$CHECK_DEPENDENCIES&quot; == true ] ; then 
+  set +x
+  source $JENKINS_HOME/kuali-infrastructure/scripts/common-functions.sh
+  if isDebug ; then
+    set -x
+  fi
+  sh $JENKINS_HOME/kuali-infrastructure/kuali_jenkins/bash-scripts/job/kuali-dependency-check.sh 
+fi
+</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </prebuilders>
+  <postbuilders>
+    <hudson.tasks.Shell>
+      <command>set +x
+echo &apos;Pulling kuali-infrastructure github repository...&apos;
+source $JENKINS_HOME/cli-credentials.sh
+java -jar $JENKINS_HOME/jenkins-cli.jar -s http://localhost:8080/ build fetch-and-reset-kuali-infrastructure -v -f
+source $JENKINS_HOME/kuali-infrastructure/scripts/common-functions.sh
+if isDebug ; then
+  set -x
+fi
+source $JENKINS_HOME/kuali-infrastructure/kuali_jenkins/bash-scripts/job/kuali-research-build-war.sh</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </postbuilders>
+  <runPostStepsIfResult>
+    <name>SUCCESS</name>
+    <ordinal>0</ordinal>
+    <color>BLUE</color>
+    <completeBuild>true</completeBuild>
+  </runPostStepsIfResult>
+</maven2-moduleset>

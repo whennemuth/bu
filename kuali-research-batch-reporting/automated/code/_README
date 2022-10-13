@@ -1,0 +1,12 @@
+Notes
+-----
+ 
+* The 'code' folder stores all code needed to run the various scheduled batch reports. 
+
+* It's used as a sort of code "storage" area. The "_loader.sh" script selects code to
+  run based on a supplied parm and loads that code into the parent "automated" folder in the
+  docker container. 
+  
+* Each SQL script run *must* include an EXIT statement to tell the SQLcl subprocess launched 
+  by Python that its job is done. If missing, SQLcl subprocess will sit and wait for the 
+  next instruction, which never comes. 

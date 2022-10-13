@@ -1,0 +1,107 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Pushes the local centos-java-tomcat docker image to the AWS docker registry</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>ECR_REGISTRY_URL</name>
+          <description>The url of the AWS docker registry</description>
+          <defaultValue>730096353738.dkr.ecr.us-east-1.amazonaws.com</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REGISTRY_REPO_NAME</name>
+          <description>This is used to identify the name of the docker registry repository that this image is going to be pushed to</description>
+          <defaultValue>centos7-java-tomcat</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>DOCKER_TAG</name>
+          <description>A list of all centos-java-tomcat docker images available to push to the registry</description>
+          <randomName>choice-parameter-37492375305230382</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def cmd = &quot;docker images -f reference=&quot; + ECR_REGISTRY_URL + &quot;/&quot; + REGISTRY_REPO_NAME + &quot; --format=&apos;{{.Repository}}:{{.Tag}}&apos;&quot;
+def cmdarr = [ &quot;ssh-agent&quot;, &quot;sh&quot;, &quot;-c&quot;, cmd ]
+def defaultValue = null
+process = new ProcessBuilder(cmdarr).start()
+
+def sb = new StringBuilder(&quot;&lt;select name=&apos;value&apos; style=&apos;width:750px;font-family:monospace;&apos;&gt;&quot;)
+process.inputStream.eachLine {
+   if( &quot;${it}&quot;.equals(defaultValue)) {
+      sb.append(&quot;&lt;option selected=true value=&apos;&quot;).append(&quot;${it}&quot;).append(&quot;&apos;&gt;&quot;).append(&quot;${it}&quot;).append(&quot;&lt;/option&gt;&quot;)
+   }
+   else {
+      sb.append(&quot;&lt;option value=&apos;&quot;).append(&quot;${it}&quot;).append(&quot;&apos;&gt;&quot;).append(&quot;${it}&quot;).append(&quot;&lt;/option&gt;&quot;)
+   }
+}
+process.waitForOrKill(20000);
+
+sb.append(&quot;&lt;/select&gt;&quot;)
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; readonly=true name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px; font-family:monospace;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>check-centos-2-docker-push-image</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>ECR_REGISTRY_URL,REGISTRY_REPO_NAME</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command># 2) Define variables.
+# NOTE: JENKINS_URL is the full URL of Jenkins, like http://server:port/jenkins/ 
+#       Only available if Jenkins URL is set in system configuration
+DOCKER_TAG=&quot;$(echo $DOCKER_TAG | sed &apos;s/,//g&apos;)&quot;
+
+# 4) Login to the registry
+# NOTE: info on how to store credentials can be found at: 
+#       http://docs.aws.amazon.com/cli/latest/topic/config-vars.html
+#       requires ~/.aws/config
+# evalstr=&quot;$(aws ecr get-login)&quot;
+         
+# NOTE: The ecr get-login command of the aws cli returns a docker command that includes a removed switch.
+# The -e (email) switch will be rejected by the newer version of docker that we have installed on our aws
+# ec2 instances to accomodate cloud watch logging from our containers. Therefore I am removing the offending
+# &quot;-e none&quot; portion of the command with the stream editor.
+# evalstr=&quot;$(echo $evalstr | sed &apos;s/ -e none//&apos;)&quot;
+# eval $evalstr
+
+$(aws ecr get-login --no-include-email --region us-east-1)
+
+# 5) Push the newly created image to the registry
+docker push ${DOCKER_TAG}
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

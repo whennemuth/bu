@@ -1,0 +1,445 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>THIS IS THE STARTING POINT FOR A MANUAL BUILD OF THE KUALI-RESEARCH APPLICATION&#xd;
+&#xd;
+The following factors of our kuali-research environment would make deploying a new release to it complicated.&#xd;
+(proper sequencing and parameter selection of multiple jobs applies):&#xd;
+&#xd;
+1) Kuali research runs in multiple &quot;landscapes&quot;&#xd;
+2) Each landscape comprises 2 load-balanced EC2 instances, except for the QA landscape, which only has one.&#xd;
+3) Each EC2 instance must be referenced by its specific AWS intance ID.&#xd;
+4) Each EC2 instance of every landscape run the BU-customized kuali research app, except for those of the sandbox landscape, which run the non-customized app.&#xd;
+5) Each EC2 instance of every landscape run the application based on the git &quot;bu-master&quot; branch, except for those of the sandbox landscape, which are based on the &quot;master&quot; branch&#xd;
+6a) Only deployments to the sandbox and CI landscapes involve maven, a new war file, and a new docker image. Builds to all other landscapes assume the last docker image pushed up to our docker registry by the most recent CI build contain the correct build artifact. Therefore such deployments only involve pulling from our docker registry and re-running a corresponding container on the target EC2 instances.&#xd;
+6b) As stated above, only deployments to the sandbox and CI landscapes involve maven, a new war file, and a new docker image. However, this only applies to the first EC2 instance of the pair. The second instance need only pull from the docker registry what was pushed there during the build and deployment process of the first EC2 instance.&#xd;
+7) A set of advanced optional parameters are provided to select from a particular point in the git codebase to carry out a &quot;feature&quot; build deployment. Some of the above rules do not apply or apply differently. However, use of these parameters is rare and is outside our standard integration procedure.&#xd;
+&#xd;
+This job requires the user make only one landscape selection from a pick-list.&#xd;
+All the rules above are handled by a dynamically validated job parameter UI screen and shell scripting that call out to other jobs in correct sequence to do the work, passing them the appropriate parameters.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_REPO_URL</name>
+          <description>The git repository from which the build will pull source code.
+
+</description>
+          <defaultValue>https://github.com/bu-ist/kuali-research</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>LANDSCAPE</name>
+          <description>The landscape to deploy to.
+NOTE: 
+   If &quot;sandbox&quot; is selected, the build will be based on the HEAD of the git master branch for kuali-research
+   If &quot;ci&quot; is selected, the build will be based on the HEAD of the git bu-master branch for kuali-research
+   If any other landscape is selected, whatever was last built for the ci is deployed to that landscape
+   or, you can override this by selecting a specific git reference below.
+
+</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>ci</string>
+              <string>sandbox</string>
+              <string>qa</string>
+              <string>stage</string>
+              <string>prod</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DEBUG</name>
+          <description>If checked, prints out would be calls to other jobs, but does not go through with them.
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+                                                CUSTOM GIT REFERENCE SELECTION
+----------------------------------------------------------------------------------------------------------------------------------------
+
+Use this section if the git reference that is default for the landscape you select is something you would like to override.
+It is assumed that you are attempting to build against a feature branch, tag or commit.
+</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>GIT_REF_TYPE</name>
+          <description>Select how you would like to determine your git commit ID
+&lt;br&gt;
+&lt;br&gt;</description>
+          <randomName>choice-parameter-11109103687020</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def list = [&apos;Default:selected&apos;, &apos;Branch&apos;, &apos;Tag&apos;, &apos;Commit ID&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>def list = [error]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research</projectName>
+          <choiceType>PT_RADIO</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>GIT_REF</name>
+          <description></description>
+          <randomName>choice-parameter-52128031899195</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def list = null
+if (&quot;branch&quot;.equalsIgnoreCase(GIT_REF_TYPE)) {
+   def multiline = (&apos;git -c core.askpass=true ls-remote -h &apos; + GIT_REPO_URL).execute() | &apos;grep -i -P -o ^[^\\s]+\\s+refs/heads/\\K(.*)\$&apos;.execute()
+   multiline.waitForOrKill(20000)
+   list = multiline.text.readLines()
+} 
+else if (&quot;tag&quot;.equalsIgnoreCase(GIT_REF_TYPE)) {
+   def multiline = (&apos;git -c core.askpass=true ls-remote -t &apos; + GIT_REPO_URL).execute() | &apos;grep -i -P -o ^[^\\s]+\\s+refs/tags/\\K(.*)\$&apos;.execute() | &apos;grep -i -P ^[^\\^\\{\\}]+$&apos;.execute()
+   multiline.waitForOrKill(20000)
+   list = multiline.text.readLines()
+}
+
+if (list== null) {
+   if (&quot;commit id&quot;.equalsIgnoreCase(GIT_REF_TYPE)) {
+      return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; style=&apos;width:310px;&apos; disabled=true&gt;&quot;
+   }
+   else {
+      return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; style=&apos;width:310px;&apos; disabled=true&gt;&quot;
+    }
+}
+else {
+   def sb = new StringBuilder(&quot;&lt;select name=&apos;value&apos; style=&apos;width:310px;&apos;&gt;&quot;)
+   list.each {
+      sb.append(&quot;&lt;option value=&apos;&quot;).append(&quot;${it}&quot;).append(&quot;&apos;&gt;&quot;).append(&quot;${it}&quot;).append(&quot;&lt;/option&gt;&quot;)
+   }
+   sb.append(&quot;&lt;/select&gt;&quot;)
+   return sb.toString()
+}
+</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:310px;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>GIT_REPO_URL, GIT_REF_TYPE</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>GIT_COMMIT_ID</name>
+          <description>This is the git commit ID that the build will be based on.
+
+</description>
+          <randomName>choice-parameter-11109106720814</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def process = null
+def commitId = null
+if (&quot;branch&quot;.equalsIgnoreCase(GIT_REF_TYPE)) {
+   process = (&quot;git -c core.askpass=true ls-remote -h &quot; + GIT_REPO_URL + &quot; refs/heads/&apos; &quot; + GIT_REF).execute() | &apos;grep -i -P -o ^[^\\s]+&apos;.execute()
+}
+else if (&quot;tag&quot;.equalsIgnoreCase(GIT_REF_TYPE)) {
+   process = (&quot;git -c core.askpass=true ls-remote -t &quot; + GIT_REPO_URL + &quot; refs/tags/&apos; &quot; + GIT_REF + &quot;^{}&quot;).execute() | &apos;grep -i -P -o ^[^\\s]+&apos;.execute()
+}
+else if(&quot;commit id&quot;.equalsIgnoreCase(GIT_REF_TYPE)) {
+    process = &quot;echo N/A&quot;.execute()
+}
+else {
+   def branch = null
+   if(&quot;ci&quot;.equalsIgnoreCase(LANDSCAPE)) {
+      branch = &quot;bu-master&quot;
+   }
+   if(&quot;sandbox&quot;.equalsIgnoreCase(LANDSCAPE)) {
+      branch = &quot;master&quot;
+   }
+   if(branch != null) {
+      //process = &quot;echo ${branch}&quot;.execute()
+      process = (&quot;git -c core.askpass=true ls-remote -h &quot; + GIT_REPO_URL + &quot; refs/heads/&quot; + branch).execute() | &apos;grep -i -P -o ^[^\\s]+&apos;.execute()
+   }
+}
+
+if (process != null) {
+   process.waitForOrKill(20000)
+   def list = process.text.readLines()
+   if (list == null || list.isEmpty()) {
+      commitId = &quot;NO RESULTS!!!&quot;
+   }
+   else {
+      commitId = list.get(0)
+   }
+}
+
+
+if(commitId == null) {
+   return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; disabled=true style=&apos;font-family:monospace; width:310px;&apos;&gt;&quot;
+}
+else if ( ! &quot;commit id&quot;.equalsIgnoreCase(GIT_REF_TYPE)) {
+   return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;&quot; + commitId + &quot;&apos; readonly=true style=&apos;font-family:monospace; width:310px;&apos;&gt;&quot;
+}
+else {
+   return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; style=&apos;font-family:monospace; width:310px;&apos;&gt;&quot;
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; disabled=true style=&apos;font-family:monospace; width:310px;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>GIT_REPO_URL, GIT_REF_TYPE, GIT_REF, LANDSCAPE</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <hudson.model.StringParameterDefinition>
+          <name>NOTIFY_EMAIL</name>
+          <description>This is the individual or group email that all job result notifications will be sent to by default.
+This parameter can be overridden in the job configuration on a more granular level.</description>
+          <defaultValue>kcrmproj@bu.edu</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+
+echo &quot;hello 1&quot;
+CLI=/var/lib/jenkins/jenkins-cli.jar
+HOST=http://localhost:8080/
+DOCKER_PUSH_LOG_FILE=/var/lib/jenkins/jobs/kuali-research-3-docker-push-image/lastSuccessful/log
+LANDSCAPE=$(echo $LANDSCAPE | tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;)
+GIT_REF_TYPE=$(echo $GIT_REF_TYPE | tr &apos;[:upper:]&apos; &apos;[:lower:]&apos;)
+BRANCH=&quot;&quot;
+CANCEL_JOB=&quot;&quot;
+EC2_IDS=()
+
+# BUGFIX: The Active Choices Reactive Parameter Rendering feature is adding 
+# a comma to the end of the GIT_REF listbox value, so strip off the comma
+if ( [ -n &quot;${GIT_REF}&quot; ] &amp;&amp; [ &quot;${GIT_REF}&quot; != &quot;,&quot; ] ); then
+   GIT_REF=$(echo ${GIT_REF} | grep -i -o -P &apos;^.*[^,](?=,?$)&apos;)
+fi
+if ( [ -n &quot;${GIT_COMMIT_ID}&quot; ] &amp;&amp; [ &quot;${GIT_COMMIT_ID}&quot; != &quot;,&quot; ] ); then
+   GIT_COMMIT_ID=$(echo ${GIT_COMMIT_ID} | grep -i -o -P &apos;^.*[^,](?=,?$)&apos;)
+fi
+# By convention, we are calling the repository name within the registry the same as the artifactid of the pom file 
+# that the repository keeps images for. However if we want to break this rule and cause downstream jobs to push 
+# and pull from the registry referencing a different repository name, then set this value accordingly.
+#POM_ARTIFACTID_OVERRIDE=&quot;kuali-research&quot;
+
+case &quot;$LANDSCAPE&quot; in
+   &quot;sandbox&quot;)
+      BRANCH=&quot;master&quot;
+      POM_ARTIFACTID_OVERRIDE=&quot;&quot; # Configures downstream jobs to push and pull from a repository in the
+                                 # remote repo whose name matches the artifact id found in the pom file.
+      EC2_IDS=(&quot;i-099de1c5407493f9b&quot; &quot;i-0c2d2ef87e98f2088&quot;);;
+   &quot;ci&quot;)
+      BRANCH=&quot;bu-master&quot;
+      EC2_IDS=(&quot;i-0258a5f2a87ba7972&quot; &quot;i-0511b83a249cd9fb1&quot;);;      
+   &quot;qa&quot;)
+      EC2_IDS=(&quot;i-011ccd29dec6c6d10&quot;);;
+   &quot;stage&quot;)
+      EC2_IDS=(&quot;i-090d188ea237c8bcf&quot; &quot;i-0cb479180574b4ba2&quot;);;
+   &quot;prod&quot;)
+      EC2_IDS=(&quot;i-0534c4e38e6a24009&quot; &quot;i-07d7b5f3e629e89ae&quot;);;
+esac
+
+# Prepare custom git references for manual feature builds and overriding of default git practice        
+if [ &quot;$GIT_REF_TYPE&quot; == &quot;branch&quot; ] ; then
+   GIT_REFSPEC=&quot;+refs/heads/${GIT_REF}:refs/remotes/origin/${GIT_REF}&quot;
+   GIT_BRANCHES_TO_BUILD=&quot;refs/heads/${GIT_REF}&quot;
+elif [ &quot;$GIT_REF_TYPE&quot; == &quot;tag&quot; ] ; then
+   GIT_REFSPEC=&quot;+refs/tags/${GIT_REF}:refs/remotes/origin/tags/${GIT_REF}&quot;
+   GIT_BRANCHES_TO_BUILD=&quot;refs/tags/${GIT_REF}&quot;
+else
+   GIT_REFSPEC=&quot;+refs/heads/*:refs/remotes/origin/*&quot;
+   GIT_BRANCHES_TO_BUILD=&quot;${GIT_COMMIT_ID}&quot;         
+fi
+
+
+source /var/lib/jenkins/cli-credentials.sh
+for i in $(seq ${#EC2_IDS[@]}); do 
+   EC2_ID=${EC2_IDS[i-1]}
+   if ( [ $i -eq 1 ] &amp;&amp; [ &quot;$BRANCH&quot; != &quot;&quot; ] ); then
+      # A) STANDARD FULL BUILD AND DEPLOY (maven &amp; docker)
+      #    (NOTE: several parameters are ommitted to invoke their default values.)
+      if [ &quot;${GIT_REF_TYPE}&quot; != &quot;default&quot; ] ; then    
+         branch=&quot;feature&quot;
+		 [ &quot;$LANDSCAPE&quot; == &quot;sandbox&quot; ] &amp;&amp; branch=&quot;master&quot;
+         CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;kuali-research-1-build-war&apos; -v -f \
+            -p BRANCH=${branch} \
+            -p GIT_REFSPEC=${GIT_REFSPEC} \
+            -p GIT_BRANCHES_TO_BUILD=${GIT_BRANCHES_TO_BUILD} \
+            -p EC2_INSTANCE_ID=${EC2_ID}&quot;      
+      else
+         branch=&quot;$BRANCH&quot;
+		 [ &quot;$LANDSCAPE&quot; == &quot;sandbox&quot; ] &amp;&amp; branch=&quot;master&quot;
+         CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;kuali-research-1-build-war&apos; -v -f \
+            -p BRANCH=${branch} \
+            -p EC2_INSTANCE_ID=${EC2_ID}&quot;      
+      fi
+   elif ( [ $i -eq 1 ] &amp;&amp; [ &quot;${GIT_REF_TYPE}&quot; != &quot;default&quot; ] ); then
+      # B) CUSTOM FULL BUILD AND DEPLOY (maven &amp; docker)
+      #    (NOTE: The resulting docker images will be pushed and pulled against the feature docker repo in our registry
+      branch=&quot;feature&quot;
+      [ &quot;$LANDSCAPE&quot; == &quot;sandbox&quot; ] &amp;&amp; branch=&quot;master&quot;
+      CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;kuali-research-1-build-war&apos; -v -f \
+         -p BRANCH=${branch} \
+         -p GIT_REFSPEC=${GIT_REFSPEC} \
+         -p GIT_BRANCHES_TO_BUILD=${GIT_BRANCHES_TO_BUILD} \
+         -p EC2_INSTANCE_ID=${EC2_ID}&quot;         
+   elif ( [ ! -f $DOCKER_PUSH_LOG_FILE ] &amp;&amp; [ &quot;$DEBUG&quot; == false ] ); then
+      echo &quot;PROBLEM!!! Cannot determine registry image to reference.&quot;;
+      echo &quot;Cannot find log for most recent docker push job:&quot;;
+      echo &quot;       ${DOCKER_PUSH_LOG_FILE}&quot;;
+      echo &quot;Cancelling build...&quot;;
+      exit 1;
+   else
+      # C) DEPLOY ONLY (docker) 
+      #    Use aws CLI only to get new docker container running against updated image on target EC2 instance.
+      #    It is assumed the corresponding docker image is already in the registry and will be the last one put there by jenkins.
+      #    (NOTE: any parameters ommitted will invoke the default values.)
+
+      POM_VERSION=$(cat ${DOCKER_PUSH_LOG_FILE} | grep -P &apos;digest&apos; | cut -d &apos;:&apos; -f 1 | tr -d &apos;[[:space:]]&apos;);
+
+      CMD=&quot;java -jar ${CLI} -s ${HOST} build &apos;kuali-research-4-docker-run-container&apos; -v -f \
+         -p EC2_INSTANCE_ID=${EC2_ID} \
+         -p POM_VERSION=${POM_VERSION}&quot;
+         
+      if [ &quot;${LANDSCAPE,,}&quot; == &quot;sandbox&quot; ] ; then
+         CMD=&quot;${CMD} -p REGISTRY_REPO_NAME=coeus-sandbox&quot;
+      elif [ &quot;${GIT_REF_TYPE}&quot; != &quot;default&quot; ] ; then
+         # Anything built from a custom selected git reference will be pushed to the feature docker repo in our registry
+         CMD=&quot;${CMD} -p REGISTRY_REPO_NAME=coeus-feature&quot;      
+      fi 
+   fi
+   
+   if [ -n &quot;${POM_ARTIFACTID_OVERRIDE}&quot; ] ; then 
+      CMD=&quot;$CMD -p POM_ARTIFACTID=${POM_ARTIFACTID_OVERRIDE}&quot;;
+   fi
+   
+   [ &quot;$DEBUG&quot; == true ] &amp;&amp; echo $CMD || eval $CMD
+
+done
+
+set -x</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
+      <recipientList></recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD SUCCESS! (kuali-research for $LANDSCAPE)</subject>
+            <body>The build succeeded!
+Ready for smoke test.
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD FAILURE! (kuali-research for $LANDSCAPE)</subject>
+            <body>The build failed.
+See attached file for console output
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>true</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+        <hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD FIXED SUCCESSFULLY! (kuali-research for $LANDSCAPE)</subject>
+            <body>After recent issue, the Kuali Research has been corrected and sucessfully run.
+Ready for smoke test.
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+        <hudson.plugins.emailext.plugins.trigger.UnstableTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD UNSTABLE! (kuali-research for $LANDSCAPE)</subject>
+            <body>The build successfully deployed, but with automated test failures.
+See attached file for console output
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>true</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.UnstableTrigger>
+      </configuredTriggers>
+      <contentType>text/plain</contentType>
+      <defaultSubject></defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+      <presendScript>def landscape = build.getBuildVariables().get(&quot;LANDSCAPE&quot;)
+
+if(&quot;ci&quot;.equalsIgnoreCase(landscape) || &quot;sandbox&quot;.equalsIgnoreCase(landscape)) {
+    logger.println(&quot;Cancelling notification email. &quot; + landscape + &quot; landscape not configured for email notifications&quot;)
+    cancel = true
+}</presendScript>
+      <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
+      <attachBuildLog>false</attachBuildLog>
+      <compressBuildLog>false</compressBuildLog>
+      <replyTo></replyTo>
+      <from></from>
+      <saveOutput>false</saveOutput>
+      <disabled>false</disabled>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+  </publishers>
+  <buildWrappers/>
+</project>

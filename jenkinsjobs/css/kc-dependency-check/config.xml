@@ -1,0 +1,63 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>This build is run by the main kuali-research build job as a pre-build step to determine if any of the supporting kc modules need to be updated.&#xd;
+The kuali-research pom file is analyzed by a shell script for maven version numbers of each module.&#xd;
+If a corresponding jar cannot be found in the maven .m2 library to match the version, that module is considered out of date and will be built here by calling the related jenkins job.&#xd;
+This build must succeed in order for the main kuali-research build to proceed.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>POM</name>
+          <description>The physical location of the pom file to be analyzed.</description>
+          <defaultValue>${JENKINS_HOME}/workspace/kuali-research-1-build-war/pom.xml</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DRYRUN</name>
+          <description>Report the list of any missing modules, but do not build them.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>S3_BUCKET</name>
+          <description>A backup record of what github tag was on the commit that the last dependency being checked was built against is kept here.</description>
+          <defaultValue>kuali-conf</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+echo &apos;Pulling kuali-infrastructure github repository...&apos;
+source $JENKINS_HOME/cli-credentials.sh
+java -jar $JENKINS_HOME/jenkins-cli.jar -s http://localhost:8080/ build fetch-and-reset-kuali-infrastructure -v -f
+source $JENKINS_HOME/kuali-infrastructure/scripts/common-functions.sh
+if [ &quot;$DEBUG&quot; == true ] ; then
+  set -x
+fi
+source $JENKINS_HOME/kuali-infrastructure/kuali_jenkins/bash-scripts/job/kuali-dependency-check.sh</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

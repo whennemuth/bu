@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<maven2-moduleset plugin="maven-plugin@2.12.1">
+  <actions/>
+  <description>This build:&#xd;
+   1) Creates the application war file from the HEAD reference of the git master branch.&#xd;
+   2) Wraps the war file into the image during its creation&#xd;
+   3) Uploads the new image to a docker registry&#xd;
+   4) Issues a command over SSH to docker on the application host to remove any existing container that is running and run a new one based on the new image.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.4.4">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>git@github.com:whennemuth/hello-world</url>
+        <credentialsId>ca8a3c5b-6245-4b07-985b-3c88ccca1f0b</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/master</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <rootModule>
+    <groupId>com.bu.ist.hello.world</groupId>
+    <artifactId>hello-world</artifactId>
+  </rootModule>
+  <aggregatorStyleBuild>true</aggregatorStyleBuild>
+  <incrementalBuild>false</incrementalBuild>
+  <ignoreUpstremChanges>true</ignoreUpstremChanges>
+  <archivingDisabled>false</archivingDisabled>
+  <siteArchivingDisabled>false</siteArchivingDisabled>
+  <fingerprintingDisabled>false</fingerprintingDisabled>
+  <resolveDependencies>false</resolveDependencies>
+  <processPlugins>false</processPlugins>
+  <mavenValidationLevel>-1</mavenValidationLevel>
+  <runHeadless>false</runHeadless>
+  <disableTriggerDownstreamProjects>false</disableTriggerDownstreamProjects>
+  <blockTriggerWhenBuilding>true</blockTriggerWhenBuilding>
+  <settings class="jenkins.mvn.DefaultSettingsProvider"/>
+  <globalSettings class="jenkins.mvn.DefaultGlobalSettingsProvider"/>
+  <reporters/>
+  <publishers/>
+  <buildWrappers/>
+  <prebuilders/>
+  <postbuilders>
+    <hudson.tasks.Shell>
+      <command># Remove any dangling items
+if [ -n &quot;$(docker images --filter dangling=true -q)&quot; ] ; then 
+   docker rmi -f $(docker images --filter dangling=true -q); 
+   echo &quot;Removed dangling image(s)&quot;;
+else
+   echo &quot;No dangling images to remove&quot;;
+fi
+if [ -n &quot;$(docker ps --filter dangling=true -q)&quot; ] ; then 
+   docker rm $(docker ps --filter dangling=true -q); 
+   echo &quot;Removed dangling container(s)&quot;;
+else
+   echo &quot;No dangling containers to remove&quot;;
+fi
+if [ -n &quot;$(docker volume ls -qf dangling=true)&quot; ] ; then 
+   docker volume rm $(docker volume ls -qf dangling=true); 
+   echo &quot;Removed dangling volume(s)&quot;;
+else 
+   echo &quot;No dangling volumes to remove&quot;;
+fi
+
+# Build the app image (the image will curl the jenkins war artifact into itself while it is building).
+docker build \
+   -f hello_world_dind_docker_file \
+   -t ec2-52-25-226-38.us-west-2.compute.amazonaws.com:5000/bu-ist/helloworlddind:v1.0 \
+   --build-arg JENKINS_URL=ec2-52-37-165-82.us-west-2.compute.amazonaws.com:8080/jenkinsdind \
+   https://github.com/whennemuth/hello-world.git#master:docker/build.context/helloworld-dind
+   
+# Push the newly created image to the registry (Assumes the directory containing the sa.crt file is mounted into this jenkins container).
+docker push ec2-52-25-226-38.us-west-2.compute.amazonaws.com:5000/bu-ist/helloworlddind:v1.0
+
+# Execute a docker command over ssh on the application host to run a container against the new image in the registry
+ssh \
+   jenkins@ec2-52-37-253-82.us-west-2.compute.amazonaws.com \
+   -i /var/jenkins_ssh/ec2_rsa &quot;set -x &amp;&amp; docker ps &amp;&amp; &quot; \
+   &quot;docker rm -f helloworlddindcontainer || echo &apos;No container to remove.&apos; &amp;&amp; &quot; \
+   &quot;docker pull ec2-52-25-226-38.us-west-2.compute.amazonaws.com:5000/bu-ist/helloworlddind:v1.0 &amp;&amp; &quot; \
+   &quot;docker run&quot; \
+   &quot; -d&quot; \
+   &quot; -u root&quot; \
+   &quot; -p 80:8080&quot; \
+   &quot; -p 3306:3306&quot; \
+   &quot; --name helloworlddindcontainer&quot; \
+   &quot; -v /var/jenkins/helloworld/logs:/usr/local/tomcat/logs &quot; \
+   &quot;ec2-52-25-226-38.us-west-2.compute.amazonaws.com:5000/bu-ist/helloworlddind:v1.0 &amp;&amp; &quot; \
+   &quot;docker ps&quot;
+</command>
+    </hudson.tasks.Shell>
+  </postbuilders>
+  <runPostStepsIfResult>
+    <name>SUCCESS</name>
+    <ordinal>0</ordinal>
+    <color>BLUE</color>
+    <completeBuild>true</completeBuild>
+  </runPostStepsIfResult>
+</maven2-moduleset>

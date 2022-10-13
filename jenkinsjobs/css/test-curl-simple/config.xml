@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command># GATEWAY=172.17.0.1
+# URL=&quot;http://${GATEWAY}:8080/job/kuali-research-1-build-war/ws/coeus-webapp/target/license/THIRD-PARTY.properties&quot;
+# URL=&quot;http://localhost:8080/job/kuali-research-1-build-war/ws/coeus-webapp/target/license/THIRD-PARTY.properties&quot;
+
+echo &quot;$(pwd)&quot;
+URL=&quot;http://localhost:8080/job/kuali-research-1-build-war/ws/coeus-webapp/target/coeus-webapp-1608.0043-SNAPSHOT.war&quot;
+
+# DOCKER_BUILD_CONTEXT=&quot;git@github.com:bu-ist/kuali-research-docker.git#master:testing/build.context&quot;
+
+#if [ -n &quot;${TOKEN}&quot; ] ; then
+#   echo &quot;${URL}&quot;
+   #URL=&quot;${URL}?token=${TOKEN}&quot;
+#fi
+
+#echo \
+#&quot;# FROM scratch
+#FROM centos:7
+#ARG URL
+#ADD ${URL} /props
+#RUN \
+#   yum install -y net-tools &amp;&amp; \\
+#   yum install -y wget &amp;&amp; \\
+#   GATEWAY=\&quot;\$(route -n | grep -Po \&quot;(?&lt;=^0\.0\.0\.0)\x20+[\d\.]+\&quot; | tr -d \&quot;[:blank:]\&quot;)\&quot; &amp;&amp; \\
+#   URL=\$(echo \&quot;\${URL}\&quot; | sed \&quot;s/localhost/\${GATEWAY}/\&quot;) &amp;&amp; \\
+   # wget --auth-no-challenge --http-user=admin --http-password=${TOKEN} $URL
+   #curl -X POST -F &apos;user=admin&apos; -F &apos;password=${TOKEN}&apos; -F &apos;token=${TOKEN}&apos; --data token=${TOKEN} \${URL}
+   # curl -X POST \${URL} &gt; /props
+   # curl -X POST \${URL} 
+   # curl -sSL \${URL} &gt; /props
+#CMD [\&quot;/props\&quot;]&quot; &gt; Dockerfile
+
+# docker build -t test-image --build-arg URL=${URL} .
+eval `ssh-agent -s`
+ssh-add ~/.ssh/bu_github_id_docker_rsa
+#docker build -t test-image --build-arg SOURCE_FILE=*.properties ${DOCKER_BUILD_CONTEXT}
+#docker build -t test-image --build-arg SOURCE_FILE=THIRD-PARTY.properties ${DOCKER_BUILD_CONTEXT}
+if [ -d kuali-research-docker ] ; then
+   rm -f -r kuali-research-docker
+fi
+mkdir kuali-research-docker
+cd kuali-research-docker
+git init	
+git config user.email &quot;jenkins@bu.edu&quot;
+git config user.name jenkins
+git config core.sparseCheckout true
+git remote add github git@github.com:bu-ist/kuali-research-docker.git
+echo testing &gt;&gt; .git/info/sparse-checkout
+git fetch github master
+git checkout master 
+eval `ssh-agent -k`
+cp /var/lib/jenkins/workspace/kuali-research-1-build-war/coeus-webapp/target/license/THIRD-PARTY.properties testing/build.context 
+docker build -t test-image testing/build.context
+
+
+if [ -n &quot;$(docker images --filter dangling=true -q)&quot; ] ; then 
+   docker rmi -f $(docker images --filter dangling=true -q); 
+   echo &quot;Removed dangling image(s)&quot;;
+else
+   echo &quot;No dangling images to remove&quot;;
+fi
+if [ -n &quot;$(docker volume ls -qf dangling=true)&quot; ] ; then 
+   docker volume rm $(docker volume ls -qf dangling=true); 
+   echo &quot;Removed dangling volume(s)&quot;;
+else 
+   echo &quot;No dangling volumes to remove&quot;;
+fi
+
+docker rmi -f test-image
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

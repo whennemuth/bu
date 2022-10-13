@@ -1,0 +1,134 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.BooleanParameterDefinition>
+          <name>KC</name>
+          <description></description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>KC_RICE</name>
+          <description></description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>FETCH_ORG</name>
+          <description>The url for the github organization where content will be fetched from</description>
+          <defaultValue>KualiCo</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>FETCH_USER</name>
+          <description>The user who has access for fetching.</description>
+          <defaultValue>bu-ist-user</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.PasswordParameterDefinition>
+          <name>FETCH_PASSWORD</name>
+          <description>The password of FETCH_USER</description>
+          <defaultValue>9POSJUWz2N+8CXQ7+ZCKtw==</defaultValue>
+        </hudson.model.PasswordParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUSH_ORG</name>
+          <description>The url for the organization where content will be pushed to</description>
+          <defaultValue>bu-ist</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUSH_USER</name>
+          <description>The user who has access for pushing</description>
+          <defaultValue>whennemuth</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.PasswordParameterDefinition>
+          <name>PUSH_PASSWORD</name>
+          <description>The password of PUSH_USER</description>
+          <defaultValue>9POSJUWz2N+8CXQ7+ZCKtw==</defaultValue>
+        </hudson.model.PasswordParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>
+counter=0
+repos=()
+
+if $KC        ; then repos=(&quot;${repos[@]}&quot; &quot;kc&quot;); fi
+if $KC_RICE   ; then repos=(&quot;${repos[@]}&quot; &quot;kc-rice&quot;); fi
+
+if [ ${#repos[@]} == 0 ] ; then
+   echo &quot;NO REPOSITORIES SELECTED! NOTHING TO DO.&quot;
+   exit 1
+else
+   echo &quot;Selected repositories: ${repos[@]}&quot;
+fi
+
+if [ -z &quot;$FETCH_ORG&quot; ] ; then
+   echo &quot;FETCH_ORG not set. Aborting&quot;
+   exit 1
+fi
+
+if [ -z &quot;$PUSH_ORG&quot; ] ; then
+   echo &quot;PUSH_ORG not set. Aborting&quot;
+   exit 1
+fi
+
+if [ -z &quot;$FETCH_USER&quot; ] ; then
+   echo &quot;FETCH_USER not set. Aborting&quot;
+   exit 1
+fi
+
+if [ -z &quot;$FETCH_PASSWORD&quot; ] ; then
+   echo &quot;FETCH_PASSWORD not set. Aborting&quot;
+   exit 1
+fi
+
+if [ -z &quot;$PUSH_USER&quot; ] ; then
+   echo &quot;PUSH_USER not set. Aborting&quot;
+   exit 1
+fi
+
+if [ -z &quot;$PUSH_PASSWORD&quot; ] ; then
+   echo &quot;PUSH_PASSWORD not set. Aborting&quot;
+   exit 1
+fi
+
+# Urlencode all bytes of the password fields
+FETCH_PWD=&quot;$(echo -ne $FETCH_PWD | xxd -plain | tr -d &apos;\n&apos; | sed &apos;s/\(..\)/%\1/g&apos;)&quot;
+PUSH_PWD=&quot;$(echo -ne $PUSH_PWD | xxd -plain | tr -d &apos;\n&apos; | sed &apos;s/\(..\)/%\1/g&apos;)&quot;
+
+cd /tmp
+
+for repo in &quot;${repos[@]}&quot;; do
+   if $KC_API ; then
+      FETCH_REPO=https://${FETCH_USER}:${FETCH_PWD}@github.com/${FETCH_ORG}/${repo}.git
+      if [ ! -d kc-api ] ; then
+         git clone -b master --single-branch $FETCH_REPO 
+         cd kc-api
+      else
+         cd kc-api
+         git fetch --tags $FETCH_REPO master 
+      fi
+   
+      PUSH_REPO=https://${PUSH_USER}:${PUSH_PWD}@github.com/${PUSH_ORG}/${repo}.git
+      git push --tags $PUSH_REPO master
+   
+      counter=$((counter+1))
+   fi
+done
+
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

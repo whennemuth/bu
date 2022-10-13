@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>This job will execute a docker command remotely against the container on application server will run kc.war.&#xd;
+It </description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>SSH_KEY</name>
+          <description>File path of the ssh key to use for scp</description>
+          <defaultValue>/var/jenkins_ssh/ec2_rsa</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SSH_URL</name>
+          <description>The url for the target kuali-research aws ec2 instance</description>
+          <defaultValue>ec2-52-37-253-82.us-west-2.compute.amazonaws.com</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>EC2_USER</name>
+          <description>Name of the user that is accessing the kuali-research aws ec2 instance via scp</description>
+          <defaultValue>jenkins</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SRC_WAR</name>
+          <description>The name of the war file to scp.</description>
+          <defaultValue>coeus-webapp-1603.49.war</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TARGET_WAR</name>
+          <description>Target directory for the war on the target server.</description>
+          <defaultValue>/var/jenkins/kc/war/kc.war</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DOCKER_TARGET_DIR</name>
+          <description>Same directory as TARGET_DIR, but as known inside the docker container (mounted directory).</description>
+          <defaultValue>/usr/local/tomcat/webapp_mount</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DOCKER_CONTAINER_WAR</name>
+          <description>The name and location inside the docker container where the war file is to be copied to once it has been scp&apos;d into the mounted folder.</description>
+          <defaultValue>/usr/local/tomcat/webapps/kc.war </defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>CONTAINER_NAME</name>
+          <description>The name of the docker container that runs the kuali-research app.</description>
+          <defaultValue>kuali-research-container</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>ssh \
+   $EC2_USER@$SSH_URL \
+   -i $SSH_KEY \
+   docker exec -d $CONTAINER_NAME cp -f $DOCKER_TARGET_WAR/$SRC_WAR $DOCKER_CONTAINER_WAR</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

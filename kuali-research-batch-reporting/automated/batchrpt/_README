@@ -1,0 +1,5 @@
+Notes
+-----
+ 
+This folder contains all the common Python modules used in batch reporting to generate
+reports, create Excel sheets, email reports, etc. 

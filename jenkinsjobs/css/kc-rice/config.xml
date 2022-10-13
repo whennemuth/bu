@@ -1,0 +1,205 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<maven2-moduleset plugin="maven-plugin@3.15.1">
+  <actions/>
+  <description>Builds the rice war.&#xd;
+&#xd;
+NOTE: &#xd;
+If the local maven repo does not have the artifacts required to run tests, then you cannot skip tests in the build.&#xd;
+That is, &quot;-Dmaven.test.skip=true&quot; and &quot;-DskipTests=true&quot; have to be ommitted.&#xd;
+These switches skip the running of the tests but maven still complains about missing dependency file(s) because some of them cannot be downloaded from the nexus repo, and they are not in the local .m2 repo.&#xd;
+&#xd;
+NOTE:&#xd;
+This build includes a parameter that allows the running of a script that merges bu customizations to the rice codebase to each subsequent upstream commit made&#xd;
+by rebasing the master branch on top of the bu-master branch where the customizations reside.&#xd;
+This way, we can build rice against any commit made AFTER the customizations and still retain&#xd;
+those customizations. This would not be possible with a simple merge as only the HEAD merge commit&#xd;
+would have the customization and it would be a merge result between the tip of bu-master and the&#xd;
+tip of upstream/master, which we don&apos;t want because we may require a version of rice that dates before the version indicated at the tip of the master branch.&#xd;
+Once the rebase is done, the pom file is searched in the git log on the rebased branch using git pickaxe for the first appearance of the&#xd;
+rice version id we are interested in and the maven build can use the SHA of that commit to build against (we check out that commit in headless mode).&#xd;
+WARNING: An assumption is made that BU customizations are minor enough to preclude the possibility that we will run&#xd;
+into a merge conflict when git attempts the rebase.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>version</name>
+          <description>Example: rice-2.5.3.1603.0002-kualico</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>REBASE_ON_BU</name>
+          <description>This parameter allows the running of a script that merges bu customizations to the rice codebase to each subsequent upstream commit made
+by rebasing the master branch on top of the bu-master branch where the customizations reside.
+This way, we can build rice against any commit made AFTER the customizations and still retain
+those customizations. This would not be possible with a simple merge as only the HEAD merge commit
+would have the customization and it would be a merge result between the tip of bu-master and the
+tip of upstream/master.
+Once the rebase is done, the pom file is searched in the git log for the first appearance of the
+rice version id we are interested in and the maven build can use the SHA of that commit to build against.
+NOTE: An assumption is made that BU customizations are minor enough to preclude the possibility that we will run
+into a merge conflict when git attempts the rebase.
+</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REBASE_ON_BRANCH</name>
+          <description>The name of the branch that we are rebasing the upstream codebase on top of.</description>
+          <defaultValue>bu-master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.10.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>git@github.com:bu-ist/kuali-kc-rice.git</url>
+        <credentialsId>credentials.github.ssh.bu-ist.rice</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>tags/$version</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions>
+      <hudson.plugins.git.extensions.impl.CloneOption>
+        <shallow>false</shallow>
+        <noTags>false</noTags>
+        <reference></reference>
+        <timeout>45</timeout>
+        <depth>0</depth>
+        <honorRefspec>false</honorRefspec>
+      </hudson.plugins.git.extensions.impl.CloneOption>
+    </extensions>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <rootModule>
+    <groupId>org.kuali.rice</groupId>
+    <artifactId>rice</artifactId>
+  </rootModule>
+  <goals>clean compile install -e -Dgrm.off=true</goals>
+  <aggregatorStyleBuild>true</aggregatorStyleBuild>
+  <incrementalBuild>false</incrementalBuild>
+  <ignoreUpstremChanges>true</ignoreUpstremChanges>
+  <ignoreUnsuccessfulUpstreams>false</ignoreUnsuccessfulUpstreams>
+  <archivingDisabled>false</archivingDisabled>
+  <siteArchivingDisabled>false</siteArchivingDisabled>
+  <fingerprintingDisabled>false</fingerprintingDisabled>
+  <resolveDependencies>false</resolveDependencies>
+  <processPlugins>false</processPlugins>
+  <mavenValidationLevel>-1</mavenValidationLevel>
+  <runHeadless>false</runHeadless>
+  <disableTriggerDownstreamProjects>false</disableTriggerDownstreamProjects>
+  <blockTriggerWhenBuilding>true</blockTriggerWhenBuilding>
+  <settings class="jenkins.mvn.DefaultSettingsProvider"/>
+  <globalSettings class="jenkins.mvn.DefaultGlobalSettingsProvider"/>
+  <reporters/>
+  <publishers/>
+  <buildWrappers/>
+  <prebuilders>
+    <hudson.tasks.Shell>
+      <command>if [ &quot;$REBASE_ON_BU&quot; == true ] ; then
+	RICE_TAG=${version}
+    
+    # Make sure the version parameter is present
+    if [ -z &quot;${RICE_TAG}&quot; ] ; then
+    	echo &quot;version job parameter is empty! Cannot rebase on bu&quot;
+        exit 1
+    fi
+    
+	# Trim off the leading artifact id if it is present
+	if [ ${RICE_TAG:0:5} = &quot;rice-&quot; ] ; then
+		RICE_TAG=${RICE_TAG:5}
+	fi
+	RICE_VERSION=&quot;&lt;version&gt;${RICE_TAG}&lt;/version&gt;&quot;
+	
+	# Check out the branch to rebase on (probably bu-master) in case it is only a remote tracking branch
+	git checkout ${REBASE_ON_BRANCH}
+    # The REBASE_ON_BRANCH branch would have already been fetched by this point, but not merged.
+    # NOTE: Assuming that there is only one remote defined.
+    git merge &quot;$(git remote)/${REBASE_ON_BRANCH}&quot;
+
+	# Check out master as we will be making a copy branch from it.
+	git checkout master
+    git merge &quot;$(git remote)/master&quot;
+	if [ -n &quot;$(git branch -a | grep &quot;rice-rebase&quot;)&quot; ] ; then
+		echo &quot;rice-base branch found. deleting...&quot;
+		git branch -D rice-rebase
+	fi
+	echo &quot;Copying master branch as &quot;rice-rebase&quot;&quot;
+	git checkout -b rice-rebase
+	
+	if [ -z &quot;$(git branch | grep &quot;rice-rebase&quot;)&quot; ] ; then
+		echo &quot;Something went wrong - rice-rebase branch is not checked out&quot;
+		exit 1
+	fi
+	
+	echo &quot;Rebasing...&quot;
+	git rebase ${REBASE_ON_BRANCH}
+	
+	# Pickaxe will search the pom file for where the rice version tag appears and disappears
+	# We should get 2 lines of history - we want the 2nd line (the one where ${RICE_TAG} appears in the pom)
+	if [ -z &quot;$(git log -S &quot;${RICE_VERSION}&quot; --pretty=oneline pom.xml | sed -n 2p)&quot; ] ; then
+		# Output has less than 2 lines.
+		if [ -z &quot;$(git log -S &quot;${RICE_VERSION}&quot; --pretty=oneline pom.xml | sed -n 1p)&quot; ] ; then
+			# Output has no lines. WE HAVE A PROBLEM HERE!
+			GETLINE=&apos;&apos;; 
+		else
+			# The rice tag appeared, but did not later disappear from the pom file.
+			echo &quot;Found rice tag and it appears to be in the HEAD of the branch&quot;
+			GETLINE=&apos;1&apos;;
+		fi
+	else
+		# Output as 2 or more lines (should be just 2)
+		GETLINE=&apos;2&apos;; 
+	fi
+	
+	if [ -n $GETLINE ] ; then
+		GREP_LINE=&quot;$(git log -S &quot;${RICE_VERSION}&quot; --pretty=oneline pom.xml | sed -n ${GETLINE}p)&quot;
+		echo &quot;Rebased commit for tag ${RICE_TAG} found:&quot;
+		echo $GREP_LINE
+		GREP_SHA=&quot;$(echo ${GREP_LINE} | grep -o -P &quot;^[^\\s]+&quot;)&quot;
+		echo &quot;SHA to use for rice build: ${GREP_SHA}&quot;
+	else
+		echo &quot;ERROR! Cannot find rebased git commit that matches ${RICE_TAG}!&quot;
+		exit 1
+	fi
+    
+    if [ -z &quot;${GREP_SHA}&quot; ] ; then
+        echo &quot;ERROR! The git commit SHA code to use for the maven build was not determined from the rebased git history&quot;
+        exit 1
+    fi
+    
+    git checkout ${GREP_SHA}
+fi</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </prebuilders>
+  <postbuilders/>
+  <runPostStepsIfResult>
+    <name>FAILURE</name>
+    <ordinal>2</ordinal>
+    <color>RED</color>
+    <completeBuild>true</completeBuild>
+  </runPostStepsIfResult>
+</maven2-moduleset>

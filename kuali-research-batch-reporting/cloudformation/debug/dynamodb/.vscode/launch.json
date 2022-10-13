@@ -1,0 +1,23 @@
+{
+  // https://code.visualstudio.com/docs/python/debugging
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "env": {
+        "AWS_SDK_LOAD_CONFIG": "1",
+        "AWS_PROFILE": "infnprd",
+        "DEBUG_MODE": "mock-response",
+        "REQUEST_TYPE": "Create"
+      },
+      "cwd": "${workspaceFolder}",
+      "name": "dynamodb-put-item",
+      "type": "node",
+      "request": "launch",
+      "program": "launch.js",
+      "args": [
+        "{ table: 'research-admin-reports-distribution'}",
+        "{ entry: { \\\"EmailSubject\\\": { \\\"S\\\": \\\"Daily - Subaward Aging Report\\\" }, \\\"EmailList\\\": { \\\"S\\\": \\\"ciccarel@bu.edu, cdemarsi@bu.edu, mvergoni@bu.edu, rohare@bu.edu, megfol@bu.edu\\\" }, \\\"EmailCC\\\": { \\\"S\\\": \\\"\\\" }, \\\"ReportCd\\\": { \\\"S\\\": \\\"subaward_aging\\\" }, \\\"EmailText\\\": { \\\"S\\\": \\\"Attached is the daily run of the Subaward Aging Report.\\\" } } }"
+      ]
+    }
+  ]
+}

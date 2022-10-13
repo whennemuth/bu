@@ -1,0 +1,348 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  Create the dynamodb table research admin reporting. 
+  KC AWS Batch uses this table to format the email message for each of the AWS batch jobs. 
+  Each table entry corresponds to a single batch job. 
+
+
+Parameters:
+
+  GlobalTag:
+    Type: String
+    Description: >
+      A common value that all resources in this template will have prefixed to
+      their name and attached as a tag to establish a bundling through naming convention.
+    Default: research-admin-reports
+    
+  Service:
+    Description: Service catalog name
+    Type: String
+    Default: research-administration
+
+  Function:
+    Description: The Function within the Service
+    Type: String
+    Default: kuali
+
+  Landscape:
+    Description: The landscape of the database.
+    Type: String
+
+
+Resources:
+
+  DynamoDbTable:
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions: 
+        - AttributeName: ReportCd
+          AttributeType: S
+      KeySchema: 
+        - AttributeName: ReportCd
+          KeyType: HASH
+      ProvisionedThroughput: 
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 2
+      TableName: !Sub ${GlobalTag}-${Landscape}-distribution
+      Tags: 
+        - Key: Name
+          Value: !Sub ${GlobalTag}-${Landscape}-distribution
+        - Key: Service
+          Value: !Ref Service
+        - Key: Function
+          Value: !Ref Function
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+       !Sub ${GlobalTag}-${Landscape}-dynamodb-lambda-role
+      Description: Gives the lambda function permission to add/remove entries to the dynamodb table and write to logs
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName:
+          !Sub ${GlobalTag}-${Landscape}-submit-policy
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:*
+            Resource: 
+            - !Sub arn:aws:dynamodb:*:${AWS::AccountId}:table/${GlobalTag}-${Landscape}-distribution
+          - Effect: Allow
+            Action:
+            # - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: 
+            - !Sub arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/lambda/${GlobalTag}-${Landscape}-dynamodb-table-loader:*
+
+  LambdaLogsGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${GlobalTag}-${Landscape}-dynamodb-table-loader
+      RetentionInDays: 14
+
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: LambdaLogsGroup 
+    Properties:
+      FunctionName: !Sub ${GlobalTag}-${Landscape}-dynamodb-table-loader
+      Runtime: nodejs12.x
+      Role: !GetAtt LambdaRole.Arn
+      Handler: index.handler
+      Timeout: 30
+      Code:
+        ZipFile: |        
+          const AWS = require('aws-sdk');
+          const db = new AWS.DynamoDB();
+          var response = require('cfn-response');
+
+          exports.handler = function (event, context) {
+            try {
+              console.log(JSON.stringify(event, null, 2));
+              var tablename = event.ResourceProperties.table;
+              if (/^((create)|(update))$/i.test(event.RequestType)) {
+                var item = event.ResourceProperties.entry;
+                if(typeof item == 'string') {
+                  console.log("Item is of type string - converting to map...");
+                  item = JSON.parse(item);
+                }
+                db.putItem(
+                  { TableName: tablename, Item: item }, 
+                  function(err, data) {                
+                    sendResponse(event, context, data, err);
+                });
+              }
+              else if(/^delete$/i.test(event.RequestType)) {
+                console.log(`${tablename} will be removed during stack delete - no need to delete single item.`);
+                sendResponse(event, context, { NoAction: 'true' }, null);
+              }
+            }
+            catch(e) {
+              sendResponse(event, context, null, e);
+            }
+          }
+
+          const sendResponse = (event, context, data, err) => {
+            if(err) {
+              console.error(err);
+              response.send(event, context, response.FAILURE, {
+                Value: { error: { name: err.name, message: err.message } 
+              }});
+            }
+            else {
+              console.log(data)
+              response.send(event, context, response.SUCCESS, {
+                result: 'SUCCESS',
+                data: `${data}`
+              });
+            }
+          }
+
+
+  # Add each row to the dynamodb table one by one by invoking the lambda function with a custom resource for each one.
+
+  PutSubawardAgingReport:
+    Type: Custom::Functions
+    Properties:
+      ServiceToken:
+        !GetAtt LambdaFunction.Arn
+      table: !Sub ${GlobalTag}-${Landscape}-distribution
+      entry: >
+        {
+          "EmailSubject": { "S": "Daily - Subaward Aging Report" },
+          "EmailList": { "S": "ciccarel@bu.edu, cdemarsi@bu.edu, mvergoni@bu.edu, rohare@bu.edu, megfol@bu.edu" },
+          "EmailCC": { "S": "" },
+          "ReportCd": { "S": "subaward_aging" },
+          "EmailText": { "S": "Attached is the daily run of the Subaward Aging Report." }
+        }
+    
+  PutAwardOAVs:
+    Type: Custom::Functions
+    Properties:
+      ServiceToken:
+        !GetAtt LambdaFunction.Arn
+      table: !Sub ${GlobalTag}-${Landscape}-distribution
+      entry: >
+        {
+          "EmailSubject": { "S": "Monthly - Award OAVs" },
+          "EmailList": { "S": "vmcraige@bu.edu" },
+          "EmailCC": { "S": "" },
+          "ReportCd": { "S": "award_oav" },
+          "EmailText": { "S": "Attached is the monthly run of the Award OAVs (Other Account Viewers)." }
+        }
+
+  PutInvoiceInstructions:
+    Type: Custom::Functions
+    Properties:
+      ServiceToken:
+        !GetAtt LambdaFunction.Arn
+      table: !Sub ${GlobalTag}-${Landscape}-distribution
+      entry: >
+        {
+          "EmailSubject": { "S": "Monthly - Invoice Instructions for Active Awards" },
+          "EmailList": { "S": "mjdowns@bu.edu, selmao@bu.edu, vmcraige@bu.edu" },
+          "EmailCC": { "S": "" },
+          "ReportCd": { "S": "invoice_instructions" },
+          "EmailText": { "S": "Attached is the monthly run of the Invoice Instructions for Active Awards." }
+        }
+
+  PutAwardsWithBillingInfo:
+    Type: Custom::Functions
+    Properties:
+      ServiceToken:
+        !GetAtt LambdaFunction.Arn
+      table: !Sub ${GlobalTag}-${Landscape}-distribution
+      entry: >
+        {
+          "EmailSubject": { "S": "Monthly - Awards with Billing Info" },
+          "EmailList": { "S": "vmcraige@bu.edu, tjholmes@bu.edu, yennie@bu.edu" },
+          "EmailCC": { "S": "" },
+          "ReportCd": { "S": "award_billing_info" },
+          "EmailText": { "S": "Attached is the monthly run of Parent Award transmissions with New or Renewal transactions with Payment Basis of Cost Reimbursable and Payment Method of Invoice." }
+        }
+
+  PutSubawardAwardTrans:
+    Type: Custom::Functions
+    Properties:
+      ServiceToken:
+        !GetAtt LambdaFunction.Arn
+      table: !Sub ${GlobalTag}-${Landscape}-distribution
+      entry: >
+        {
+          "EmailSubject": { "S": "Weekly - Award Actions with Affiliated Subawards" },
+          "EmailList": { "S": "vmcraige@bu.edu, tjholmes@bu.edu, mbmyers@bu.edu" },
+          "EmailCC": { "S": "" },
+          "ReportCd": { "S": "subaward_award_trans" },
+          "EmailText": { "S": "Attached is the weekly run of Subawards involved in Award actions." }
+        }
+
+  PutQa:
+    Type: Custom::Functions
+    Properties:
+      ServiceToken:
+        !GetAtt LambdaFunction.Arn
+      table: !Sub ${GlobalTag}-${Landscape}-distribution
+      entry: >
+        {
+          "EmailSubject": { "S": "Monthly - KC QA Reports" },
+          "EmailList": { "S": "vmcraige@bu.edu, ciccarel@bu.edu, rrussell@bu.edu, mvergoni@bu.edu, cdemarsi@bu.edu, rohare@bu.edu, megfol@bu.edu, eljamies@bu.edu, palmurph@bu.edu, antcast@bu.edu" },
+          "EmailCC": { "S": "" },
+          "ReportCd": { "S": "qa" },
+          "EmailText": { "S": "Attached is the monthly run of the KC QA Reports." }
+        }
+
+  PutIRB:
+    Type: Custom::Functions
+    Properties:
+      ServiceToken:
+        !GetAtt LambdaFunction.Arn
+      table: !Sub ${GlobalTag}-${Landscape}-distribution
+      entry: >
+        {
+          "EmailSubject": { "S": "Scheduled - IRB Lite" },
+          "EmailList": { "S": "laneia@bu.edu, IRB@bu.edu" },
+          "EmailCC": { "S": "" },
+          "ReportCd": { "S": "irb" },
+          "EmailText": { "S": "Attached is the scheduled run of the IRB Lite report version." }
+        }
+
+  PutPreAwardNotBillable:
+    Type: Custom::Functions
+    Properties:
+      ServiceToken:
+        !GetAtt LambdaFunction.Arn
+      table: !Sub ${GlobalTag}-${Landscape}-distribution
+      entry: >
+        {
+          "EmailSubject": { "S": "Pre-Award Not Billable" },
+          "EmailList": { "S": "mjdowns@bu.edu, vmcraige@bu.edu, antcast@bu.edu" },
+          "EmailCC": { "S": "" },
+          "ReportCd": { "S": "pre_award_not_billable" },
+          "EmailText": { "S": "Attached is the monthly run of the Pre-Award not Billable report." }
+        }
+
+  PutNegotiation:
+    Type: Custom::Functions
+    Properties:
+      ServiceToken:
+        !GetAtt LambdaFunction.Arn
+      table: !Sub ${GlobalTag}-${Landscape}-distribution
+      entry: >
+        {
+          "EmailSubject": { "S": "Daily - Negotiation Master & Activity Reports" },
+          "EmailList": { "S": "vmcraige@bu.edu, segarra@bu.edu, cdemarsi@bu.edu, ctgonz@bu.edu, rrussell@bu.edu, hhchiang@bu.edu, jpsewell@bu.edu" },
+          "EmailCC": { "S": "" },
+          "ReportCd": { "S": "negotiation" },
+          "EmailText": { "S": "Attached is the daily run of the Negotiation Master & Activity Reports." }
+        }
+
+  PutAwardActiveUpdate:
+    Type: Custom::Functions
+    Properties:
+      ServiceToken:
+        !GetAtt LambdaFunction.Arn
+      table: !Sub ${GlobalTag}-${Landscape}-distribution
+      entry: >
+        {
+          "EmailSubject": { "S": "Award Multiple Active Update" },
+          "EmailList": { "S": "dhaywood@bu.edu" },
+          "EmailCC": { "S": "" },
+          "ReportCd": { "S": "award_active_update" },
+          "EmailText": { "S": "Attached is the periodic run of a task to remediate Awards with multiple ACTIVE versions. Older versions are set to a status of ARCHIVED.\n\nThe first CSV file lists any newly created duplicate ACTIVE Awards from the previous day to help identify what process might be causing this condition. Any duplicate ACTIVE Awards are then remediated. The second CSV file is an audit of updates applied to the database.\n\nThis job is a temp fix until KC Award versioning code is permanently corrected. See ServiceNow DFCT0012546. Although this Defect is closed, the underlying issue was not resolved." }
+        }
+
+  PutNewIps:
+    Type: Custom::Functions
+    Properties:
+      ServiceToken:
+        !GetAtt LambdaFunction.Arn
+      table: !Sub ${GlobalTag}-${Landscape}-distribution
+      entry: >
+        {
+          "EmailSubject": { "S": "Bi-monthly - New IPs List" },
+          "EmailList": { "S": "vmcraige@bu.edu, lilcamp1@bu.edu, buori@bu.edu, carcar@bu.edu" },
+          "EmailCC": { "S": "" },
+          "ReportCd": { "S": "new_ips" },
+          "EmailText": { "S": "Attached is the bi-monthly run of the New IPs List." }
+        }
+
+  PutNewSponsorActivity:
+    Type: Custom::Functions
+    Properties:
+      ServiceToken:
+        !GetAtt LambdaFunction.Arn
+      table: !Sub ${GlobalTag}-${Landscape}-distribution
+      entry: >
+        {
+          "EmailSubject": { "S": "SP Weekly New Sponsor Activity" },
+          "EmailList": { "S": "ctgonz@bu.edu, dbaldwin@bu.edu" },
+          "EmailCC": {  "S": "" },
+          "ReportCd": { "S": "new_sponsor_activity" },
+          "EmailText": { "S": "Attached is the weekly run of New Sponsor Activity." }
+        }
+
+  PutIpPendingUpdate:
+    Type: Custom::Functions
+    Properties:
+      ServiceToken:
+        !GetAtt LambdaFunction.Arn
+      table: !Sub ${GlobalTag}-${Landscape}-distribution
+      entry: >
+        {
+          "EmailSubject": { "S": "IP Pending to Not Funded Update" },
+          "EmailList": { "S": "vmcraige@bu.edu" },
+          "EmailCC": { "S": "" },
+          "ReportCd": { "S": "ip_pending_update" },
+          "EmailText": { "S": "Attached is the monthly run of a task to update IPs from 'Pending' to 'Not Funded' if there has been no update activity for over 18 months. The attached CSV lists IPs which were updated. The second file is an audit of applied updates to the database.\n\nSee ServiceNow INC12216285 for details." }
+        }

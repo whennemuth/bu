@@ -1,0 +1,12 @@
+SET SERVEROUTPUT ON;
+execute drop_all_constraints;
+PURGE RECYCLEBIN;
+execute drop_all_indexes;
+PURGE RECYCLEBIN;
+execute drop_all_tables;
+PURGE RECYCLEBIN;
+execute drop_all_triggers;
+PURGE RECYCLEBIN;
+execute drop_all_sequences;
+PURGE RECYCLEBIN;
+SET SERVEROUTPUT OFF;

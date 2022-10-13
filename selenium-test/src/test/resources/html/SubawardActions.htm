@@ -1,0 +1,5655 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- saved from url=(0051)https://kuali-research-qa.bu.edu/kc/subAwardHome.do -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+
+	<script type="text/javascript">
+	<!--
+	setTimeout("alert('Your session will expire in 5 minutes.')",'6900000');
+	// -->
+	</script>
+
+
+	
+
+
+	<script type="text/javascript">var jsContextPath = "/kc";</script>
+	<title>Kuali :: KC Subaward</title>
+	
+
+			<link href="./SubawardActions_files/kuali.css" rel="stylesheet" type="text/css">
+
+
+
+			<link href="./SubawardActions_files/calendar-win2k-1.css" rel="stylesheet" type="text/css">
+
+
+
+			<link href="./SubawardActions_files/jquery.fancybox-kuali-1.4.0.css" rel="stylesheet" type="text/css">
+
+
+
+			<link href="./SubawardActions_files/kuali_application.css" rel="stylesheet" type="text/css">
+
+
+
+			<link href="./SubawardActions_files/bootstrap-skinned.css" rel="stylesheet" type="text/css">
+
+
+	
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/jquery-1.8.3.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/jquery.cookie.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/core.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/dhtml.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/my_common.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/calendar.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/calendar-en.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/calendar-setup.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/engine.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/util.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/PersonService.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/StateService.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/objectInfo.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/CustomAttributeService.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/BudgetService.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/AwardTemplateReportTermService.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/jquery.fancybox-kuali-1.4.0.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/jquery.blockUI.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/kuali_application.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/bootstrap.js.download"></script>
+
+
+
+			<script language="JavaScript" type="text/javascript" src="./SubawardActions_files/person.js.download"></script>
+
+
+
+<!-- new iframe resize logic -->
+<script type="text/javascript">
+
+var jq = jQuery.noConflict();
+var bodyHeight;
+function publishHeight(){
+    var parentUrl = "";
+    if(navigator.cookieEnabled){
+        parentUrl = jQuery.cookie('parentUrl');
+        var passedUrl = decodeURIComponent( document.location.hash.replace( /^#/, '' ) );
+        if(passedUrl && passedUrl.substring(0, 4) === "http"){
+            jQuery.cookie('parentUrl', passedUrl, {path: '/'});
+            parentUrl = passedUrl;
+        }
+    }
+
+    if(parentUrl === ""){
+        //make the assumption for not cross-domain, will have no effect if cross domain (message wont be
+        //received)
+        parentUrl = window.location;
+        parentUrl = decodeURIComponent(parentUrl);
+    }
+
+    var height = jQuery("body").outerHeight();
+    jQuery("body").attr("style", "overflow-x: auto; padding-right: 20px;");
+    if (parentUrl && !isNaN(height) && height > 0) {
+        jQuery.postMessage({ if_height: height}, parentUrl, parent);
+        bodyHeight = height;
+    }
+}
+
+jQuery(function(){
+  publishHeight();
+  window.onresize = publishHeight;
+  window.setInterval(publishHeight, 249);
+});
+</script>
+
+    
+    
+    
+      
+    
+  
+</head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+		
+			
+				
+				
+			
+		
+		
+		<body onload="if ( !restoreScrollPosition() ) { jumpToAnchor(&#39;topOfForm&#39;); }" onkeypress="return isReturnKeyAllowed(&#39;methodToCall.&#39; , event);" style="overflow-x: auto; padding-right: 20px;">
+    <div id="Uif-Application">
+			
+			
+	
+
+
+
+
+
+<form name="KualiForm" id="kualiForm" method="post" action="https://kuali-research-qa.bu.edu/kc/subAwardActions.do" accept-charset="utf-8" enctype="" onsubmit="return hasFormAlreadyBeenSubmitted();">
+
+	
+	
+		<a name="topOfForm"></a>
+		<div class="headerarea" id="headerarea">
+				<h1>
+					KC Subaward&nbsp;
+					
+						
+						
+							
+								
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<a href="https://kuali-research-qa.bu.edu/kc/kr/help.do?methodToCall=getDocumentHelpText&amp;documentTypeName=SubAwardDocument" tabindex="-1" target="helpWindow" title="[Help]document help">
+<img src="./SubawardActions_files/my_cp_inf.gif" alt="[Help]document help" hspace="5" border="0" align="middle"></a>
+							
+						
+					
+				</h1>
+			
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+	
+
+
+<!-- DOCUMENT INFO HEADER BOX -->
+	
+
+	
+	
+
+    
+    
+  	
+  	
+
+  <div class="headerbox">
+	
+		
+		
+			<table class="headerinfo" summary="document header: general information" cellpadding="0" cellspacing="0">
+		
+	
+
+	
+	 <tbody><tr>
+			
+				
+					
+			 		
+			 			
+			 				
+			 				
+					        	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="row" align="right">&nbsp;
+    
+    
+    
+        
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+        
+            
+            
+                
+            
+            
+                
+            
+            
+                
+            
+        
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+
+
+
+
+
+
+  <font color="">*&nbsp;</font>
+
+Requisitioner ID:
+
+
+
+        
+    
+      
+</th>
+
+					        	<td>
+					        	
+								
+									
+									
+										cgagnon
+									
+								
+						 		</td>
+			 				
+			 			
+					
+					
+				
+		 		
+			 	
+				
+		 
+				
+					
+			 		
+			 			
+			 				
+			 				
+					        	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="row" align="right">&nbsp;
+    
+    
+    
+        
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+        
+            
+            
+                
+            
+            
+                
+            
+            
+                
+            
+        
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+
+
+
+
+
+
+
+Document ID:Status:
+
+
+
+        
+    
+      
+</th>
+
+					        	<td>
+					        	
+								
+									
+									
+										459732:SAVED
+									
+								
+						 		</td>
+			 				
+			 			
+					
+					
+				
+		 		
+			 	
+				
+		 
+      </tr>
+    
+	 <tr>
+			
+				
+					
+			 		
+			 			
+			 				
+			 				
+					        	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="row" align="right">&nbsp;
+    
+    
+    
+        
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+        
+            
+            
+                
+            
+            
+                
+            
+            
+                
+            
+        
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+
+
+
+
+
+
+  <font color="">*&nbsp;</font>
+
+Requisitioner Unit:
+
+
+
+        
+    
+      
+</th>
+
+					        	<td>
+					        	
+								
+									
+									
+										Charles River Campus
+									
+								
+						 		</td>
+			 				
+			 			
+					
+					
+				
+		 		
+			 	
+				
+		 
+				
+					
+			 		
+			 			
+			 				
+			 				
+					        	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="row" align="right">&nbsp;
+    
+    
+    
+        
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+        
+            
+            
+                
+            
+            
+                
+            
+            
+                
+            
+        
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+
+
+
+
+
+
+
+Subaward ID:
+
+
+
+        
+    
+      
+</th>
+
+					        	<td>
+					        	
+								
+									
+									
+										1835
+									
+								
+						 		</td>
+			 				
+			 			
+					
+					
+				
+		 		
+			 	
+				
+		 
+      </tr>
+    
+	 <tr>
+			
+				
+					
+			 		
+			 			
+			 				
+			 				
+					        	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="row" align="right">&nbsp;
+    
+    
+    
+        
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+        
+            
+            
+                
+            
+            
+                
+            
+            
+                
+            
+        
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+
+
+
+
+
+
+  <font color="">*&nbsp;</font>
+
+Subrecipient:
+
+
+
+        
+    
+      
+</th>
+
+					        	<td>
+					        	
+								
+									
+									
+										Brigham &amp; Women's Hospital
+									
+								
+						 		</td>
+			 				
+			 			
+					
+					
+				
+		 		
+			 	
+				
+		 
+				
+					
+			 		
+			 			
+			 				
+			 				
+					        	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="row" align="right">&nbsp;
+    
+    
+    
+        
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+        
+            
+            
+                
+            
+            
+                
+            
+            
+                
+            
+        
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+    
+        
+        
+            
+        
+    
+
+
+
+
+
+
+
+
+Last Update:
+
+
+
+        
+    
+      
+</th>
+
+					        	<td>
+					        	
+								
+									
+									
+										2017-03-22 19:04:24.013 By wrh
+									
+								
+						 		</td>
+			 				
+			 			
+					
+					
+				
+		 		
+			 	
+				
+		 
+      </tr>
+    
+   </tbody></table>
+  </div>
+
+
+
+	
+	
+
+		</div>
+		
+            <div class="horz-links-bkgrnd" id="horz-links">
+                <div id="tabs">
+                    <dl class="tabul">
+                        
+                            
+                            
+                                
+                                    
+                                    <dt>
+                                    <span class="tabright ">
+                                        <input type="submit" name="methodToCall.headerTab.headerDispatch.save.navigateTo.subAward" value="Subaward" alt="Subaward">
+                                    </span></dt>
+                                
+                                    
+                                    <dt>
+                                    <span class="tabright ">
+                                        <input type="submit" name="methodToCall.headerTab.headerDispatch.save.navigateTo.financial" value="Financial" alt="Financial">
+                                    </span></dt>
+                                
+                                    
+                                    <dt>
+                                    <span class="tabright ">
+                                        <input type="submit" name="methodToCall.headerTab.headerDispatch.save.navigateTo.customData" value="Custom Data" alt="Custom Data">
+                                    </span></dt>
+                                
+                                    
+                                    <dt>
+                                    <span class="tabright ">
+                                        <input type="submit" name="methodToCall.headerTab.headerDispatch.save.navigateTo.templateInformation" value="Template Information" alt="Template Information">
+                                    </span></dt>
+                                
+                                    
+                                    <dt class="licurrent">
+                                    <span class="tabright tabcurrent">
+                                        <input type="submit" name="methodToCall.headerTab.headerDispatch.save.navigateTo.subAwardActions" value="Subaward Actions" alt="Subaward Actions">
+                                    </span></dt>
+                                
+                                    
+                                    <dt>
+                                    <span class="tabright ">
+                                        <input type="submit" name="methodToCall.headerTab.headerDispatch.save.navigateTo.medusa" value="Medusa" alt="Medusa">
+                                    </span></dt>
+                                
+                            
+                        
+                    </dl>
+                </div>
+            </div>
+        
+		<div class="msg-excol">
+		  <div class="left-errmsg">
+			 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			 
+			 
+                 
+                 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+			 
+			 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="kul-error kul-message">Document was successfully saved.</div>
+
+			 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+		  </div>
+		  <div class="right">
+		    <div class="excol">
+		  	   
+			   
+				  <input type="image" name="methodToCall.showAllTabs" src="./SubawardActions_files/tinybutton-expandall.gif" tabindex="-1" onclick="javascript: return expandAllTab(document, tabStatesSize); " class="tinybutton" title="show all panel content" alt="show all panel content">
+				  <input type="image" name="methodToCall.hideAllTabs" src="./SubawardActions_files/tinybutton-collapseall.gif" tabindex="-1" onclick="javascript: return collapseAllTab(document, tabStatesSize); " class="tinybutton" title="hide all panel content" alt="hide all panel content">
+		       
+			   
+				<br>* required field
+			   
+		  	 </div>
+		  </div>
+		</div>
+
+        
+        <script type="text/javascript">
+            //if no error exists then render the error as a message
+            jQuery( document ).ready(function() {
+                if(jQuery(".error").length === 0) {
+                    jQuery(".kul-error").addClass("kul-message");
+                }
+            });
+        </script>
+
+		<table class="page-main" width="100%" cellpadding="0" cellspacing="0">
+			<tbody><tr>
+											<td width="1%">
+												<img src="./SubawardActions_files/pixel_clear.gif" alt="" width="20" height="20">
+											</td>
+				<td>
+
+	
+
+					
+     	
+  	
+  	<div align="right">
+       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="./SubawardActions_files/jquery-ui.css">
+<link href="./SubawardActions_files/icon" rel="stylesheet">
+<script src="./SubawardActions_files/jquery-ui.min.js.download"></script>
+<script>
+    var $j = jQuery.noConflict();
+    $j(function() {
+        $j( "#dialog" ).dialog({
+            autoOpen: false
+        });
+
+        $j( "#opener" ).click(function() {
+            $j( "#dialog" ).dialog( "open" );
+            $j("#shortUrlText").select();
+        });
+    });
+</script>
+
+
+
+<div style="display:inline;cursor:pointer" id="opener"><i style="font-size:15px" class="material-icons">link</i></div>
+       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<a href="https://kuali-research-qa.bu.edu/kc/kr/help.do?methodToCall=getHelpUrlByNamespace&amp;helpParameterNamespace=KC-SUBAWARD&amp;helpParameterDetailType=Document&amp;helpParameterName=subAwardActionsHelpUrl" tabindex="-1" target="helpWindow">
+<img src="./SubawardActions_files/my_cp_inf.gif" alt="[Help]help" hspace="5" border="0" align="middle"></a></div>
+  	
+<div id="workarea">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+	
+	<div id="workarea">
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+        
+    
+
+
+<!--  hit form method to increment tab index -->
+
+
+
+
+    
+        
+    
+    
+
+
+<!-- if the section has errors, override and set isOpen to true -->
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+		
+			
+		
+	
+
+	
+
+
+
+	
+		
+	
+
+
+
+
+  
+
+
+
+
+
+
+<input type="hidden" name="tabStates(DataValidation)" value="CLOSE">
+<!-- TAB -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+
+
+
+        <table width="100%" class="tab" cellpadding="0" cellspacing="0" summary="" border="1">
+          <tbody><tr>
+              
+	          
+			  
+			  	<td class="tabtable1-left">
+			  
+			  
+
+              <img src="./SubawardActions_files/tab-topleft.gif" alt="" width="12" height="29" align="absmiddle">
+              
+              <a name="DataValidation"></a>
+              
+                
+                
+                  <h2>Data Validation</h2>
+                
+              
+              
+              
+              
+            </td>
+            
+
+            
+
+      		
+
+            <td class="tabtable1-mid">
+
+            
+    		
+               
+               
+                 <input type="image" name="methodToCall.toggleTab.tabDataValidation" src="./SubawardActions_files/tinybutton-show.gif" tabindex="-1" onclick="javascript: return toggleTab(document, &#39;DataValidation&#39;); " id="tab-DataValidation-imageToggle" class="tinybutton" title="open Data Validation" alt="open Data Validation">
+               
+               
+                
+                
+
+            </td>
+            <td class="tabtable1-right"><img src="./SubawardActions_files/tab-topright.gif" alt="" width="12" height="29" align="middle"></td>
+          </tr>
+        </tbody></table>
+
+
+
+
+
+<div style="display: none;" id="tab-DataValidation-div">
+
+
+
+
+        <!-- display errors for this tab -->
+        
+          <div class="tab-container-error"><div class="left-errmsg-tab">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+</div></div>
+        
+
+        <!-- comment for reference by KRA devs during KNS extraction -->
+        
+
+
+        <!-- Before the jsp:doBody of the kul:tab tag -->
+        
+	<div class="tab-container" align="center">
+		<h3> 
+			<span class="subhead-left">Data Validation</span>
+			
+		</h3>
+		<table cellpadding="0" cellspacing="0" summary="">
+			<tbody><tr>
+				<td>
+					<div class="floaters">
+						
+						
+							
+								
+								
+									
+                    <p>You can activate a Validation check to determine any errors or incomplete information. The following Validations types will be determined:</p>
+                    <ul>
+                      <li>errors that prevent submission into routing</li>
+                      <li>warnings that serve as alerts to  possible data issues but will not prevent submission into routing</li>
+                      <li>errors that prevent submission to grants.gov</li>
+                    </ul>
+
+								
+							
+						<p align="center">
+							
+								
+								<input type="image" name="methodToCall.activate" src="./SubawardActions_files/tinybutton-validateon.gif" class="tinybutton" alt="activate validation">
+							
+						</p>
+					</div>
+				</td>
+			</tr>
+		</tbody></table>
+		
+	</div>
+
+        <!-- After the jsp:doBody of the kul:tab tag -->
+
+
+
+</div>
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+.multi-col-list dl {
+ 	clear:both;
+	margin: .5em;
+	width: 100%;
+	min-width:38em;
+}
+.multi-col-list dl dd {
+	width: 32%;
+	float: left;
+	padding-left: 65px;
+	padding-right: .2em;
+}
+.multi-col-list dl dd ul { 
+ 	list-style: none; 
+ 	padding: 0;
+}
+.multi-col-list dl dd ul li {
+   list-style: none;
+}
+li.truncateAlign table {
+    display: inline-block;
+    width: auto !important;
+}
+#workarea th {
+  background-repeat: repeat-x;
+  background-color: #f5f5f5;
+}
+#workarea td.infoline {
+   background-repeat: repeat-x;
+}
+</style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+        
+    
+
+
+<!--  hit form method to increment tab index -->
+
+
+
+
+    
+        
+    
+    
+
+
+<!-- if the section has errors, override and set isOpen to true -->
+
+
+
+
+
+
+<input type="hidden" name="tabStates(Print)" value="CLOSE">
+<!-- TAB -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <table width="100%" class="tab" cellpadding="0" cellspacing="0" summary="" border="1">
+          <tbody><tr>
+              
+	          
+			  
+			  	<td class="tabtable1-left">
+			  
+			  
+
+              <img src="./SubawardActions_files/tab-topleft1.gif" alt="" width="12" height="29" align="absmiddle">
+              
+              <a name="Print"></a>
+              
+                
+                
+                  <h2>Print</h2>
+                
+              
+              
+              
+              
+            </td>
+            
+
+            
+
+      		
+
+            <td class="tabtable2-mid">
+
+            
+    		
+               
+               
+                 <input type="image" name="methodToCall.toggleTab.tabPrint" src="./SubawardActions_files/tinybutton-show.gif" tabindex="-1" onclick="javascript: return toggleTab(document, &#39;Print&#39;); " id="tab-Print-imageToggle" class="tinybutton" title="open Print" alt="open Print">
+               
+               
+                
+                
+
+            </td>
+            <td class="tabtable2-right"><img src="./SubawardActions_files/tab-topright1.gif" alt="" width="12" height="29" align="middle"></td>
+          </tr>
+        </tbody></table>
+
+
+
+
+
+<div style="display: none;" id="tab-Print-div">
+
+
+
+
+        <!-- display errors for this tab -->
+        
+
+        <!-- comment for reference by KRA devs during KNS extraction -->
+        
+
+
+        <!-- Before the jsp:doBody of the kul:tab tag -->
+        
+		<div class="tab-container" align="center">
+		<h3>
+			<span class="subhead-left">Print</span>
+		</h3>
+		<table id="print-table" cellpadding="0" cellspacing="0" summary="Print Options">
+			<tbody><tr>
+				<th rowspan="8" scope="row" style="width:150px; text-align:center;">Agreement/Modification</th>
+				</tr>
+				<tr>
+				<td scope="row" style="width:160px; text-align:center;" nowrap="nowrap">
+				
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Funding Source
+
+
+</td>
+				<td>
+				   <div class="multi-col-list">
+						<dl><dd><ul>
+						<li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+		
+			
+		
+	
+
+	
+
+
+
+	
+		
+	
+
+
+
+
+
+
+
+
+
+	
+
+
+  
+  
+    
+    
+  
+
+
+
+
+  
+    
+    
+
+    
+    
+
+    
+    
+            
+            
+
+            <select name="subAwardPrintAgreement.fundingSource" tabindex="2" onchange="" onblur="" id="subAwardPrintAgreement.fundingSource" style="" class="" title="Funding Source"><option value="">No Funding Source has been added to this Subaward</option></select>
+    
+
+    
+    
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+  
+  
+  
+  
+  	
+
+
+
+
+
+		      				  
+		      			</li>
+						</ul></dd></dl>
+					</div>
+						</td>
+						<td rowspan="5" class="infoline" style="text-align:center;width:74px;"><input type="image" name="methodToCall.printForms" src="./SubawardActions_files/tinybutton-print.gif" onclick="excludeSubmitRestriction=true" class="tinybutton" alt="Print Award Notice"></td>
+				</tr>
+				<tr>
+				<td scope="row" style="width:160px; text-align:center;" nowrap="nowrap">FDP Template:</td>
+				<td>
+						<div class="multi-col-list" id="awardPrintNoticeItems">
+						<dl><dd><ul>
+						<li>
+				         <input type="radio" name="subAwardPrintAgreement.fdpType" value="fdpAgreement" checked="checked">
+				         FDP Agreement
+		      			</li>
+						</ul></dd>
+						<dd><ul>
+						<li><input type="radio" name="subAwardPrintAgreement.fdpType" value="fdpModification">
+				         FDP Modification
+		      			</li>
+						</ul></dd></dl>
+						</div><table id="print-table" cellpadding="0" cellspacing="0">
+						<tbody><tr>
+
+						
+
+						</tr>
+					</tbody></table>
+				</td>
+				</tr>
+				<tr>
+					<td scope="row" style="width:160px; text-align:center;" nowrap="nowrap">FDP Template Attachments:</td>
+					  <td>
+						<div class="multi-col-list" id="awardPrintNoticeItems">
+						<dl><dd><ul>
+						<li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+		
+			
+		
+	
+
+	
+
+
+
+	
+		
+	
+
+
+
+
+
+
+
+
+
+	
+
+
+  
+  
+    
+    
+  
+
+
+
+
+  
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+            <input type="checkbox" name="subAwardPrintAgreement.attachment3A" tabindex="3" value="on" onclick="" onchange="" onblur="" id="subAwardPrintAgreement.attachment3A" style="" class="" title="FDP Attachment 3A">
+            
+                <input type="hidden" name="checkboxToReset" value="subAwardPrintAgreement.attachment3A"> 
+    
+
+    
+    
+
+    
+    
+    
+  
+  
+  
+  
+  	
+
+
+
+
+
+		      				  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+FDP Attachment 3A
+
+
+
+		      			</li>
+		      			<li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+		
+			
+		
+	
+
+	
+
+
+
+	
+		
+	
+
+
+
+
+
+
+
+
+
+	
+
+
+  
+  
+    
+    
+  
+
+
+
+
+  
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+            <input type="checkbox" name="subAwardPrintAgreement.attachment3B" tabindex="4" value="on" onclick="" onchange="" onblur="" id="subAwardPrintAgreement.attachment3B" style="" class="" title="FDP Attachment 3B">
+            
+                <input type="hidden" name="checkboxToReset" value="subAwardPrintAgreement.attachment3B"> 
+    
+
+    
+    
+
+    
+    
+    
+  
+  
+  
+  
+  	
+
+
+
+
+
+		      				  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+FDP Attachment 3B
+
+
+
+						</li>
+						</ul></dd>
+						<dd><ul>
+						<li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+		
+			
+		
+	
+
+	
+
+
+
+	
+		
+	
+
+
+
+
+
+
+
+
+
+	
+
+
+  
+  
+    
+    
+  
+
+
+
+
+  
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+            <input type="checkbox" name="subAwardPrintAgreement.attachment3BPage2" tabindex="5" value="on" onclick="" onchange="" onblur="" id="subAwardPrintAgreement.attachment3BPage2" style="" class="" title="FDP Attachment 3B Page 2">
+            
+                <input type="hidden" name="checkboxToReset" value="subAwardPrintAgreement.attachment3BPage2"> 
+    
+
+    
+    
+
+    
+    
+    
+  
+  
+  
+  
+  	
+
+
+
+
+
+		      				  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+FDP Attachment 3B Page 2
+
+
+
+		      				  </li>
+		      				   
+						</ul></dd></dl>
+						</div>
+				</td>
+				</tr> 
+				<tr>
+				<td scope="row" style="width:160px; text-align:center;">Sponsor Attachments:</td>
+				<td>
+				<div class="multi-col-list" id="awardPrintNoticeItems">
+				<dl>
+				
+				
+				
+				
+				 <dd><ul>
+				  <li>
+				  <input type="checkbox" name="document.subAwardList[0].subAwardForms[0].selectToPrint" value="on">
+				  NSF Attachment
+				</li>
+				</ul></dd>
+      			   
+      			  
+      			  
+      			  
+				
+				
+				
+      			  
+      			 <dd><ul>
+      			  <li>
+      			  <input type="checkbox" name="document.subAwardList[0].subAwardForms[1].selectToPrint" value="on">
+      			  EPA Attachment
+      			  </li>
+      			  </ul></dd>
+      			  
+      			  
+      			  
+				
+				
+				
+				 <dd><ul>
+				  <li>
+				  <input type="checkbox" name="document.subAwardList[0].subAwardForms[2].selectToPrint" value="on">
+				  ONR Attachment
+				</li>
+				</ul></dd>
+      			   
+      			  
+      			  
+      			  
+				
+				
+				
+      			  
+      			 <dd><ul>
+      			  <li>
+      			  <input type="checkbox" name="document.subAwardList[0].subAwardForms[3].selectToPrint" value="on">
+      			  USDA Attachment
+      			  </li>
+      			  </ul></dd>
+      			  
+      			  
+      			  
+				
+				
+				
+				 <dd><ul>
+				  <li>
+				  <input type="checkbox" name="document.subAwardList[0].subAwardForms[4].selectToPrint" value="on">
+				  NASA Attachment
+				</li>
+				</ul></dd>
+      			   
+      			  
+      			  
+      			  
+				
+				
+				
+      			  
+      			 <dd><ul>
+      			  <li>
+      			  <input type="checkbox" name="document.subAwardList[0].subAwardForms[5].selectToPrint" value="on">
+      			  DOE Attachment
+      			  </li>
+      			  </ul></dd>
+      			  
+      			  
+      			  
+				
+				
+				
+				 <dd><ul>
+				  <li>
+				  <input type="checkbox" name="document.subAwardList[0].subAwardForms[6].selectToPrint" value="on">
+				  AFOSR Attachment
+				</li>
+				</ul></dd>
+      			   
+      			  
+      			  
+      			  
+				
+				
+				
+      			  
+      			 <dd><ul>
+      			  <li>
+      			  <input type="checkbox" name="document.subAwardList[0].subAwardForms[7].selectToPrint" value="on">
+      			  AMRMC Attachment
+      			  </li>
+      			  </ul></dd>
+      			  
+      			  
+      			  
+				
+				
+				
+				 <dd><ul>
+				  <li>
+				  <input type="checkbox" name="document.subAwardList[0].subAwardForms[8].selectToPrint" value="on">
+				  ARO Attachment
+				</li>
+				</ul></dd>
+      			   
+      			  
+      			  
+      			  
+				
+				
+				
+      			  
+      			 <dd><ul>
+      			  <li>
+      			  <input type="checkbox" name="document.subAwardList[0].subAwardForms[9].selectToPrint" value="on">
+      			  NIH Attachment
+      			  </li>
+      			  </ul></dd>
+      			  
+      			  
+      			  
+      			  </dl>
+				  </div>
+				
+				</td>
+				
+			   </tr>
+			   <tr>
+				<td scope="row" style="width:160px; text-align:center;">Subaward Attachments:</td>
+				
+				<td>
+				
+				
+				<div class="multi-col-list" id="awardPrintNoticeItems">
+				 <dl>
+				
+      			  </dl>
+      			 </div>
+      			  </td>
+      			  </tr>
+			   
+				<tr>
+				  <td colspan="3" style="text-align: center;">
+					  <input type="image" name="methodToCall.selectAllSubAwardPrintNoticeItems.anchorPrint" src="./SubawardActions_files/tinybutton-selectall.gif" onclick="setAllItemsIn(&#39;awardPrintNoticeItems&#39;, true);return false;" class="tinybutton" title="Select All" alt="Select All">
+      			      <input type="image" name="methodToCall.deselectAllSubAwardPrintNoticeItems.anchorPrint" src="./SubawardActions_files/tinybutton-selectnone.gif" onclick="setAllItemsIn(&#39;awardPrintNoticeItems&#39;, false);return false;" class="tinybutton" title="Select None" alt="Select None">
+				  </td>
+				</tr>
+				
+				
+    	</tbody></table>
+		</div>
+
+        <!-- After the jsp:doBody of the kul:tab tag -->
+
+
+
+</div>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+        
+    
+
+
+<!--  hit form method to increment tab index -->
+
+
+
+
+    
+        
+    
+    
+
+
+<!-- if the section has errors, override and set isOpen to true -->
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+		
+			
+		
+			
+		
+			
+		
+			
+		
+	
+
+	
+
+
+
+
+
+
+  
+
+
+
+
+
+
+<input type="hidden" name="tabStates(AdHocRecipients)" value="CLOSE">
+<!-- TAB -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <table width="100%" class="tab" cellpadding="0" cellspacing="0" summary="" border="1">
+          <tbody><tr>
+              
+	          
+			  
+			  	<td class="tabtable1-left">
+			  
+			  
+
+              <img src="./SubawardActions_files/tab-topleft1.gif" alt="" width="12" height="29" align="absmiddle">
+              
+              <a name="AdHocRecipients"></a>
+              
+                
+                
+                  <h2>Ad Hoc Recipients</h2>
+                
+              
+              
+              
+              
+            </td>
+            
+
+            
+
+      		
+
+            <td class="tabtable2-mid">
+
+            
+    		
+               
+               
+                 <input type="image" name="methodToCall.toggleTab.tabAdHocRecipients" src="./SubawardActions_files/tinybutton-show.gif" tabindex="-1" onclick="javascript: return toggleTab(document, &#39;AdHocRecipients&#39;); " id="tab-AdHocRecipients-imageToggle" class="tinybutton" title="open Ad Hoc Recipients" alt="open Ad Hoc Recipients">
+               
+               
+                
+                
+
+            </td>
+            <td class="tabtable2-right"><img src="./SubawardActions_files/tab-topright1.gif" alt="" width="12" height="29" align="middle"></td>
+          </tr>
+        </tbody></table>
+
+
+
+
+
+<div style="display: none;" id="tab-AdHocRecipients-div">
+
+
+
+
+        <!-- display errors for this tab -->
+        
+          <div class="tab-container-error"><div class="left-errmsg-tab">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+</div></div>
+        
+
+        <!-- comment for reference by KRA devs during KNS extraction -->
+        
+
+
+        <!-- Before the jsp:doBody of the kul:tab tag -->
+        
+
+        <div class="tab-container" align="center">
+    <h3>Ad Hoc Recipients</h3>
+            <table cellpadding="0" cellspacing="0" class="datatable" summary="view/edit ad hoc recipients">
+        
+              <tbody><tr>
+                <td colspan="4" class="tab-subhead">Person Requests:</td>
+              </tr>
+            <tr>
+                  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col">&nbsp;
+    
+    
+    
+        
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <font color="">*&nbsp;</font>
+
+Action Requested
+
+
+
+        
+    
+      
+</th>
+
+                  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="2" scope="col">&nbsp;
+    
+    
+    
+        
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <font color="">*&nbsp;</font>
+
+Person
+
+
+
+        
+    
+      
+</th>
+
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col">&nbsp;
+    
+    
+    
+        
+        Actions
+            
+        
+        
+    
+      
+</th>
+
+              </tr>
+
+                <tr>
+                    <td class="infoline"><div align="center">
+                        <input type="hidden" name="newAdHocRoutePerson.type" value="0">
+                        
+                        
+                                                
+                        
+                          
+                        
+                        
+                          
+                        
+                        <select name="newAdHocRoutePerson.actionRequested" title="* Action Requested"><option value="A" selected="selected">APPROVE</option>
+<option value="C">COMPLETE</option>
+<option value="F">FYI</option>
+<option value="K">ACKNOWLEDGE</option></select></div>
+                    </td>
+					
+					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+		
+			
+		
+	
+
+	
+
+
+
+
+
+
+				
+                    <td class="infoline" colspan="2"><div align="center">
+                        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+  
+  
+    
+    <input type="text" id="newAdHocRoutePerson.id" name="newAdHocRoutePerson.id" value="" title="Principal Name" size="10" maxlength="40" style="" onblur="loadUserInfo( &#39;newAdHocRoutePerson.id&#39;, &#39;&#39;, &#39;newAdHocRoutePerson.name&#39; );" onchange="" tabindex="">
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+
+  
+  
+    
+  
+
+
+
+ 
+<input type="image" tabindex="1000011" name="methodToCall.performLookup.(!!org.kuali.rice.kim.api.identity.Person!!).(((principalName:newAdHocRoutePerson.id,name:newAdHocRoutePerson.name))).((`newAdHocRoutePerson.id:principalName`)).((&lt;&gt;)).(([])).((**)).((^^)).((&amp;&amp;)).((//)).((~~)).(::::;;::::).anchor6" src="./SubawardActions_files/searchicon.gif" border="0" class="tinybutton" valign="middle" alt="Search " title="Search ">
+
+  
+
+
+  
+  
+    
+    <br>
+  
+
+
+    
+        <span id="newAdHocRoutePerson.name.div">&nbsp;</span>
+    
+    
+
+  
+
+
+  
+  <input type="hidden" name="newAdHocRoutePerson.name" id="newAdHocRoutePerson.name" value="">
+
+
+
+
+                    </div></td>
+                    <td class="infoline"><div align="center">
+                        <input type="image" name="methodToCall.insertAdHocRoutePerson" src="./SubawardActions_files/tinybutton-add1.gif" class="tinybutton" title="Insert Additional Ad Hoc Person" alt="Insert Additional Ad Hoc Person"></div>
+                    </td>
+                </tr>
+              
+        
+          <tr>
+                <td colspan="4" class="tab-subhead">Ad Hoc Group Requests:</td>
+              </tr>
+            <tr>
+                  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col">&nbsp;
+    
+    
+    
+        
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <font color="">*&nbsp;</font>
+
+Action Requested
+
+
+
+        
+    
+      
+</th>
+
+                  
+                  
+                  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col">&nbsp;
+    
+    
+    
+        
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <font color="">*&nbsp;</font>
+
+Namespace Code
+
+
+
+        
+    
+      
+</th>
+
+                  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col">&nbsp;
+    
+    
+    
+        
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <font color="">*&nbsp;</font>
+
+Name
+
+
+
+        
+    
+      
+</th>
+
+                  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<th rowspan="1" colspan="1" scope="col">&nbsp;
+    
+    
+    
+        
+        Actions
+            
+        
+        
+    
+      
+</th>
+
+              </tr>
+                <tr>
+                    <td class="infoline"><div align="center">
+                        <input type="hidden" name="newAdHocRouteWorkgroup.type" value="1">
+                        <select name="newAdHocRouteWorkgroup.actionRequested" title="* Action Requested"><option value="A" selected="selected">APPROVE</option>
+<option value="C">COMPLETE</option>
+<option value="F">FYI</option>
+<option value="K">ACKNOWLEDGE</option></select></div>
+                    </td>
+                    <td class="infoline"><div align="center">
+                        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+		
+			
+		
+	
+
+	
+
+
+
+	
+		
+	
+
+
+
+
+
+
+
+
+
+	
+
+
+  
+  
+    
+    
+  
+
+
+
+
+  
+    
+    
+           <input type="text" name="newAdHocRouteWorkgroup.recipientNamespaceCode" maxlength="40" size="10" tabindex="7" value="" onchange="" onblur="" id="newAdHocRouteWorkgroup.recipientNamespaceCode" style="" class="" title="Namespace Code">
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+  
+  
+  
+  
+  	
+
+
+
+
+
+                    </div></td>
+                    <td class="infoline"><div align="center">
+                        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+		
+			
+		
+	
+
+	
+
+
+
+	
+		
+	
+
+
+
+
+
+
+
+
+
+	
+
+
+  
+  
+    
+    
+  
+
+
+
+
+  
+    
+    
+           <input type="text" name="newAdHocRouteWorkgroup.recipientName" maxlength="80" size="10" tabindex="8" value="" onchange="" onblur="" id="newAdHocRouteWorkgroup.recipientName" style="" class="" title="Name">
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+  
+  
+  
+  
+  	
+
+
+
+
+
+                        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+
+  
+  
+    
+  
+
+
+
+ 
+<input type="image" tabindex="1000012" name="methodToCall.performLookup.(!!org.kuali.rice.kim.impl.group.GroupBo!!).(((namespaceCode:newAdHocRouteWorkgroup.recipientNamespaceCode,name:newAdHocRouteWorkgroup.recipientName))).((`newAdHocRouteWorkgroup.recipientNamespaceCode:namespaceCode,newAdHocRouteWorkgroup.recipientName:name`)).((&lt;&gt;)).(([])).((**)).((^^)).((&amp;&amp;)).((//)).((~~)).(::::;;::::).anchor" src="./SubawardActions_files/searchicon.gif" border="0" class="tinybutton" valign="middle" alt="Search " title="Search ">
+
+</div>
+                    </td>
+                    <td class="infoline"><div align="center">
+                        <input type="image" name="methodToCall.insertAdHocRouteWorkgroup" src="./SubawardActions_files/tinybutton-add1.gif" class="tinybutton" title="Insert Additional Ad Hoc Workgroup" alt="Insert Additional Ad Hoc Workgroup"></div>
+                    </td>
+                </tr>
+                
+          </tbody></table>
+          </div>
+      
+        <!-- After the jsp:doBody of the kul:tab tag -->
+
+
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+        
+    
+
+
+<!--  hit form method to increment tab index -->
+
+
+
+
+    
+        
+    
+    
+
+
+<!-- if the section has errors, override and set isOpen to true -->
+
+
+
+
+
+
+<input type="hidden" name="tabStates(RouteLog)" value="CLOSE">
+<!-- TAB -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <table width="100%" class="tab" cellpadding="0" cellspacing="0" summary="" border="1">
+          <tbody><tr>
+              
+	          
+			  
+			  	<td class="tabtable1-left">
+			  
+			  
+
+              <img src="./SubawardActions_files/tab-topleft1.gif" alt="" width="12" height="29" align="absmiddle">
+              
+              <a name="RouteLog"></a>
+              
+                
+                
+                  <h2>Route Log</h2>
+                
+              
+              
+              
+              
+            </td>
+            
+
+            
+
+      		
+
+            <td class="tabtable2-mid">
+
+            
+    		
+               
+               
+                 <input type="image" name="methodToCall.toggleTab.tabRouteLog" src="./SubawardActions_files/tinybutton-show.gif" tabindex="-1" onclick="javascript: return toggleTab(document, &#39;RouteLog&#39;); " id="tab-RouteLog-imageToggle" class="tinybutton" title="open Route Log" alt="open Route Log">
+               
+               
+                
+                
+
+            </td>
+            <td class="tabtable2-right"><img src="./SubawardActions_files/tab-topright1.gif" alt="" width="12" height="29" align="middle"></td>
+          </tr>
+        </tbody></table>
+
+
+
+
+
+<div style="display: none;" id="tab-RouteLog-div">
+
+
+
+
+        <!-- display errors for this tab -->
+        
+
+        <!-- comment for reference by KRA devs during KNS extraction -->
+        
+
+
+        <!-- Before the jsp:doBody of the kul:tab tag -->
+        
+<div class="tab-container" align="center">
+	
+	  <iframe onload="setRouteLogIframeDimensions();" name="routeLogIFrame" id="routeLogIFrame" src="./SubawardActions_files/RouteLog.html" height="500" width="95%" hspace="0" vspace="0" frameborder="0" title="Workflow Route Log for document id: 459732" style="height: 940px;">
+	  </iframe>
+	
+</div>
+
+        <!-- After the jsp:doBody of the kul:tab tag -->
+
+
+
+</div>
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+   
+        <table width="100%" border="0" cellpadding="0" cellspacing="0" class="b3" summary="">
+          <tbody><tr>
+            <td align="left" class="footer"><img src="./SubawardActions_files/pixel_clear.gif" alt="" width="12" height="14" class="bl3"></td>
+            <td align="right" class="footer-right"><img src="./SubawardActions_files/pixel_clear.gif" alt="" width="12" height="14" class="br3"></td>
+          </tr>
+        </tbody></table>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        
+		
+		
+	        <div id="globalbuttons" class="globalbuttons">
+	        	
+	        	
+	            
+	            
+	            
+	            
+	                <input type="image" name="methodToCall.route" src="./SubawardActions_files/buttonsmall_submit.gif" tabindex="0" onclick="resetScrollPosition();" class="globalbuttons" title="submit" alt="submit">
+	            
+	            
+	                <input type="image" name="methodToCall.save" src="./SubawardActions_files/buttonsmall_save.gif" tabindex="0" onclick="resetScrollPosition();" class="globalbuttons" title="save" alt="save">
+	            
+	            
+	                <input type="image" name="methodToCall.reload" src="./SubawardActions_files/buttonsmall_reload.gif" tabindex="0" onclick="excludeSubmitRestriction=true;resetScrollPosition();" class="globalbuttons" title="reload" alt="reload">
+	            
+	            
+	                <input type="image" name="methodToCall.blanketApprove" src="./SubawardActions_files/buttonsmall_blanketapp.gif" tabindex="0" onclick="resetScrollPosition();" class="globalbuttons" title="blanket approve" alt="blanket approve">
+	            
+	            
+	            
+	            
+	            
+	            
+	                <input type="image" name="methodToCall.close" src="./SubawardActions_files/buttonsmall_close.gif" tabindex="0" class="globalbuttons" title="close" alt="close">
+	                        
+	            
+              
+                
+	        </div>
+        
+        
+
+<script language="javascript" src="./SubawardActions_files/kuali_application.js.download"></script>
+
+
+
+
+
+	
+	
+					<div class="left-errmsg">
+															
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+					</div>
+					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+		<!-- footer -->
+		
+			
+				
+			
+		
+		
+					<p>&nbsp;</p>
+				</div></td>
+				<!-- KULRICE-8093: Horizontal scrolling for maintenance documents with errors listed  -->
+				<td width="21"><img src="./SubawardActions_files/pixel_clear.gif" alt="" width="20" height="20"></td>
+			</tr>
+		</tbody></table>
+	
+
+
+
+
+					<!-- So that JS expandAllTab / collapseAllTab know the tabStates size. Subtract 1 because currentTabIndex = size + 1. -->
+														<input type="hidden" name="tabStatesSize" value="9">
+
+
+					<!-- state maintenance for returning the user to the action list if they started there -->
+														
+															<input type="hidden" name="returnToActionList" value="No">
+					
+	
+
+
+    <input type="hidden" name="documentWebScope" value="session">
+	<input type="hidden" name="formKey" value="2">
+	<input type="hidden" name="docFormKey" value="2">
+    <input type="hidden" name="docNum" value="459732">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<input type="hidden" name="actionEditablePropertiesGuid" value="c44b6ff1-4ab3-4500-910d-7e3685426943">
+
+
+<input type="hidden" name="csrfToken" value="d4051d1a-af6c-48db-bdf1-c39d76a7f2db">
+
+
+</form>
+<div id="formComplete"></div>
+</div>
+
+
+
+
+
+<div id="fancybox-tmp"></div><div id="fancybox-loading"><div></div></div><div id="fancybox-overlay"></div><div id="fancybox-wrap"><div id="fancybox-outer"><div class="fancybox-bg" id="fancybox-bg-n"></div><div class="fancybox-bg" id="fancybox-bg-ne"></div><div class="fancybox-bg" id="fancybox-bg-e"></div><div class="fancybox-bg" id="fancybox-bg-se"></div><div class="fancybox-bg" id="fancybox-bg-s"></div><div class="fancybox-bg" id="fancybox-bg-sw"></div><div class="fancybox-bg" id="fancybox-bg-w"></div><div class="fancybox-bg" id="fancybox-bg-nw"></div><div id="fancybox-content"></div><a id="fancybox-close"></a><div id="fancybox-title"></div><a href="javascript:;" id="fancybox-left"><span class="fancy-ico" id="fancybox-left-ico"></span></a><a href="javascript:;" id="fancybox-right"><span class="fancy-ico" id="fancybox-right-ico"></span></a></div></div><div class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-front ui-draggable ui-resizable" tabindex="-1" role="dialog" aria-describedby="dialog" aria-labelledby="ui-id-1" style="display: none; position: absolute;"><div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix ui-draggable-handle"><span id="ui-id-1" class="ui-dialog-title">Short Url</span><button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only ui-dialog-titlebar-close" role="button" title="Close"><span class="ui-button-icon-primary ui-icon ui-icon-closethick"></span><span class="ui-button-text">Close</span></button></div><div style="min-height:50px" id="dialog" class="ui-dialog-content ui-widget-content">
+    <input id="shortUrlText" style="width:100%" type="text" value="https://kuali-research-qa.bu.edu/kc/kc-common/subawards/1835">
+</div><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-e" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-s" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-sw" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-ne" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90;"></div></div></body></html>

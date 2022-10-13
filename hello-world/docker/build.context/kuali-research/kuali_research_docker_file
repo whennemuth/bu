@@ -1,0 +1,41 @@
+FROM tomcat:8-jre8
+MAINTAINER Warren
+
+# Beef up the memory to get the most it can for a t2.medium (4GB)
+# NOTE: This can be alternatively set by including a setenv.sh file in the build context with these settings (uncomment the corresponding COPY statement below)
+#       Also, you can override this setting by including it in an -e switch of the docker container run command.
+ENV JAVA_OPTS="-Xmx3072m -Xms512m -XX:MaxPermSize=256m"
+
+USER root
+
+RUN \
+   mkdir -p /usr/local/tomcat/webapp_mount && \
+   mkdir -p /root/kuali/main/dev && \
+   mkdir -p /root/kuali/main/config && \
+   mkdir -p /root/kuali/main/logs/printing
+
+# Copy the setenv.sh file into the the catalina bin directory to increase the java heap size.
+# COPY setenv.sh /usr/local/tomcat/bin
+
+# Copy the spring intrumentation jar file to the tomcat lib directory
+COPY spring-instrument-tomcat-3.2.13.RELEASE.jar /usr/local/tomcat/lib
+
+# Copy the mysql driver to the tomcat lib directory
+COPY mysql-connector-java-5.1.38-bin.jar /usr/local/tomcat/lib
+
+# Overwrite the context.xml in the catalina conf directory with one that includes a reference to the spring intrumentation jar
+COPY context.xml /usr/local/tomcat/conf/context.xml
+
+# Copy the kc-config.xml file to the user directory
+COPY kc-config.xml /root/kuali/main/dev
+COPY kc-config.xml /root/kuali/main/config
+
+# Copy in a script that will run catalina.sh, but only after it does some custom tasks first.
+# Namely, copying war file from mounted directory to webapps dir so containter can start with last built war running.
+COPY tomcatInit.sh /usr/local/tomcat/bin
+RUN chmod ugo+x /usr/local/tomcat/bin/tomcatInit.sh
+
+# 8080 is already exposed in parent image. Expose port 80 as well.
+EXPOSE 80
+
+CMD ["tomcatInit.sh"]

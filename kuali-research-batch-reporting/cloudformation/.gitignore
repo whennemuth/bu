@@ -1,0 +1,7 @@
+json
+json/*
+cloudfront-key
+cloudfront-key.pub
+*.pem
+*.temp
+last-cmd.sh

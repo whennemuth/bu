@@ -1,0 +1,245 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>THIS IS THE STARTING POINT FOR A MANUAL BUILD OF THE RESEARCH PDF APPLICATION&#xd;
+</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>VERBOSE</name>
+          <description></description>
+          <randomName>choice-parameter-70832967218311944</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def opendiv = &quot;&lt;div style=&apos;font-size:14px;font-family:verdana; width:500px; align:left;&apos;&gt;&quot;
+def checkbox = &quot;&lt;input type=&apos;checkbox&apos; name=&apos;value&apos; value=&apos;false&apos; style=&apos;display:inline;&apos;&gt;&quot;
+def desc = &quot;If checked log output will be verbose.&quot;
+def closediv = &quot;&lt;/div&gt;&quot;
+return opendiv + checkbox + desc + closediv</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;Error creating verbose selection&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-pdf-1-update-docker-image</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>BU_VERSION</name>
+          <description></description>
+          <randomName>choice-parameter-70667680918360775</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>// Create the picklist for ECR images
+def sb = new StringBuilder(&quot;&lt;table border=0 style=&apos;padding-left:5px;&apos;&gt;&lt;tr&gt;&quot;)
+sb.append(&quot;&lt;/td&gt;&lt;td style=&apos;font-size:14px;font-family:verdana;&apos;&gt;&quot;)
+sb.append(&quot;Research-pdf image versions available in our ECR repository&quot;)
+sb.append(&quot;&lt;/td&gt;&lt;/tr&gt;&lt;td&gt;&quot;)
+
+sb.append(&quot;&lt;select name=&apos;value&apos; style=&apos;width:300px;font-family:monospace;&apos;&gt;&quot;)
+def ecrCmd = &quot;aws ecr list-images --registry-id 730096353738 --repository-name research-pdf | jq &apos;.imageIds[].imageTag&apos; | sed &apos;s/\&quot;//g&apos;&quot;
+def ecrCmdArr = [ &quot;sh&quot;, &quot;-c&quot;, ecrCmd ]
+def ecrCmdProcess = new ProcessBuilder(ecrCmdArr).start()
+ecrCmdProcess.inputStream.eachLine {
+   sb.append(&quot;&lt;option value=&apos;${it}&apos;&gt;${it}&lt;/option&gt;&quot;)
+}
+ecrCmdProcess.waitFor()
+sb.append(&quot;&lt;/select&gt;&quot;)
+
+sb.append(&quot;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&quot;)
+
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; readonly=true name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px; font-family:monospace;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-pdf-1-update-docker-image</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>KUALICO_IMAGE</name>
+          <description></description>
+          <randomName>choice-parameter-70836855878651228</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>import jenkins.*
+import jenkins.model.* 
+import hudson.*
+import hudson.model.*
+def jenkinsCredentials = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(
+        com.cloudbees.plugins.credentials.Credentials.class,
+        Jenkins.instance,
+        null,
+        null
+);
+
+def sb = new StringBuilder(&quot;&lt;table border=0 style=&apos;padding-left:5px;&apos;&gt;&lt;tr&gt;&quot;)
+sb.append(&quot;&lt;/td&gt;&lt;td style=&apos;font-size:14px;font-family:verdana;&apos;&gt;&quot;)
+sb.append(&quot;Research-pdf images available in the kualico registry&quot;)
+sb.append(&quot;&lt;/td&gt;&lt;/tr&gt;&lt;td&gt;&quot;)
+
+// Get the github personal access token and the dockerhub username and password
+def secret = &quot;unknown&quot;
+def username = &quot;unknown&quot;
+def password = &quot;unknown&quot;
+for (creds in jenkinsCredentials) {
+    if ( &quot;credentials.bu.github.token&quot;.equals(creds.id)) {
+        secret = creds.secret
+    }
+    if( &quot;credentials.kualico.dockerhub&quot;.equals(creds.id)) {
+        username = creds.username
+        password = creds.password
+    }
+}
+
+// Get the raw content of the dockerhub.sh file using the token and execute it. Output will be a list of docker images.
+def cmd = 
+      &quot;curl&quot; +
+      &quot;  -H &apos;Authorization: token ${secret}&apos;&quot; +
+      &quot;  -L https://api.github.com/repos/bu-ist/kuali-research-docker/contents/dockerhub.sh&quot; +
+      &quot;  | jq &apos;.content&apos;&quot; +
+      &quot;  | sed &apos;s/\\\\n//g&apos;&quot; + 
+      &quot;  | sed &apos;s/\&quot;//g&apos;&quot; + 
+      &quot;  | base64 --decode | bash -s &apos;${username}&apos; &apos;${password}&apos; &apos;research-pdf&apos; &apos;kuali&apos;&quot;
+
+def cmdarr = [ &quot;sh&quot;, &quot;-c&quot;, cmd ]
+def process = new ProcessBuilder(cmdarr).start()
+process.waitFor();
+
+// Output the list of docker images to a listbox
+sb.append(&quot;&lt;select name=&apos;value&apos; style=&apos;width:300px;font-family:monospace;&apos;&gt;&quot;)
+process.inputStream.eachLine {
+   if( ! &quot;${it}&quot;.endsWith(&quot;:latest&quot;)) {
+        sb.append(&quot;&lt;option value=&apos;&quot;).append(&quot;${it}&quot;).append(&quot;&apos;&gt;&quot;).append(&quot;${it}&quot;).append(&quot;&lt;/option&gt;&quot;)
+   }
+}
+process.waitFor();
+sb.append(&quot;&lt;/select&gt;&quot;)
+
+sb.append(&quot;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&quot;)
+
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; readonly=true name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px; font-family:monospace;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-pdf-1-update-docker-image</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>[ &quot;$(echo $VERBOSE | sed &apos;s/,//g&apos;)&quot; == false ] &amp;&amp; set +x
+
+ECR_REGISTRY=&quot;730096353738.dkr.ecr.us-east-1.amazonaws.com&quot;
+KUALICO_IMAGE=&quot;$(echo $KUALICO_IMAGE | sed &apos;s/,//g&apos;)&quot;
+KUALI_VERSION=&quot;$(echo $KUALICO_IMAGE | cut -d&apos;:&apos; -f2)&quot;
+
+# 1) Validate entries. Make sure the dockerhub image to pull has not already been pushed to the ecr.
+printf &quot;\nVALIDATING: Checking whether research-pdf/$KUALI_VERSION already exists in the ecr:\n&quot;
+found=&quot;&quot;
+for bu_version in $(aws ecr list-images --registry-id 730096353738 --repository-name research-pdf | jq &apos;.imageIds[].imageTag&apos; | sed &apos;s/&quot;//g&apos;) ; do
+  printf &quot;Found ${bu_version}&quot;
+  if [ &quot;$bu_version&quot; == &quot;$KUALI_VERSION&quot; ] ; then
+  	found=&quot;true&quot;
+    printf &quot; (oops!)...&quot;
+  else
+    printf &quot;...&quot;
+  fi
+  printf &quot;\n&quot;
+done
+
+if [ -n &quot;$found&quot; ] ; then
+  printf &quot;\n&quot;
+  echo &quot;INVALID SELECTION: research-pdf:$KUALI_VERSION already exists in the ecr!&quot;
+  echo &quot;This probably means you can relax and go to your next step.&quot;
+  echo &quot;However, if what&apos;s in the ecr is tagged incorrectly, remove it from there first and try again.&quot;
+  printf &quot;\n&quot;
+  exit 1
+fi
+
+# 2) Authenticate and then retrieve the specified image from dockerhub
+printf &quot;\nPULLING $KUALICO_IMAGE from dockerhub.com\n&quot;
+echo &quot;$DOCKERHUB_PASSWORD&quot; | docker login --username $DOCKERHUB_USERNAME --password-stdin
+docker pull $KUALICO_IMAGE
+
+exit 0
+
+# 3) Tag the downloaded image so it is uploadable to the ecr
+printf &quot;\nTAGGING: Creating tag: $ECR_REGISTRY/research-pdf:$KUALI_VERSION:\n&quot;
+docker tag ${KUALICO_IMAGE} ${ECR_REGISTRY}/research-pdf:${KUALI_VERSION}
+
+# 4) Log into the ecr and push the image to it.
+printf &quot;\nPUSHING: Logging into ecr and pushing $ECR_REGISTRY/research-pdf:${KUALI_VERSION} to it:\n&quot;
+evalstr=&quot;$(aws ecr get-login)&quot;
+# NOTE: The ecr get-login command of the aws cli returns a docker command that includes a removed switch.
+# The -e (email) switch will be rejected by the newer version of docker that we have installed on our aws
+# ec2 instances to accomodate cloud watch logging from our containers. Therefore I am removing the offending
+# &quot;-e none&quot; portion of the command with the stream editor.
+evalstr=&quot;$(echo $evalstr | sed &apos;s/ -e none//&apos;)&quot;
+eval $evalstr
+
+docker push $ECR_REGISTRY/research-pdf:${KUALI_VERSION}
+
+printf &quot;\n\nBuild Completed!&quot;</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.37">
+      <deleteDirs>false</deleteDirs>
+      <cleanupParameter></cleanupParameter>
+      <externalDelete></externalDelete>
+      <disableDeferredWipeout>false</disableDeferredWipeout>
+    </hudson.plugins.ws__cleanup.PreBuildCleanup>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.18">
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+          <credentialsId>credentials.kualico.dockerhub</credentialsId>
+          <usernameVariable>DOCKERHUB_USERNAME</usernameVariable>
+          <passwordVariable>DOCKERHUB_PASSWORD</passwordVariable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+      </bindings>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
+  </buildWrappers>
+</project>

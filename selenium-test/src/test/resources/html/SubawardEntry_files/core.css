@@ -1,0 +1,644 @@
+/*
+ * Kuali Coeus, a comprehensive research administration system for higher education.
+ * 
+ * Copyright 2005-2016 Kuali, Inc.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* These override styles exist to get the new look. Eventually these rules will be
+   placed in a more appropriate place. */
+.logoBrand .actionImage {
+	padding-top: 5px;
+	height: 45px;
+	padding-left: 9px;
+}
+
+#DummyLoginView #u1rttg5q > div:first-child {
+	height: 200px;
+	width: 371px;
+	margin: 0 auto;
+	-webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.08) inset;
+	-moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.08) inset;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.08) inset;
+	float: inherit !important;
+	background-image: url('../images/KualiCo.png');
+	background-size: 32px;
+	background-repeat: no-repeat;
+	background-position: 50px 30px;
+	margin-top: 25px;
+}
+
+#Rice-LoginButton.btn-primary {
+	color: #ffffff;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+	background-color: #217a98;
+	background-image: -moz-linear-gradient(top, #2587a9, #1c667f);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#2587a9), to(#1c667f));
+	background-image: -webkit-linear-gradient(top, #2587a9, #1c667f);
+	background-image: -o-linear-gradient(top, #2587a9, #1c667f);
+	background-image: linear-gradient(to bottom, #2587a9, #1c667f);
+	background-repeat: repeat-x;
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff2587a9', endColorstr='#ff1c667f', GradientType=0);
+	border-color: #1c667f #1c667f #0e3340;
+	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+	filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+	padding: 2px 10px;
+	font-size: 11.9px;
+	-webkit-border-radius: 3px !important;
+	-moz-border-radius: 3px !important;
+	border-radius: 3px !important;
+	top: 158px;
+	left: 128px;
+}
+
+#DummyLoginView .uif-headerText-span {
+	font-family: 'Open Sans', sans-serif;
+	font-size: 28px;
+	font-weight: bold;
+	top: 39px;
+	left: 127px;
+}
+
+#DummyLoginView #Rice-UserName_label, #DummyLoginView #Rice-Password_label {
+	font-family: 'Open Sans', sans-serif;
+	font-size: 14px;
+	font-weight: normal;
+	line-height: 20px;
+	left: 50px;
+}
+
+#DummyLoginView #Rice-UserName_label {
+	top: 71px;
+}
+
+#DummyLoginView #Rice-Password_label {
+	top: 116px;	
+}
+
+#DummyLoginView #Rice-UserName_control, #DummyLoginView #Rice-Password_control {
+	font-size: 14px;
+	padding: 4px 6px;
+	background-color: #ffffff;
+	border: 1px solid #cccccc;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	-webkit-transition: border linear .2s, box-shadow linear .2s;
+	-moz-transition: border linear .2s, box-shadow linear .2s;
+	-o-transition: border linear .2s, box-shadow linear .2s;
+	transition: border linear .2s, box-shadow linear .2s;
+	-webkit-border-radius: 4px !important;
+	-moz-border-radius: 4px !important;
+	border-radius: 4px !important;
+	vertical-align: middle;
+}
+
+#DummyLoginView #Rice-UserName_control {
+	top: 71px;
+	left: 128px;
+	width: 214px;
+}
+
+#DummyLoginView #Rice-UserName_control:focus, #DummyLoginView #Rice-Password_control:focus {
+	background-color: #ffffff;
+	border-color: rgba(82, 168, 236, 0.8);
+	outline: 0;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+	-moz-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+}
+
+#DummyLoginView #Rice-Password_control {
+	top: 115px;
+	left: 128px;
+	width: 214px;
+}
+
+#LoginSection_headerWrapper {
+	position: absolute;
+}
+
+#DummyLoginView #u4t04te {
+	position: absolute;
+}
+
+#Rice-LoginMessage {
+	top: 161px;
+	left: 194px;
+	width: 100px;
+	color: red;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 14px;
+}
+
+#DummyLoginView section#LoginSection > *, 
+#Rice-UserName_label,
+#Rice-UserName_control,
+#Rice-Password_label,
+#Rice-Password_control,
+#Rice-LoginButton.btn-primary,
+#Rice-LoginMessage,
+#DummyLoginView .uif-headerText-span {
+	position: absolute;
+}
+
+#u1nruckb {
+	float: inherit;
+	text-align: center;
+	width: 100%;
+	right: inherit;
+	margin-top: 20px;
+}
+
+#u1nruckb > p {
+	float: inherit;
+}
+
+body#Uif-Application {
+	background-color: white;
+}
+
+#Uif-Navigation ul.nav.nav-list>.active>a,
+#Uif-Navigation ul.nav.nav-list > li > a:hover, 
+#Uif-Navigation ul.nav > li > a:focus,
+#Uif-Navigation ul.nav.nav-list>li>a:hover,
+.nav .open > a, 
+.nav .open > a:hover, 
+.nav .open > a:focus {
+	background: none repeat scroll 0 0 #0A7194 !important;
+}
+
+.nav-list > li ul.submenu > li.active > a {
+	background-color: #DCF6FF !important;
+}
+
+#Uif-GlobalApplicationHeader, 
+#Uif-GlobalApplicationHeader nav.navbar,
+#Uif-GlobalApplicationHeader .navbar a:hover,
+#Uif-GlobalApplicationHeader .navbar a:focus {
+	background-color: #2587a9 !important;
+}
+
+#Uif-GlobalApplicationHeader .navbar .nav .open > a:focus,
+#Uif-GlobalApplicationHeader .navbar .nav .open > a:active,
+#Uif-GlobalApplicationHeader .navbar .nav .open > a:hover,
+#Uif-GlobalApplicationHeader .navbar .nav .open > a {
+	background-color: #1f708c !important;
+}
+
+#Uif-GlobalApplicationHeader .navbar .nav a.dropdown-toggle {
+	color: #eee;
+}
+
+#Uif-GlobalApplicationHeader .navbar .nav a:hover {
+	color: white;
+}
+
+#Uif-GlobalApplicationHeader .app-header-version {
+	display: none;
+}
+
+.toolbar .uif-listLayout .pull-right {
+	float: initial !important;
+	display: inline-block;
+}
+
+.toolbar .uif-listLayout .pull-right:first-child {
+	position: absolute;
+	right: 0;
+	top: -39px;
+	z-index: 999;
+	text-transform: uppercase;
+}
+
+.toolbar .uif-listLayout .pull-right:first-child a {
+	font-size: 13px;
+	border-right: 0;
+}
+
+.toolbar .uif-listLayout .pull-right:first-child a:hover {
+	background-color: transparent;
+}
+
+.toolbar .uif-listLayout .pull-right > a {
+	color: white;
+	font-size: 14px;
+	font-family: 'Open Sans', sans-serif;
+	border-left: 0;
+	border-right: 1px solid #8e9d31;
+	box-shadow: none;
+	padding-right: 9px;
+}
+
+.toolbar .uif-listLayout .pull-right > a:hover,
+.toolbar .uif-listLayout .pull-right > a:focus {
+	background-color: #8e9d31;
+}
+
+#Uif-GlobalApplicationHeader div:first-child .nav.navbar-nav {
+	float: left !important;
+	margin-left: 150px;
+}
+
+#Uif-GlobalApplicationHeader #upils8b {
+	background-color: #b1c04b;
+	background-image: linear-gradient(to bottom, #bccb59, #a0b037);
+	border: 1px solid #768128;
+}
+
+#Uif-GlobalApplicationHeader > .container-fluid:first-child {
+	border-bottom: 1px solid #154e62;
+}
+/* End new styles */
+
+.input-range-msg {
+    width: 1%;
+    font-size: 14px;
+}
+
+.input-group-btn:nth-child(2) > .btn {
+    margin-left: -1px;
+}
+
+.form-inline .form-control {
+    display: inline-block;
+}
+
+.form-control {
+    border-radius: 0 !important;
+}
+
+/** fix for form controls inside input groups that were blocking hovering elements (ie suggestions) **/
+.input-group .form-control {
+    z-index: 1;
+}
+
+/** add bottom border for view header **/
+.uif-viewHeader-contentWrapper {
+    border-bottom: 1px solid #ccc;
+}
+
+.input-group-btn > a {
+    display: inline-block;
+    border-top: 1px solid #aaa;
+    border-right: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;
+    color: #1150b0;
+    border-color: #cccccc;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(20%, #ffffff), color-stop(50%, #ffffff), color-stop(52%, #f2f2f2), color-stop(100%, #e6e6e6));
+    background: -webkit-linear-gradient(top, #ffffff 20%, #ffffff 50%, #f2f2f2 52%, #e6e6e6 100%);
+    background: -moz-linear-gradient(top, #ffffff 20%, #ffffff 50%, #f2f2f2 52%, #e6e6e6 100%);
+    background: -o-linear-gradient(top, #ffffff 20%, #ffffff 50%, #f2f2f2 52%, #e6e6e6 100%);
+    background: linear-gradient(top, #ffffff 20%, #ffffff 50%, #f2f2f2 52%, #e6e6e6 100%);
+    background-clip: padding-box;
+    margin-left: 0px;
+}
+
+.input-group-btn > a.icon-search {
+    padding: 7px 7px 8px 7px;
+}
+
+.input-group-btn > a.icon-edit-sign {
+    padding: 8px 7px 7px 7px;
+}
+
+/** Readonly alignment fix for css grid layout **/
+
+div[class^="col-"] .uif-inputField span[id$="_control"] {
+    display: inline-block;
+    padding-top: 0.5em;
+}
+
+.uif-inputField pre, .uif-field pre {
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+.uif-viewHeader-contentWrapper .uif-viewHeader {
+    margin-top: 0;
+    padding-top: 10px;
+}
+
+.uif-stickyButtonFooter {
+    background: none repeat scroll 0 0 #F8F8F8;
+    border-top: 1px solid #E2E2E2;
+    /* box-shadow: none;     */
+    padding: 0;
+}
+
+.uif-stickyButtonFooter > div {
+    float: right;
+    padding: 15px;
+}
+
+.uif-stickyButtonFooter button {
+    margin: 0;
+}
+
+.textarea_popout {
+    padding: 15px;
+}
+
+.uif-lightbox{
+    width: 720px;
+}
+
+.uif-lightbox h1 {
+    font-size: 26px;
+    margin: 0;
+    padding-bottom: 10px;
+    padding-top: 15px;
+    padding-left: 15px;
+}
+
+.uif-lightbox h3 {
+    font-size: 16px;
+    margin: 0;
+}
+
+.uif-lightbox .uif-cssGridLayout {
+    padding: 15px 15px 1px;
+}
+
+.uif-lightbox .uif-cssGridLayout {
+    background-color: #FFFFFF;
+}
+
+.uif-lightbox .uif-footer {
+    background: none repeat scroll 0 0 #F9F9F9;
+    margin-bottom: 0;
+    padding-top: 5px;
+    text-align: right;
+}
+
+.uif-lightbox > div .uif-label-top {
+    margin-bottom: 5px;
+}
+
+.uif-lightbox .row{
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.fancybox-skin {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 15px !important;
+}
+
+.uif-verticalRadioFieldset > span {
+    margin-bottom: 5px;
+}
+
+.ui-autocomplete-input {
+	background-image: none;
+}
+
+
+.btn {
+    border-radius: 0 !important;
+}
+
+input[type="checkbox"] {
+    margin-top: 8px;
+}
+
+.transparentField .belowInputField {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: -500;
+	text-align: right;
+	color: rgb(130, 130, 130);
+	border: none;
+}
+
+.transparentField .belowInputField.has-helper {
+	padding-right: 65px;
+}
+
+.transparentField .form-control {
+	background-color: transparent;
+}
+
+.uif-actionBar .dataOverride {
+    color: orange;
+}
+
+/** ie specific fix **/
+[data-role="Page"] {
+    display: block !important;
+}
+
+/** Document info styling **/
+
+#PropDev-DefaultView_header, #PropBudget-DefaultView_header {
+    min-height: 5em;
+}
+
+.uif-documentInfo {
+    margin-right: 15px;
+}
+
+.uif-documentInfo .dropdown-menu {
+    width: 40em;
+}
+
+/**  Nav menu responsive to screen size css **/
+
+.kc-navMenuDropdown .dropdown-menu a, .kc-navMenuDropdown .dropdown-menu h3, .kc-navMenuDropdown .dropdown-menu h4 {
+    font-size: .9em;
+}
+
+.kc-navMenuDropdown .dropdown-menu h3, .kc-navMenuDropdown .dropdown-menu h4 {
+    font-size: 1em !important;
+}
+
+@media (min-width: 768px) {
+    .kc-navMenuDropdown .dropdown-menu {
+        min-width: 65em !important;
+    }
+    
+    .kc-reportsDropdown .dropdown-menu {
+    	min-width: 25em !important;
+	}
+
+    .kc-researcherDropdown .dropdown-menu, .kc-unitDropdown .dropdown-menu, .kc-centralAdminDropdown .dropdown-menu, .kc-reportsDropdown .dropdown-menu {
+        left: 0;
+        right: inherit;
+    }
+}
+
+@media (min-width: 992px) {
+    .kc-navMenuDropdown .dropdown-menu {
+        min-width: 70em !important;
+    }
+    
+    .kc-reportsDropdown .dropdown-menu {
+    	min-width: 25em !important;
+	}
+
+    .kc-centralAdminDropdown .dropdown-menu, .kc-reportsDropDown .dropdown-menu {
+        right: 0;
+    }
+}
+
+@media (min-width: 1200px) {
+    .kc-researcherDropdown .dropdown-menu, .kc-unitDropdown .dropdown-menu {
+        right: 0;
+    }
+}
+
+a.paginate_active {
+    color: white;
+    background-color: #07C;
+}
+
+/** z-index fix for blocking element for component refreshes **/
+div.blockOverlay {
+    z-index: 1000 !important;
+}
+
+div.blockElement {
+    z-index: 1001 !important;
+}
+
+.modal div.blockOverlay {
+    z-index: 10000 !important;
+}
+
+.modal div.blockElement {
+    z-index: 10101 !important;
+}
+
+/** center modal footer buttons in all cases... **/
+.modal-footer {
+    text-align: center;
+}
+
+li.kc-listIconDropdown li:before {
+    content: '\e949';
+    font-family: krad-icons;
+    display: inline-block;
+    width: 1em;
+    margin-left: 0em;
+}
+
+li.kc-listIconDropdown li p.uif-boxLayoutHorizontalItem  {
+    float: none;
+    display: inline;
+    margin-right: .2em;
+}
+
+li.kc-listIconDropdown li a.uif-boxLayoutHorizontalItem  {
+    float: none;
+    display: inline;
+    margin-right: .2em;
+    margin-left: .2em;
+}
+
+li.kc-listIconDropdown li div.uif-boxSection  {
+    display: inline-block;
+}
+section.medusa div.jstree a ins {
+    display:none;
+}
+div.medusa-node-value a {
+    display:inline-block;
+    line-height:16px;
+    height:16px;
+    color: #07c;
+    white-space:nowrap;
+    text-decoration:none;
+    padding:1px 2px;
+    margin:0;
+}
+section.medusa a:hover{
+    text-decoration:underline;
+}
+section.medusa div.btn a:hover{
+    text-decoration:none;
+}
+.app-header-version {
+    padding-right: 5px;
+    padding-top: 3px;
+}
+
+/** help menu dropdown **/
+.kc-help-menu .dropdown-menu {
+    left: inherit;
+    right: 0;
+    padding: .5em;
+    top: 22px;
+}
+
+.kc-help-menu .dropdown-menu .divider{
+    display: block;
+    margin: 2px 0;
+}
+
+.kc-help-menu .dropdown-menu .dropdown-header{
+    padding: 0;
+}
+
+
+/** fix for chrome not working with auto resize for rich table **/
+
+.uif-tableCollectionLayout {
+    width: 100% !important;
+}
+
+.kc-applicationFooter {
+    background-color: #2587a9;
+    color: #FFF;
+    bottom: 0px;
+    width: 100%;
+    text-align: center;
+    padding-top: 20px;
+    padding-bottom: 12px;
+    background-repeat: no-repeat;
+    background-position: right 5px;
+    height: 80px;
+}
+
+.kc-applicationFooter a {
+    color:white;
+    text-decoration: underline;
+}
+
+.kc-applicationFooter-version {
+    font-size: 10px;
+}
+
+.kc-applicationFooter .kc-footer-img {
+	height : 50px;
+	width : 50px;
+}
+
+.fluidInputField {
+	min-width: 100px;
+	width: 100%;
+}
+
+.uif-applicationHeader .toolbar {
+	margin-right: 0;
+}

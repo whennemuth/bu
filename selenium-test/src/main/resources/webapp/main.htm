@@ -1,0 +1,110 @@
+<html>
+<body leftmargin=50 topmargin=50 rightmargin=50>
+
+	<head>
+	 	<link rel="stylesheet" type="text/css" href="style.css" />
+		<script src = "http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+		<script src = "http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-route.min.js"></script>
+		<script src = "http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-sanitize.min.js"></script>
+		<script src = "js/navigationService.js"></script>
+		<script src = "js/configController.js"></script>
+		<script src = "js/configService.js"></script>
+		<script src = "js/cycleController.js"></script>
+		<script src = "js/cycleService.js"></script>
+	</head>
+	
+	<div ng-app="kitApp" ng-controller="kitNavController">
+		
+		<div class=navstrip>
+			<div class="{{getTabs().configClass}}">
+				<a href="#/config/">config</a>
+			</div>
+			<div class="{{getTabs().homeClass}}">
+				<a href="#/home/">home</a>
+			</div>
+			<div class="{{getTabs().helpClass}}">
+				<a href="#/help/">help</a>
+			</div>
+			<div class=navigation>
+				<a href="#" onclick="document.location.href = 'main.htm#/home/';">refresh</a>
+			</div>
+			<div style="float: right;">
+				<div class="basicfont showjson" click="show">show json</div>
+				<input id="showjson" type="checkbox" ng-model="jsoncbx"">
+			</div>
+		</div>
+
+		<div ng-view></div>
+	</div>
+	
+	<script>
+		// 1) Create the application module
+		//    (NOTE: 'ngRoute' is another module loaded in with the angular-route.min.js script file.)
+		var app = angular.module('kitApp', ['ngRoute']);
+
+		// 2) Configure the application module by defining how its routeProvider service will operate.
+		//    (NOTE: Like other core Angular identifiers, built-in services always start with $ (e.g. $http)).
+		//    (NOTE: .when('/name/'), NOT .when('/name') - (use trailing "/"))
+		app.config(['$routeProvider', function routeProvider($routeProvider) {
+			$routeProvider
+				.when('/home/', {
+					templateUrl: 'default.htm',
+					controller: 'kitAppController'
+				})
+				.when('/help/', {
+					templateUrl: 'help.htm',
+					controller: 'kitAppController'
+				})
+				.when('/suite/', {
+					templateUrl: 'suite.htm',
+					controller: 'kitAppController'
+				})
+				.when('/config/', {
+					templateUrl: 'config.htm',
+					controller: 'kitAppController'
+				})
+				.otherwise({
+					redirectTo: '/home/'
+				});
+		}]);
+
+		// 3) Set the navigation controller for the kitApp module and load its default model and event handlers
+		app.controller('kitNavController', function($scope, $routeParams, $location, navSvc) {
+			
+			console.log("Configuring navigation controller scope");			
+			
+			navSvc.setTabs($location.path());
+			
+			$scope.getTabs = function() {
+				return navSvc.getTabs();
+			}
+			
+			$scope.jsoncbx = false;
+			navSvc.setScope($scope);
+		});
+
+		// 4) Set the application controller for the kitApp module and load its default model and event handlers
+		app.controller('kitAppController', function($scope, $routeParams, $location, configCtrl, configSvc, cycleCtrl, cycleSvc, navSvc) {
+			
+			navSvc.setTabs($location.path());
+			
+			configCtrl.setScope($scope, configSvc, cycleSvc);
+			
+			cycleCtrl.setScope($scope, cycleSvc);	
+			
+			$scope.showJson = function() {
+				return navSvc.showJson();
+			}
+		});
+		
+		// 5) Setup injection for the various services (If anything is injected, it will be as a variable whose name matches the string parameter of the factory method)
+		app.factory("configCtrl", configCtrlFactory);
+		app.factory("configSvc", configSvcFactory);
+		app.factory("navSvc", navigationFactory);
+		app.factory("cycleCtrl", cycleCtrlFactory);
+		app.factory("cycleSvc", cycleSvcFactory);
+		
+	</script>
+</body>
+
+</html>

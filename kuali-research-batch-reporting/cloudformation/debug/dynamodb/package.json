@@ -1,0 +1,17 @@
+{
+  "name": "dynamodb_add_truncate",
+  "description": "Small test app for adding and removing items from a dynamodb table",
+  "dependencies": {
+    "cfn-response": "latest"
+  },
+  "devDependencies": {
+    "aws-sdk": "latest"
+  },
+  "optionalDependencies": {
+    "zip": "file:../zip"
+  },
+  "scripts": {
+    "pack-old": "sh -c 'npm install' & node node_modules/zip/zip.js dynamodb_add_truncate.js",
+    "pack": "npm install && node node_modules/zip/zip.js dynamodb_add_truncate.js"
+  }
+}

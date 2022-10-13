@@ -1,0 +1,31 @@
+{
+  "id" : "MyJob",
+  "engine" : "selenium",
+  "viewports" : [{
+     "width" : 60,
+     "height" : 100,
+     "label" : "smartphone"
+  }],
+  "scenarios" : [
+    {
+      "label" : "label1",
+      "url" : "url1",
+      "referenceUrl" : "refurl1",
+      "loginUrl" : "loginurl1",
+	  "viewports" : [{
+	     "label" : "smartphone"
+	  }]
+    },
+    {
+	  "viewports" : [{
+	     "width" : 60,
+	     "height" : 100,
+	     "label" : "smartphone"
+	  }]
+  }],
+  "scenarioInheritance" : {
+    "label" : "Default-Label",
+    "cookiePath" : "backstop_data/engine_scripts/cookies.json",
+    "loginUrl" : "https://login/url/inherited/from/JobDefinition/login.htm"
+  }
+}

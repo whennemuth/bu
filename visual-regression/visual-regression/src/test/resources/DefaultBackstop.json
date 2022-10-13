@@ -1,0 +1,43 @@
+{
+  "id" : "MyJob",
+  "viewports" : [
+    {
+      "label" : "laptop",
+      "width" : 1440,
+      "height" : 900
+    }
+  ],
+  "onBeforeScript" : "onBefore.js",
+  "onReadyScript" : "puppet/onReady.js",
+  "paths" : {
+    "bitmaps_reference" : "backstop_data/bitmaps_reference",
+    "bitmaps_test" : "backstop_data/bitmaps_test",
+    "engine_scripts" : "backstop_data/engine_scripts",
+    "html_report" : "backstop_data/html_report",
+    "ci_report" : "backstop_data/ci_report"
+  },
+  "report" : [
+    "report"
+  ],
+  "engine" : "puppeteer",
+  "engineOptions" : {
+    "args" : [
+      "--no-sandbox"
+    ]
+  },
+  "asyncCaptureLimit" : 3,
+  "asyncCompareLimit" : 1,
+  "debug" : false,
+  "debugWindow" : false,
+  "delay" : 0,
+  "misMatchThreshold" : 0,
+  "scenarios" : [
+    {
+      "label" : "label1",
+      "cookiePath" : "backstop_data/engine_scripts/cookies.json",
+      "url" : "https://ref-domain.bu.edu/main-test.htm",
+      "referenceUrl" : "https://ref-domain.bu.edu/main.htm",
+      "loginUrl" : "https://ref-domain.bu.edu/login.htm"
+    }
+  ]
+}

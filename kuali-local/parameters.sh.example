@@ -1,0 +1,8 @@
+# -------------------------------------------------------------------------
+#   Copy this file as "parameters.sh" and fill/modify entries where needed.
+# -------------------------------------------------------------------------
+
+# export VIRTUAL_HOST=localhost
+export KC_ROOT=[ where did you clone the kuali-research git repo to? ]
+export DB_HOST=buaws-kuali-db-qa001.bu.edu
+export KCOEUS_PASSWORD=[ the password for the KCOEUS user in the oracle database kc will connect to ]

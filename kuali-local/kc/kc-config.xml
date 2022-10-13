@@ -1,0 +1,77 @@
+<config>
+    <!-- NOTE: Some variables (like VIRTUAL_HOST) may look like they come from environment variables. This may be true,
+         but to be visible here, they have to have been set as java system ("-D") variables. Environment variables
+         will not resolve in this context. Use setenv.sh to get them into system variables. -->
+    <param name="application.http.scheme">https</param>
+    <param name="application.host">${VIRTUAL_HOST}</param>
+    <param name="app.host">${application.http.scheme}://${application.host}</param>
+    <param name="app.context.name">kc</param>
+    <param name="application.url">${app.host}/${app.context.name}</param>
+    <param name="http.port">8080</param>
+    <param name="build.environment" override="true">dev</param>
+
+    <!-- Database -->
+    <param name="datasource.url">jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(FAILOVER=OFF)(LOAD_BALANCE=OFF)(ADDRESS=(PROTOCOL=TCP)(HOST=${DB_HOST})(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=kuali)))</param>
+    <param name="datasource.username" override="true">KCOEUS</param>
+    <param name="datasource.password" override="true">${KCOEUS_PASSWORD}</param>
+    <param name="datasource.ojb.platform">Oracle9i</param>
+
+    <!-- Don't need these, turn them off -->
+    <param name="kc.schemaspy.enabled">false</param>
+    <param name="kc.monitoring.enabled">false</param>
+
+    <!-- Turn off rabbit mq -->
+    <param name="amqp.project.consumer.enabled">false</param>
+
+    <param name="rice.krad.jpa.global.jpa.vendor.adapter.class">co.kuali.coeus.sys.impl.monitor.MonitoringEclipseLinkJpaVendorAdapter</param>
+
+    <!-- Keystore info -->
+    <param name="keystore.alias">rice</param>
+    <param name="keystore.file">/opt/kuali/rice.keystore</param>
+    <param name="keystore.password">r1c3pw</param>
+
+    <!-- Secret value for service to service calls -->
+    <param name="auth.filter.service2service.secret">${SERVICE_SECRET_1}</param>
+    <param name="auth.filter.service2service.enabled">true</param>
+    <param name="auth.filter.service2service.username">admin</param>
+
+    <!-- Add BU struts messages -->
+    <param name="kc.struts.message.resources">ApplicationResources,BUApplicationResources</param>
+
+    <!-- Setup BU Help link -->
+    <param name="feedback.link.url">http://www.bu.edu/tech/services/admin/research-systems/kuali/</param>
+    <param name="feedback.link.text">GET HELP</param>
+
+    <!--
+    ####################################
+            Core Auth Settings: 
+    ####################################
+         You need to create a SERVICE user in Core Auth, generate a token for that user and enter in auth.system.token param.
+         NOTE: auth.base.url or app.host is the default prefix for /api/vi/... api calls to core. However, these will fail in
+         a local development setup with connection refused (even with correct JWT in header) because they are based on localhost.
+         Localhost urls, when issued from within a container get caught up in loopback and go nowhere. Attempts will produce:
+            "Failed to connect to ::1: Cannot assign requested address"
+         Use of 127.0.0.1 has a similar effect: 
+            "Failed connect to 127.0.0.1:443; Connection refused"
+         So a non-secure, direct api call to the container over the docker network bridge is used instead (CORE_PRIVATE_URL), 
+         including the port the container is listening on. This bypasses the reverse-proxy, which seems to avoid the issue.
+         A similar approach is made with other containers whose api is being contacted from other services.
+     -->
+    <param name="auth.base.url">${app.host}</param>
+    <param name="auth.users.url">${CORE_PRIVATE_URL}/api/v1/users</param>
+    <param name="core.categories.url">${CORE_PRIVATE_URL}/api/v1/categories</param>
+    <param name="core.groups.url">${CORE_PRIVATE_URL}/api/v1/groups</param>        
+    <param name="filter.restlogin.class">org.kuali.coeus.sys.framework.auth.AuthServiceFilter</param>
+    <param name="filtermapping.restlogin.1">/*</param>
+    <param name="auth.core.enabled">${CORE_AUTH_ENABLED}</param>
+    <param name="auth.system.token">${CORE_AUTH_TOKEN}</param>
+
+    <!--
+    <param name="identityService.url">${application.url}/remoting/soap/kim/v2_0/identityService</param>
+    -->
+    <param name="identityService.url">http://${KC_PRIVATE_HOST}/${app.context.name}/remoting/soap/kim/v2_0/identityService</param>
+
+    <param name="dashboard.standalone.base.url">${app.host}</param>
+
+    <param name="pdf.service.path">${PDF_PRIVATE_URL}/api/v1/pdf</param>
+</config>

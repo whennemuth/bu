@@ -1,0 +1,8 @@
+-- Set common Oracle SQLcl system variables used in all KC batch report jobs.  
+SET SQLFORMAT CSV;
+SET SQLBLANKLINES ON;
+SET NEWPAGE 0;
+SET FEEDBACK OFF;
+SET ECHO OFF;
+SET VERIFY OFF;
+ALTER SESSION SET NLS_DATE_FORMAT = 'MM/DD/YYYY';

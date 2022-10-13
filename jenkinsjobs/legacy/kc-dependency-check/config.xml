@@ -1,0 +1,163 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>This build is run by the main kuali-research build job as a pre-build step to determine if any of the supporting kc modules need to be updated.&#xd;
+The kuali-research pom file is analyzed by a shell script for maven version numbers of each module.&#xd;
+If a corresponding jar cannot be found in the maven .m2 library to match the version, that module is considered out of date and will be built here by calling the related jenkins job.&#xd;
+This build must succeed in order for the main kuali-research build to proceed.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>POM</name>
+          <description>The physical location of the pom file to be analyzed.</description>
+          <defaultValue>${JENKINS_HOME}/workspace/kuali-research-1-build-war/pom.xml</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>jdk-11</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+echo &quot; &quot;
+echo &quot;----------------------------------------------------------------------------&quot;
+echo &quot;          M2 DEPENDENCY CHECK (schemaspy, rice, coeus-api, s2sgen)&quot;
+echo &quot;----------------------------------------------------------------------------&quot;
+echo &quot; &quot;
+echo &quot;1) Analyzing pom for versions...&quot;
+
+# Get the content of the pom file with all return/newline characters removed.
+content=$(cat ${POM} | sed &apos;:a;N;$!ba;s/\n//g&apos;)
+
+# Get versions of dependencies, use a zero width lookbehind for the open element and capture 
+# all following characters thereafter until a closing element character is encountered
+ 
+schemaspy_version=$(echo &quot;$content&quot; | grep -Po &apos;(?&lt;=&lt;schemaspy\.version&gt;)([^&lt;]+)&apos;)
+echo &quot;schemaspy version: ${schemaspy_version}&quot;
+ 
+rice_version=$(echo &quot;$content&quot; | grep -Po &apos;(?&lt;=&lt;rice\.version&gt;)([^&lt;]+)&apos;)
+echo &quot;rice version: ${rice_version}&quot;
+ 
+api_version=$(echo &quot;$content&quot; | grep -Po &apos;(?&lt;=&lt;coeus\-api\-all\.version&gt;)([^&lt;]+)&apos;)
+echo &quot;coeus-api version: ${api_version}&quot;
+ 
+s2sgen_version=$(echo &quot;$content&quot; | grep -Po &apos;(?&lt;=&lt;coeus\-s2sgen\.version&gt;)([^&lt;]+)&apos;)
+echo &quot;s2sgen version: ${s2sgen_version}&quot;
+
+echo &quot; &quot;
+echo &quot;2) Searching .m2 directory for dependencies installed for above versions...&quot;
+
+# repo=&quot;${JENKINS_HOME}/.m2/repository&quot;
+# If the local repo location has been customized in settings.xml, then we need to parse it from maven help plugin output.
+repo=$(echo $(mvn help:effective-settings | grep &apos;localRepository&apos;) | cut -d &apos;&gt;&apos; -f 2 | cut -d &apos;&lt;&apos; -f 1)
+echo &quot;.m2 repository: ${repo}&quot;
+
+# file extension, group, version, artifactid, parent_artifactid, job
+m2_items=(
+   &quot;jar,co/kuali/schemaspy,${schemaspy_version},schemaspy,schemaspy,schemaspy&quot;
+   # &quot;jar,org/kuali/rice,${rice_version},rice-archetype-quickstart,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-core-api,rice,kc-rice&quot;
+   # &quot;jar,org/kuali/rice,${rice_version},rice-db-config,rice,kc-rice&quot;
+   # &quot;jar,org/kuali/rice,${rice_version},rice-deploy,rice,kc-rice&quot;
+   # &quot;jar,org/kuali/rice,${rice_version},rice-development-tools,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-impex-client-bootstrap,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-impex-master,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-impex-server-bootstrap,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-impl,rice,kc-rice&quot;
+   # &quot;jar,org/kuali/rice,${rice_version},rice-it-config,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-ken-api,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-kew-api,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-kim-api,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-kns,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-krad-app-framework,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-krms-api,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-ksb-api,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-legacy-web,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-location-api,rice,kc-rice&quot;
+   # &quot;war,org/kuali/rice,${rice_version},rice-serviceregistry,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-sql,rice,kc-rice&quot;
+   &quot;war,org/kuali/rice,${rice_version},rice-standalone,rice,kc-rice&quot;
+   # &quot;jar,org/kuali/rice,${rice_version},rice-tools-test,rice,kc-rice&quot;
+   &quot;war,org/kuali/rice,${rice_version},rice-web,rice,kc-rice&quot;
+   &quot;jar,org/kuali/rice,${rice_version},rice-xml,rice,kc-rice&quot;
+   &quot;jar,org/kuali/coeus,${api_version},coeus-api-all,coeus-api,kc-api&quot;
+   &quot;jar,org/kuali/coeus,${s2sgen_version},coeus-s2sgen-api,coeus-s2sgen,kc-s2sgen&quot;
+   &quot;jar,org/kuali/coeus,${s2sgen_version},coeus-s2sgen-impl,coeus-s2sgen,kc-s2sgen&quot;
+)
+
+jobs_to_run=()
+git_tags=()
+
+for i in ${m2_items[@]}; do
+
+   IFS=&apos;,&apos; read -ra parts &lt;&lt;&lt; &quot;${i}&quot;
+
+   ext=${parts[0]}
+   group=${parts[1]}
+   version=${parts[2]}
+   artifactid=${parts[3]}
+   parentartifactid=${parts[4]}
+   job=${parts[5]}
+
+   artifact=&quot;${repo}/${group}/${artifactid}/${version}/${artifactid}-${version}.${ext}&quot;
+   if [ -f $artifact ] ; then
+      echo &quot;found: ${artifact}&quot;;
+   else
+      echo &quot;MISSING: ${artifact}&quot;;
+      if [ -z &quot;$(echo ${jobs_to_run[*]} | grep ${job})&quot; ] ; then
+         jobs_to_run+=(${job});
+         git_tags+=(&quot;${parentartifactid}-${version}&quot;);
+      fi
+   fi
+done
+
+echo &quot; &quot;
+
+if [ ${#jobs_to_run[@]} -eq 0 ] ; then
+   echo &quot;All dependencies accounted for&quot;;
+else
+   source /var/lib/jenkins/cli-credentials.sh
+   echo &quot;DEPENDENCIES MISSING. Must build the following: ${jobs_to_run[*]}&quot;;
+   echo &quot; &quot;
+   for ((i=0; i&lt;${#jobs_to_run[*]}; i++));
+   do
+      # java -jar ${JENKINS_HOME}/jenkins-cli.jar -s http://localhost:8080/ build &apos;jenkins-cli test2&apos; -v -f -p PARM1=hello --username=warren --password=password
+      set -x
+      java -jar ${JENKINS_HOME}/jenkins-cli.jar -s http://localhost:8080/ build ${jobs_to_run[i]} -v -f -p version=${git_tags[i]}
+      set +x
+      # echo &quot;java -jar ${JENKINS_HOME}/jenkins-cli.jar -s http://localhost:8080/ build ${jobs_to_run[i]} -v -f -p version=${git_tags[i]}&quot;
+   done
+fi
+
+echo &quot; &quot;
+echo &quot;----------------------------------------------------------------------------&quot;
+echo &quot;                      FINISHED M2 DEPENDENCY CHECK&quot;
+echo &quot;----------------------------------------------------------------------------&quot;
+echo &quot; &quot;
+
+set -x
+
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

@@ -1,0 +1,33 @@
+<config>
+        <param name="application.http.scheme">http</param>
+        <!--
+        <param name="application.host">localhost</param>
+        -->
+        <param name="application.host">ec2-52-37-253-82.us-west-2.compute.amazonaws.com</param>
+        <param name="http.port">8080</param>
+        <param name="app.context.name">kc</param>
+	<param name="build.environment" override="true">dev</param>
+	<!--
+	<param name="datasource.url" override="true">jdbc:mysql://localhost:3306/kc?verifyServerCertificate:false;requireSSL:false;useSSL:false</param>
+	<param name="datasource.url" override="true">jdbc:mysql://localhost:3306/kc?verifyServerCertificate=false&requireSSL=false&useSSL=false</param>
+	-->
+	<param name="datasource.url" override="true">jdbc:mysql://ec2-52-25-226-38.us-west-2.compute.amazonaws.com:3306/kualicoeusdb?verifyServerCertificate=false&amp;requireSSL=false&amp;useSSL=false</param>
+	<param name="datasource.username" override="true">warren</param>
+	<param name="datasource.password" override="true">mypassword123</param>
+        <param name="datasource.ojb.platform">MySQL</param>
+	<param name="kc.schemaspy.enabled">false</param>
+
+        <!-- Virtual KC Client DB - Oracle
+        <param name="datasource.url">jdbc:oracle:thin:@usl3.bu.edu:5803:KUALI</param>
+        <param name="datasource.username">kuali_conv1</param>
+        <param name="datasource.password">e8hMa17V6s</param>
+        <param name="datasource.ojb.platform">Oracle9i</param>
+	-->
+
+        <!-- Virtual KC Client DB - Mysql
+        <param name="datasource.url">jdbc:mysql://192.168.99.100:43306/kualicoeusdb</param>
+        <param name="datasource.username">kcusername</param>
+        <param name="datasource.password">kcpassword</param>
+        <param name="datasource.ojb.platform">MySQL</param>
+	-->
+</config>

@@ -1,0 +1,60 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>source $JENKINS_HOME/cli-credentials.sh
+java -jar /var/lib/jenkins/jenkins-cli.jar \
+  -s http://localhost:8080/ \
+  build \
+  &apos;jenkins-cli test2&apos; -v -f \
+  -p PARM1=hello \
+  -p PARM2=goodbye
+
+exit
+
+java -jar $JENKINS_HOME/jenkins-cli.jar \
+  -s http://localhost:8080/ \
+  -auth ${JENKINS_USER_ID}:${JENKINS_API_TOKEN} \
+  build \
+  &apos;jenkins-cli test2&apos; -v -f \
+  -p PARM1=hello \
+  -p PARM2=goodbye
+
+exit
+
+# Does not seem to work (missing header value)
+java -jar $JENKINS_HOME/jenkins-cli.jar \
+  -s http://localhost:8080/ \
+  -ssh -user jenkins -i ~/.ssh/id_rsa \
+  build \
+  &apos;jenkins-cli test2&apos; -v -f \
+  -p PARM1=hello \
+  -p PARM2=goodbye
+
+</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

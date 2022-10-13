@@ -1,0 +1,136 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  Create the s3 bucket for research admin reports
+  
+Parameters:
+
+  GlobalTag:
+    Type: String
+    Description: >
+      A common value that all resources in this template will have prefixed to
+      their name and attached as a tag to establish a bundling through naming convention.
+    Default: research-admin-reports
+ 
+  Service:
+    Description: Service catalog name
+    Type: String
+    Default: research-administration
+
+  Function:
+    Description: The Function within the Service
+    Type: String
+    Default: kuali
+
+  Landscape:
+    Description: The landscape of the database.
+    Type: String
+
+  CloudfrontOriginAccessIdentity:
+    Description: Indicates the cloudfront origin principal that the bucket will set a trust policy for.
+    Type: String
+      
+  ReportBucketName:
+    Description: Overrides the default naming of the s3 bucket.
+    Type: String
+    Default: empty
+
+  CreateReportBucket:
+    Description: Indicates if the bucket already exists (false), or not (true)
+    Type: String
+    Default: "true"
+
+
+Conditions:
+  BucketNameProvided: !Not [ !Equals [!Ref ReportBucketName, empty] ]
+  CreateBucket: !Equals [ !Ref CreateReportBucket, "true" ]
+
+
+Resources:
+
+  Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Condition: CreateBucket
+    Properties: 
+      BucketName: 
+        !If 
+          - BucketNameProvided
+          - !Ref ReportBucketName
+          - !Sub bu-${GlobalTag}-${Landscape}-archive
+      IntelligentTieringConfigurations: 
+        - Id: !Sub ${GlobalTag}-${Landscape}-deep-archive
+          Status: Enabled
+          Tierings: 
+            - AccessTier: ARCHIVE_ACCESS
+              Days: 90
+            - AccessTier: DEEP_ARCHIVE_ACCESS
+              Days: 180
+      LifecycleConfiguration: 
+        Rules:
+          - Id: !Sub ${GlobalTag}-${Landscape}-expiration-date
+            ExpirationInDays: 365
+            Status: Enabled
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags: 
+        - Key: Name
+          Value: !Sub bu-${GlobalTag}-${Landscape}-archive
+        - Key: Service
+          Value: !Ref Service
+        - Key: Function
+          Value: !Ref Function
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-policy.html
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: 
+        !If 
+          - CreateBucket
+          - !Ref Bucket
+          - !If 
+              - BucketNameProvided
+              - !Ref ReportBucketName
+              - !Sub bu-${GlobalTag}-${Landscape}-archive
+      PolicyDocument:
+        Version: '2008-10-17'
+        Id: PolicyForCloudFrontPrivateContent
+        Statement:
+        - Sid: '1'
+          Effect: Allow
+          Principal:
+            AWS: !Sub arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudfrontOriginAccessIdentity}
+          Action: s3:GetObject
+          Resource: 
+            !If 
+              - BucketNameProvided
+              - !Sub arn:aws:s3:::${ReportBucketName}/*
+              - !Sub arn:aws:s3:::bu-${GlobalTag}-${Landscape}-archive/*
+
+
+Outputs:
+
+  BucketName:
+    Value: 
+      !If 
+        - CreateBucket
+        - !Ref Bucket
+        - !If 
+            - BucketNameProvided
+            - !Ref ReportBucketName
+            - !Sub bu-${GlobalTag}-${Landscape}-archive
+
+
+  BucketArn:
+    Value: 
+      !If 
+        - CreateBucket
+        - !Ref Bucket
+        - !If 
+            - BucketNameProvided
+            - !Sub arn:aws:s3:::${ReportBucketName}
+            - !Sub arn:aws:s3:::bu-${GlobalTag}-${Landscape}-archive

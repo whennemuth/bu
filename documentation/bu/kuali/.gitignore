@@ -1,0 +1,4 @@
+*.csv
+input/*
+output/*
+snaplogic-request.sh

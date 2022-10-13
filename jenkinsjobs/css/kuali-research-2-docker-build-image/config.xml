@@ -1,0 +1,133 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>This job creates a kuali-research docker image, wrapping a specified war file into it.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DEBUG</name>
+          <description>Makes all console output verbose (puts in debug mode with set -x)</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>JENKINS_WAR_FILE</name>
+          <description>The location of the war file within the jenkins home directory.
+Example: /var/lib/jenkins/workspace/kuali-research-1-build-war/coeus-webapp/target/coeus-webapp-1603.50-SNAPSHOT.war	
+
+NOTE: If you are executing this job directly, keep in mind that the war file you want will not necessarily be the last war file that was built by maven in the kuali-research-1-build-war job (this is the default value). Instead, you may want one of the war files that has been backed up in /var/lib/jenkins/backup/kuali-research/war</description>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>POM_VERSION</name>
+          <description>The maven version number for the war file the docker image being built is based on.
+Example: 1603.50-SNAPSHOT</description>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REGISTRY_REPO_NAME</name>
+          <description>This value comes from maven artifact id (except for sandbox builds).
+This is used to identify the name of the docker registry repository that this image is going to be pushed to.
+The value is &quot;coeus&quot; by default, but remember that any sandbox images should go to a registry repository called &quot;coeus-sandbox&quot;</description>
+          <defaultValue>kuali-coeus</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>ECR_REGISTRY_URL</name>
+          <description>The url of the elastic container registry (ECR) where the newly created image is to be pushed to from this server and pulled from by the target docker host for the image wrapping the newly built war file.</description>
+          <randomName>choice-parameter-17426194576130660</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>return new URL(&quot;http&quot;, &quot;127.0.0.1&quot;, 8002, &quot;/active-choices?parameter-name=ecr_url&quot;).text;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;font-family:monospace; width:400px;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research-2-docker-build-image</projectName>
+          <projectFullName>kuali-research-2-docker-build-image</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <hudson.model.StringParameterDefinition>
+          <name>DOCKER_BUILD_CONTEXT_GIT_BRANCH</name>
+          <description>You can modify this value to pull a build context stored in a branch other than master.</description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>JAVA_VERSION</name>
+          <description>The version of java that runs that application.
+The image to be built is based on a centos7-java-tomcat image that is tagged with a value that contains this number.</description>
+          <randomName>choice-parameter-37673092737987989</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>def sb = new StringBuilder(&quot;&lt;select name=&apos;value&apos; style=&apos;width:400px;font-family:monospace;&apos;&gt;&quot;)
+sb.append(&quot;&lt;option selected=true value=&apos;11&apos;&gt;11&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;8&apos;&gt;8&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;7&apos;&gt;7&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;/select&gt;&quot;)
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research-2-docker-build-image</projectName>
+          <projectFullName>kuali-research-2-docker-build-image</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <hudson.model.StringParameterDefinition>
+          <name>TOMCAT_VERSION</name>
+          <description>The version of tomcat under which the app runs.
+The image to be built is based on a centos7-java-tomcat image that is tagged with a value that contains this version.</description>
+          <defaultValue>9.0.41</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set +x
+echo &apos;Pulling kuali-infrastructure github repository...&apos;
+source $JENKINS_HOME/cli-credentials.sh
+java -jar $JENKINS_HOME/jenkins-cli.jar -s http://localhost:8080/ build fetch-and-reset-kuali-infrastructure -v -f
+source $JENKINS_HOME/kuali-infrastructure/scripts/common-functions.sh
+if isDebug ; then
+  set -x
+fi
+source $JENKINS_HOME/kuali-infrastructure/kuali_jenkins/bash-scripts/job/kuali-research-build-image.sh</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

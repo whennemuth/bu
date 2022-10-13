@@ -1,0 +1,37 @@
+if (typeof dwr == 'undefined' || dwr.engine == undefined) throw new Error('You must include DWR engine before including this file');
+
+(function() {
+  if (dwr.engine._getObject("AwardTemplateReportTermService") == undefined) {
+    var p;
+    
+    p = {};
+
+    /**
+     * @param {class java.lang.String} p0 a param
+     * @param {class java.lang.String} p1 a param
+     * @param {function|Object} callback callback function or options object
+     */
+    p.getFrequencyForAjaxCall = function(p0, p1, callback) {
+      return dwr.engine._execute(p._path, 'AwardTemplateReportTermService', 'getFrequencyForAjaxCall', arguments);
+    };
+
+    /**
+     * @param {class java.lang.String} p0 a param
+     * @param {function|Object} callback callback function or options object
+     */
+    p.getFrequencyBaseForAjaxCall = function(p0, callback) {
+      return dwr.engine._execute(p._path, 'AwardTemplateReportTermService', 'getFrequencyBaseForAjaxCall', arguments);
+    };
+
+    /**
+     * @param {class java.lang.String} p0 a param
+     * @param {function|Object} callback callback function or options object
+     */
+    p.getReportTypeForAjaxCall = function(p0, callback) {
+      return dwr.engine._execute(p._path, 'AwardTemplateReportTermService', 'getReportTypeForAjaxCall', arguments);
+    };
+    
+    dwr.engine._setObject("AwardTemplateReportTermService", p);
+  }
+})();
+

@@ -1,0 +1,147 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>REGISTRY_REPO_NAME</name>
+          <description>This is used to identify the name of the docker registry repository that this image is going to be pushed to</description>
+          <defaultValue>centos7-java-tomcat</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ECR_REGISTRY_URL</name>
+          <description>The url of the elastic container registry (ECR) where the newly created image is to be pushed to from this server and pulled from by the target docker host</description>
+          <defaultValue>730096353738.dkr.ecr.us-east-1.amazonaws.com</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DOCKER_BUILD_CONTEXT_GIT_BRANCH</name>
+          <description>You can modify this value to pull a build context stored in a branch other than master.</description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>JAVA_VERSION</name>
+          <description></description>
+          <randomName>choice-parameter-37489169288878561</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def sb = new StringBuilder(&quot;&lt;select name=&apos;value&apos; style=&apos;width:400px;font-family:monospace;&apos;&gt;&quot;)
+sb.append(&quot;&lt;option selected=true value=&apos;11&apos;&gt;11&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;8&apos;&gt;8&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;7&apos;&gt;7&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;/select&gt;&quot;)
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>check-centos-1-docker-build-image</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>JAVA_RELEASE</name>
+          <description></description>
+          <randomName>choice-parameter-37489391278223480</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.54">
+              <script>def sb = new StringBuilder(&quot;&lt;select name=&apos;value&apos; style=&apos;width:400px;font-family:monospace;&apos;&gt;&quot;)
+sb.append(&quot;&lt;option selected=true value=&apos;JDK&apos;&gt;JDK&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;option value=&apos;JRE&apos;&gt;JRE&lt;/option&gt;&quot;)
+sb.append(&quot;&lt;/select&gt;&quot;)
+return sb.toString()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.54">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;font-family:monospace&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>check-centos-1-docker-build-image</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <hudson.model.StringParameterDefinition>
+          <name>TOMCAT_VERSION</name>
+          <description>The value the image being built is to tagged with for identification within the local and registry repositories.</description>
+          <defaultValue>8.5.34</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command># 1) Remove any dangling items
+if [ -n &quot;$(docker images --filter dangling=true -q)&quot; ] ; then 
+   docker rmi -f $(docker images --filter dangling=true -q); 
+   echo &quot;Removed dangling image(s)&quot;;
+else
+   echo &quot;No dangling images to remove&quot;;
+fi
+if [ -n &quot;$(docker volume ls -qf dangling=true)&quot; ] ; then 
+   docker volume rm $(docker volume ls -qf dangling=true); 
+   echo &quot;Removed dangling volume(s)&quot;;
+else 
+   echo &quot;No dangling volumes to remove&quot;;
+fi
+
+# 2) Define variables.
+# NOTE: JENKINS_URL is the full URL of Jenkins, like http://server:port/jenkins/ 
+#       Only available if Jenkins URL is set in system configuration
+ECR_REPO_URL=&quot;${ECR_REGISTRY_URL}/${REGISTRY_REPO_NAME}&quot;
+JAVA_VERSION=&quot;$(echo $JAVA_VERSION | sed &apos;s/,//g&apos;)&quot;
+JAVA_RELEASE=&quot;$(echo $JAVA_RELEASE | sed &apos;s/,//g&apos;)&quot;
+DOCKER_TAG=&quot;${ECR_REPO_URL}:java${JAVA_VERSION}-tomcat${TOMCAT_VERSION}&quot;
+DOCKER_BUILD_CONTEXT=&quot;git@github.com:bu-ist/kuali-research-docker.git#${DOCKER_BUILD_CONTEXT_GIT_BRANCH}:centos-java/build.context&quot;
+
+# 3) This is a private repo and needs ssh to access it
+eval `ssh-agent -s`
+# Add the key to the agent.
+ssh-add ${JENKINS_HOME}/.ssh/bu_github_id_docker_rsa
+
+# 4) Build the image
+docker build \
+  --build-arg TCAT_VERSION=${TOMCAT_VERSION} \
+  --build-arg JAVA_VERSION=${JAVA_VERSION} \
+  --build-arg JAVA_RELEASE=${JAVA_RELEASE} \
+  -t ${DOCKER_TAG} \
+  ${DOCKER_BUILD_CONTEXT}
+
+# 5) Kill the ssh agent
+eval `ssh-agent -k`</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

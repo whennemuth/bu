@@ -1,0 +1,431 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>THIS IS THE STARTING POINT FOR A MANUAL BUILD OF THE KUALI-RESEARCH APPLICATION&#xd;
+&#xd;
+The following factors of our kuali-research environment would make deploying a new release to it complicated.&#xd;
+(proper sequencing and parameter selection of multiple jobs applies):&#xd;
+&#xd;
+1) Kuali research runs in multiple &quot;landscapes&quot;&#xd;
+2) Each landscape comprises 2 load-balanced EC2 instances, except for the QA landscape, which only has one.&#xd;
+3) Each EC2 instance must be referenced by its specific AWS intance ID.&#xd;
+4) Each EC2 instance of every landscape run the BU-customized kuali research app, except for those of the sandbox landscape, which run the non-customized app.&#xd;
+5) Each EC2 instance of every landscape run the application based on the git &quot;bu-master&quot; branch, except for those of the sandbox landscape, which are based on the &quot;master&quot; branch&#xd;
+6a) Only deployments to the sandbox and CI landscapes involve maven, a new war file, and a new docker image. Builds to all other landscapes assume the last docker image pushed up to our docker registry by the most recent CI build contain the correct build artifact. Therefore such deployments only involve pulling from our docker registry and re-running a corresponding container on the target EC2 instances.&#xd;
+6b) As stated above, only deployments to the sandbox and CI landscapes involve maven, a new war file, and a new docker image. However, this only applies to the first EC2 instance of the pair. The second instance need only pull from the docker registry what was pushed there during the build and deployment process of the first EC2 instance.&#xd;
+7) A set of advanced optional parameters are provided to select from a particular point in the git codebase to carry out a &quot;feature&quot; build deployment. Some of the above rules do not apply or apply differently. However, use of these parameters is rare and is outside our standard integration procedure.&#xd;
+&#xd;
+This job requires the user make only one landscape selection from a pick-list.&#xd;
+All the rules above are handled by a dynamically validated job parameter UI screen and shell scripting that call out to other jobs in correct sequence to do the work, passing them the appropriate parameters.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DEBUG</name>
+          <description>Makes all console output verbose (puts in debug mode with set -x)</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DRYRUN</name>
+          <description>Prints out the calls to other jobs as the selected parameters would configure them, but does not actually trigger those jobs.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>STACK</name>
+          <randomName>choice-parameter-18419962058080340</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>return new URL(
+   &quot;http&quot;, 
+    &quot;127.0.0.1&quot;, 
+   8002, 
+   &quot;/active-choices?&quot; + 
+      &quot;parameter-name=stack&amp;&quot; +
+       &quot;flush-stack-cache=true&quot;).text;
+</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; disabled=true style=&apos;font-family:monospace; width:310px;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research</projectName>
+          <projectFullName>kuali-research</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>BUILD_TYPE</name>
+          <randomName>choice-parameter-307078002574736</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>def landscape=&quot;&quot;
+if(String.valueOf(STACK).contains(&quot;|&quot;)) {
+  landscape=STACK.split(&quot;\\|&quot;)[2];
+}
+
+return new URL(
+   &quot;http&quot;, 
+    &quot;127.0.0.1&quot;, 
+   8002, 
+   &quot;/active-choices?&quot; + 
+      &quot;parameter-name=build_type&amp;&quot; + 
+      &quot;landscape=&quot; + landscape).text;
+</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; disabled=true style=&apos;font-family:monospace; width:310px;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research</projectName>
+          <projectFullName>kuali-research</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>STACK</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>BUILD_TYPE_SCRIPT</name>
+          <randomName>choice-parameter-397609380161764</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>return new URL(
+   &quot;http&quot;, 
+    &quot;127.0.0.1&quot;, 
+   8002, 
+   &quot;/active-choices?&quot; + 
+      &quot;parameter-name=build_type_script&quot;).text;
+</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;script&gt;function toggleBuildType() { console.log(&apos;ERROR from toggleBuildType&apos;); }&lt;/script&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research</projectName>
+          <projectFullName>kuali-research</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HIDDEN_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.7">
+          <name>LEGACY_DEPLOY</name>
+          <description>Also deploy to an environment in the old aws account.</description>
+          <randomName>choice-parameter-494149823532087</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>if(&quot;release&quot;.equalsIgnoreCase(BUILD_TYPE)) {
+  def list = [&apos;none:selected&apos;, &apos;staging&apos;, &apos;production&apos;]
+}
+else {
+  def list = [&apos;none:selected&apos;, &apos;staging&apos;]
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>def list = [error]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research</projectName>
+          <projectFullName>kuali-research</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>BUILD_TYPE</referencedParameters>
+          <choiceType>PT_RADIO</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.7">
+          <name>GIT_REF_TYPE</name>
+          <description>Select how you would like to determine your git commit ID</description>
+          <randomName>choice-parameter-1093976883179935</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>if(&quot;feature&quot;.equalsIgnoreCase(BUILD_TYPE)) {
+  def list = [&apos;Branch:selected&apos;, &apos;Tag&apos;, &apos;Commit ID&apos;]
+}
+else {
+  // Must be &quot;release&quot;
+  def list = [&apos;Branch:selected&apos;]
+}
+</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>def list = [error]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research</projectName>
+          <projectFullName>kuali-research</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>BUILD_TYPE</referencedParameters>
+          <choiceType>PT_RADIO</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>GIT_REPO_URL</name>
+          <description>The git repository from which the build will pull source code.</description>
+          <randomName>choice-parameter-19059041207238927</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;git@github.com:bu-ist/kuali-research.git&apos; style=&apos;font-family:monospace; width:400px;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; disabled=true style=&apos;font-family:monospace; width:400px;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research</projectName>
+          <projectFullName>kuali-research</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>GIT_REF, GIT_COMMIT_ID</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>GIT_REF</name>
+          <randomName>choice-parameter-52128031899195</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>def landscape=&quot;&quot;
+if(String.valueOf(STACK).contains(&quot;|&quot;)) {
+  landscape=STACK.split(&quot;\\|&quot;)[2];
+}
+
+def selectedItem=&quot;bu-master&quot;
+if(&quot;sandbox&quot;.equalsIgnoreCase(landscape)) {
+  selectedItem=&quot;master&quot;;
+}
+
+return new URL(
+   &quot;http&quot;, 
+    &quot;127.0.0.1&quot;, 
+   8002, 
+   &quot;/active-choices?&quot; + 
+      &quot;parameter-name=git_refs&amp;&quot; + 
+      &quot;selected-item=&quot; + selectedItem + &quot;&amp;&quot; +
+      &quot;git-ref-type=&quot; + (GIT_REF_TYPE == &quot;Commit ID&quot; ? &quot;none&quot; : GIT_REF_TYPE) + &quot;&amp;&quot; +
+      &quot;build-type=&quot; + BUILD_TYPE + &quot;&amp;&quot; +
+      &quot;git-ssh-key=bu_github_id_kc_rsa&amp;&quot; +
+      &quot;git-remote-url=&quot; + GIT_REPO_URL).text;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;width:400px;&apos; disabled=true&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research</projectName>
+          <projectFullName>kuali-research</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>GIT_REPO_URL,GIT_REF_TYPE,BUILD_TYPE,STACK</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>GIT_COMMIT_ID</name>
+          <description>This is the git commit ID that the build will be based on.
+
+</description>
+          <randomName>choice-parameter-11109106720814</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>if(&quot;commit ID&quot;.equalsIgnoreCase(GIT_REF_TYPE)) {
+    return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; style=&apos;font-family:monospace; width:400px;&apos;&gt;&quot;
+}
+
+return new URL(
+   &quot;http&quot;, 
+    &quot;127.0.0.1&quot;, 
+   8002, 
+   &quot;/active-choices?&quot; + 
+      &quot;parameter-name=git_commit&amp;&quot; + 
+      &quot;git-ref=&quot; + GIT_REF + &quot;&amp;&quot; +
+      &quot;git-ref-type=&quot; + GIT_REF_TYPE + &quot;&amp;&quot; +
+      &quot;git-ssh-key=bu_github_id_kc_rsa&amp;&quot; +
+      &quot;git-remote-url=&quot; + GIT_REPO_URL).text;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; disabled=true style=&apos;font-family:monospace; width:310px;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research</projectName>
+          <projectFullName>kuali-research</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>GIT_REPO_URL, GIT_REF_TYPE, GIT_REF,STACK</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.5.7">
+          <name>ECR_REGISTRY_URL</name>
+          <description>The url of the elastic container registry (ECR) where any newly created images are to be pushed to from this server and pulled from by the target docker host for the image wrapping the newly built war file.</description>
+          <randomName>choice-parameter-29201506851372</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.78">
+              <script>return new URL(&quot;http&quot;, &quot;127.0.0.1&quot;, 8002, &quot;/active-choices?parameter-name=ecr_url&quot;).text;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.78">
+              <script>return &quot;&lt;input type=&apos;text&apos; name=&apos;value&apos; value=&apos;error&apos; style=&apos;font-family:monospace; width:400px;&apos;&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>kuali-research</projectName>
+          <projectFullName>kuali-research</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters></referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <hudson.model.StringParameterDefinition>
+          <name>NOTIFY_EMAIL</name>
+          <description>This is the individual or group email that all job result notifications will be sent to by default.
+This parameter can be overridden in the job configuration on a more granular level.</description>
+          <defaultValue>kcrmproj@bu.edu</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set -a
+set +x
+echo &apos;Pulling kuali-infrastructure github repository...&apos;
+source $JENKINS_HOME/cli-credentials.sh
+java -jar $JENKINS_HOME/jenkins-cli.jar -s http://localhost:8080/ build fetch-and-reset-kuali-infrastructure -v -f
+source $JENKINS_HOME/kuali-infrastructure/scripts/common-functions.sh
+if isDebug ; then
+  set -x
+fi
+source $JENKINS_HOME/kuali-infrastructure/kuali_jenkins/bash-scripts/job/kuali-research.sh</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.85">
+      <recipientList></recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD SUCCESS! (kuali-research for $LANDSCAPE)</subject>
+            <body>The build succeeded!
+Ready for smoke test.
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD FAILURE! (kuali-research for $LANDSCAPE)</subject>
+            <body>The build failed.
+See attached file for console output
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>true</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+        <hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD FIXED SUCCESSFULLY! (kuali-research for $LANDSCAPE)</subject>
+            <body>After recent issue, the Kuali Research has been corrected and sucessfully run.
+Ready for smoke test.
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+        <hudson.plugins.emailext.plugins.trigger.UnstableTrigger>
+          <email>
+            <recipientList>$NOTIFY_EMAIL</recipientList>
+            <subject>BUILD UNSTABLE! (kuali-research for $LANDSCAPE)</subject>
+            <body>The build successfully deployed, but with automated test failures.
+See attached file for console output
+
+$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders/>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>true</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$NOTIFY_EMAIL</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.UnstableTrigger>
+      </configuredTriggers>
+      <contentType>text/plain</contentType>
+      <defaultSubject></defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+      <presendScript>def landscape = build.getBuildVariables().get(&quot;LANDSCAPE&quot;)
+
+if(&quot;ci&quot;.equalsIgnoreCase(landscape) || &quot;sandbox&quot;.equalsIgnoreCase(landscape)) {
+    logger.println(&quot;Cancelling notification email. &quot; + landscape + &quot; landscape not configured for email notifications&quot;)
+    cancel = true
+}</presendScript>
+      <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
+      <attachBuildLog>false</attachBuildLog>
+      <compressBuildLog>false</compressBuildLog>
+      <replyTo></replyTo>
+      <from></from>
+      <saveOutput>false</saveOutput>
+      <disabled>false</disabled>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+  </publishers>
+  <buildWrappers/>
+</project>

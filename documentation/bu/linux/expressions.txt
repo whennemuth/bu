@@ -1,0 +1,306 @@
+# Version of Linux (distro):
+cat /etc/*-release
+
+# Kernel version and gcc version used to build the same:
+cat /proc/version
+
+# Kernel version:
+uname -a
+
+# List directories from the root according to size in descending order:
+sudo du -x -d1 -h / | sort -h -r
+
+# How much memory do I have (megabytes)
+free -m
+
+# Search all directories for a file by name (case-insensitive search)
+sudo find / -type f -iname "myfile.txt" 
+
+# sed example using regex and captured match to make a replacement (in a file, using -i parameter)
+# Replace a quoted value with itself, followed by a space and another quoted value
+# The quoted value in the example is 'protocol="AJP/1.3"'
+# NOTE: it is difficult to escape single quotes within single quotes with sed, so bound the expression with double-quotes.
+sed -i -r "s/(protocol=[\"']AJP\/1\.3[\"'])/\1 tomcatAuthentication=\"false\"/g" server.xml
+
+# More complex sed usage that stops the default single-line matching of sed
+# and puts the entire file into the pattern space before attempting the replacement.
+# See: https://www.gnu.org/software/sed/manual/html_node/Multiline-techniques.html#Multiline-techniques
+sed ':a;N;$!ba; s|<jdks>.*<\/jdks>|'"$JDKS"'|g' config.xml
+
+# Search through a directory and its subdirectories recursively for any files containing text that matches a specified pattern:
+grep -irP 'my regex pattern' /etc/my/directory
+
+# Query memory usage:
+grep -P '(Mem)|(Cache)|(Swap)' /proc/meminfo
+
+# Use tcpdump to screen for all traffic on (or except) a particlar port with packet ascii content matching a pattern
+tcpdump -XX -n port 8080 | grep -i -P '(forwarded-for)|(REMOTE_USER)' -A 10 -B 10
+tcpdump -XX -n port not 22 | grep -i -P '(forwarded-for)|(REMOTE_USER)' -A 10 -B 10
+tcpdump k /opt/kuali/tls/private/kuali-research.bu.edu-2048bit-sha256-2016.key -i eth0 -dXXn port 8080 or 443
+# See what http(s) traffic is getting into the host bound for coi:
+tcpdump -vvAls0 | grep 'GET' | grep -i '/coi/'
+tcpdump -vvvs 1024 -l -A host kuali-research-qa.bu.edu | grep -i 'kuali-research-qa.bu.edu'
+
+# Find out what the latest release of a major version of tomcat is (tomcat 8 in this case)
+curl "https://archive.apache.org/dist/tomcat/tomcat-8/?C=M;O=A" | grep 'v8' | tail -n 1 | grep -Po '(?<=>)[^<>]+(?=</a>)' | sed 's/\///'
+
+# Send the output of a command to nothing (won't get printed)
+mycommand > /dev/null
+
+# Send the output of stdout to stderr
+mycommand > 1>&2
+
+# Suppress ALL output (stdout & stderr)
+mycommand > /dev/null 2>&1
+
+# SCP example: Quick transfer of war files between servers:
+# 1) Transfer private key to jenkins server from laptop.
+scp -C -i /c/Users/wrh/.ssh/buaws-kuali-rsa /c/Users/wrh/.ssh/buaws-kuali-rsa wrh@10.57.236.6:/home/wrh/.ssh/
+# 2) log into jenkins server and reduce permissions on the private key
+chmod 600 ~/.ssh/buaws-kuali-rsa
+# 3) From the jenkins server transfer the last built war file to another server (staging in this case)
+scp -C -i ~/.ssh/buaws-kuali-rsa /var/lib/jenkins/workspace/kuali-research-1-build-war/coeus-webapp/target/coeus-webapp-1709.0037.war wrh@10.57.236.68:/home/wrh/
+# 4) Remove the private key
+rm -f ~/.ssh/buaws-kuali-rsa
+
+# Get the number of files in a directory whose name(s) match a specified pattern ("*_rsa" in this case)
+ls -1 *_rsa | wc -l
+
+# Create an rsa key:
+ssh-keygen -b 2048 -t rsa -f bu_kuali_id_jenkins_rsa -q -N ""
+
+# Show a log of only those git commits that are tagged and show the date, ref and tag
+git log --tags --simplify-by-decoration --pretty="format:%h %ci %d" -n 10
+
+# Show only the names of files that have been committed in the last 3 months by the specified committers
+git log --no-merges --committer=wrh --committer=mukadder --name-only --pretty=format:"" --since=3.months.ago | sort -u
+
+# urlencode a string. Can be used to supply a password along with a command against a git repository that requires authentication (if not using a key).
+ENCODED_PASSWORD="$(echo -ne $GIT_PASSWORD | xxd -plain | tr -d '\n' | sed 's/\(..\)/%\1/g')"
+git pull https://$GIT_USER:$ENCODED_PASSWORD@myrepo master
+
+# Delete a branch from a remote repository
+git push origin :the_remote_branch
+or...
+git push origin --delete the_remote_branch
+
+# Put the content of a file into a variable as base64
+base64var="$(base64 -w 0 myfile.txt)"
+echo ${base64var} | base64 --decode > myfile.copy.txt
+
+# Grep a javascript codebase without getting minified results and map files:
+grep -r \
+--exclude=*.bundle.js \
+--exclude=bundle.js \
+--exclude=*.min.js \
+--exclude=*.min.js.* \
+--exclude=*.map \
+'NODE_ENV' .
+
+
+Examples of cat <<EOF syntax usage in Bash:
+----------------------------------------------------------------------------------
+1. Assign multi-line string to a shell variable
+$ sql=$(cat <<EOF
+SELECT foo, bar FROM db
+WHERE foo='baz'
+EOF
+)
+The $sql variable now holds the new-line characters too. 
+You can verify with echo -e "$sql".
+
+2. Pass multi-line string to a file in Bash
+$ cat <<EOF > print.sh
+#!/bin/bash
+echo \$PWD
+echo $PWD
+EOF
+The print.sh file now contains:
+
+#!/bin/bash
+echo $PWD
+echo /home/user
+3. Pass multi-line string to a pipe in Bash
+$ cat <<EOF | grep 'b' | tee b.txt
+foo
+bar
+baz
+EOF
+The b.txt file contains bar and baz lines. The same output is printed to stdout
+
+
+Upgrade the version of aws cli to the latest version:
+$ pip install awscli --upgrade --user
+NOTE: This will apply only to the current user.
+
+# Remove all docker containers
+for c in $(docker ps -a --format "{{.ID}}") ; do docker rm -f $c; done
+
+# Remove all docker containers from a certain image "java:6"
+for c in $(docker ps -a --filter ancestor=java:6 --format "{{.ID}}") ; do docker rm -f $c; done
+
+# Remove all docker containers that are exited (no longer running)
+for c in $(docker ps -a --filter status=exited --format "{{.ID}}") ; do docker rm -f $c; done
+
+# Pretty print out all docker mounts for a container.
+docker inspect -f "{{json .Mounts}}" kuali-research | jq
+
+# Pretty print out all docker port bindings for a container.
+docker inspect -f "{{json .HostConfig.PortBindings}}" kuali-research | jq
+
+# Remove all docker images 6 months or older
+docker rmi $(docker images | awk '($4 >= 6 && $5 == "months") || ($5 == "years") {print $3}')) 2> /dev/null && \
+docker rmi $(docker images -a --filter dangling=true -q)
+
+# Iterate over lines in a file
+while read line; do
+  echo $line
+done < myfile.txt
+
+# Iterate over lines in a file that match certain criterion
+cat myfile.txt | grep 'some filter expression' | while read line; do
+  echo $line
+done
+
+# Iterate over lines with spaces (below example lists only subdirectories without separating directories with spaces in the name on separate lines)
+find . -type f -iname '*.template' | \
+  while read line; do \
+    echo $line; \
+  done
+
+# Iterate over lines with space (Same as above, but using heredoc - doesn't get executed in a subshell, 
+# so variables outside loop retain modifications made inside the loop)
+myvar="1"
+count=1
+while read line; do
+  myvar="$count) $myvar "
+  ((count++))
+done <<< $(find . -type f -iname '*.template')
+echo "$myvar"
+
+# Execute a function against file found
+# Example: this use of find searches a diretorie(s) of jar files for any contained file that matches a pattern
+find *.jar -exec jar -tf '{}' \; | grep EncodingDetector
+
+
+# Export a docker container and send it to someone.
+docker export NAME | gzip > NAME.gz
+
+# Receive an exported docker container and import it.
+zcat NAME.gz | docker import - NAME
+docker run -i -t NAME /bin/bash
+
+# To start an interactive shell into a docker container on windows, you must use winpty:
+winpty docker run -ti --name=mycontainer myimage
+
+# To prevent Git Bash Shell doing window path conversion, set the MSYS_NO_PATHCONV environment variable.
+# For example, if you wanted to see what the default configuration file for the nginx image looked like, you would use:
+winpty docker run -ti --name=mycontainer myimage cat nginx /etc/nginx/nginx.conf
+# However, this results in:
+cat: 'C:/Program Files/Git/etc/nginx/nginx.conf': No such file or directory
+# To avoid this:
+export MSYS_NO_PATHCONV=1 && winpty docker run -ti --name=mycontainer myimage cat nginx /etc/nginx/nginx.conf
+
+# Archive a dir or file with gzip compression
+tar -czvf name-of-archive.tar.gz /path/to/directory-or-file
+
+# Extract an archive created with gzip compression
+tar -xzvf archive.tar.gz -C /tmp
+
+# Generate a random password (15 characters in length):
+openssl rand -base64 15
+
+# Force removal of the last commit pushed to a git repository:
+# EXAMPLE:
+#   - git remote name = "github"
+#   - name of branch on git remote repo: "testbranch"
+#   - commit id you want to remove (and restore its parent): 67290f1
+#
+# git push github +67290f1^:testbranch
+#
+# or...
+# git reset --hard HEAD^
+# git push -f github testbranch
+
+# Force removal of the 2nd to last commit pushed to a git repository, ie:
+# Rewrite the history and force the result back to [remote]/[branch]
+# EXAMPLE:
+#   - git remote name = "github"
+#   - name of branch on git remote repo: "testbranch"
+#   - commit id you want to remove: 5a0b2d2
+#
+# git rebase -i 5a0b2d2^
+#
+# This will open an editor and show a list of all commits since the commit we want to get rid of:
+# 1: pick 5a0b2d2
+# 2: pick dd61ab32
+# 3: ...
+# Simply remove the line with the offending commit, likely that will be the first line (vi: delete current line = dd).
+# Save and close the editor (vi: press :wq and return). Resolve any conflicts if there are any, and your local branch should be fixed.
+# Force it to the remote and you're done:
+#
+# git push -f github testbranch
+#
+# VARIANT OF ABOVE:
+# Instead of deleting 2nd to last commmit, fix a typo in it. This works almost exactly the same way, but instead of removing the line with the bad commit, 
+# simply replace its pick with edit and save/exit. Rebase will then stop at that commit, put the changes into the index and then let you change it as you like.
+# Commit the change and continue the rebase (git will tell you how to keep the commit message and author if you want).
+# Then push the changes as described above. The same way you can even split commits into smaller ones, or merge commits together.
+
+# "Revert" back to an orphaned commit. If using git log --graph --all --decorate output contains something like this:
+# --------------------------------------------------------------------------------------------
+# * 3f9a4b3	refs/tags/v20.2.0 Bump lint-staged from 10.0.4 to 10.0.7 (#500)
+# * fafdd50	refs/tags/v20.2.0 Bump eslint-plugin-import from 2.20.0 to 2.20.1 (#496)
+# | * f0809b7	refs/tags/2001.0040 (tag: 2001.0040) trying different className and container
+# | * b2fac6c	refs/tags/2001.0040 trying href instead of to
+# | * f93aedf	refs/tags/2001.0040 miscapitalized iconName
+# | * be233f4	refs/tags/2001.0040 Adding sponsor request link
+# | * 0657759	refs/tags/2001.0040 Resolving git revert conflict. New January Release
+# | *   c87cf7d	refs/tags/2001.0040 Merge Commit for January release
+# | |\
+# | |/
+# |/|
+# * | 0758bf8	refs/tags/v20.1.7 (tag: v20.1.7) Release research-portal v20.1.7 [skip ci]
+# * | 55eb052	refs/tags/v20.1.7 Bump newrelic from 6.2.0 to 6.3.0 (#491)
+# --------------------------------------------------------------------------------------------
+# Then commit f0809b7 is orphaned and you cannot revert back to it with git revert f0809b7..HEAD
+# To perform the equivalent you must do the following (assumes master branch needs reverting):
+git checkout master
+git checkout f0809b7
+git checkout -b f0809b7-orphan
+git merge --strategy ours master
+# Ensure all master branch content was dumped (diff should produce no output):
+git diff f0809b7-orphan^
+git checkout master
+git merge --squash f0809b7-orphan
+git commit -m "Reverting to orphaned commit f0809b7"
+# Ensure f0809b7 and master HEAD are now identical.
+git diff f0809b7
+# The master branch has been reverted, and should be fast-forward when pushing to remote.
+
+
+# Make vscode use gitbash as the default terminal:
+# 1) Open settings.json
+# 2) Find the entry: "terminal.integrated.shell.windows"
+# 3) Change entry to: "C:\\Program Files\\Git\\bin\\bash.exe"
+# 4) Will be missing some of the PATH entries that the ming terminal uses, including the path to docker, so you when the terminal is opened you must add it:
+# export PATH=/c/Program\ Files/Docker/Docker/resources/bin:/c/ProgramData/DockerDesktop/version-bin:$PATH:q
+
+# Upon restart of windows, may have trouble using docker:
+#    "error during connect: In the default daemon configuration on Windows, 
+#    the docker client must be run with elevated privileges to connect.: 
+#    Get http://%2F%2F.%2Fpipe%2Fdocker_engine/v1.24/containers/json: open //./pipe/docker_engine: The system cannot find the file specified."
+# SOLUTION STEPS:
+# 1)
+ cd "C:\Program Files\Docker\Docker"
+./DockerCli.exe -SwitchDaemon
+# 2) Docker Desktop client > settings > general > "Use the WSL 2 based engine" (uncheck)
+     Save and restart
+
+# Find and kill an orphaned process this is still running a port forwarding session
+# Assuming the port is 1043, Run the following to see all processes on that port:
+netstat -ano | grep ':1043'
+# The 5th column of the output will list the PID. If more than one result, determine the right one and note the PID
+# Run the following to kill the process
+taskkill /PID number /F
+# where number is the PID
