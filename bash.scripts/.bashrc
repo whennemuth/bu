@@ -390,7 +390,6 @@ alias gitdocker='git_ssh \
   bu_github_id_docker_rsa \
   github \
   bu-ist/kuali-research-docker.git'
-alias gitbkp='git_ssh /c/whennemuth/workspaces/bu_workspace github_id_rsa github'
 alias gitcloudformation='git_ssh '$KUALI_INFRASTRUCTURE' bu_github_id_kuali_cloudformation_rsa bu-ist/kuali-infrastructure.git'
 alias cfn='cd '$KUALI_INFRASTRUCTURE'; ls -la'
 alias bye='eval `ssh-agent -k` && exit'

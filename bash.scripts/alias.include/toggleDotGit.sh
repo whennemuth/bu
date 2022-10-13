@@ -37,4 +37,18 @@ renameDotGit() {
     done;
 }
 
-# rename '.git' 'dot_git'
+workspacebackup() {
+
+  if [ -z "$(git status -s -z)" ] ; then
+    echo "Noting to commit!"
+  fi
+
+  rename '.git' 'dot_git'
+
+  git_ssh /c/whennemuth/workspaces/bu_workspace github_id_rsa github
+  git add --all
+  git commit -m 'routine commit'
+  git push github master
+
+  rename 'dot_git' '.git'
+}
