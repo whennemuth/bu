@@ -43,12 +43,12 @@ workspacebackup() {
     echo "Noting to commit!"
   fi
 
-  rename '.git' 'dot_git'
+  renrenameDotGitame '.git' 'dot_git'
 
   git_ssh /c/whennemuth/workspaces/bu_workspace github_id_rsa github
   git add --all
   git commit -m 'routine commit'
   git push github master
 
-  rename 'dot_git' '.git'
+  renameDotGit 'dot_git' '.git'
 }
